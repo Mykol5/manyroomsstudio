@@ -106,9 +106,9 @@ export default function LoginPage() {
               <div className="flex flex-col items-center gap-6">
                 <p className="text-slate-500 text-xs font-medium">
                   New here?{' '}
-                  <a className="text-white hover:text-primary transition-colors" href="#">
+                  <Link href="/signup" className="text-white hover:text-primary transition-colors">
                     Join the Collective
-                  </a>
+                  </Link>
                 </p>
                 <div className="flex gap-4">
                   <button className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/5 transition-all">
