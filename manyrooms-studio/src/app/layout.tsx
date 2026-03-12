@@ -2,8 +2,8 @@ import type { Metadata } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'Login | ManyRooms Studios',
-  description: 'Access the ManyRooms Studio Management Platform',
+  title: 'ManyRooms | Space For Visionaries',
+  description: 'Premium production environments curated for the world\'s most ambitious creative agencies and independent makers.',
 }
 
 export default function RootLayout({
@@ -12,17 +12,48 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en">
       <head>
-        <link
-          href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&display=swap"
-          rel="stylesheet"
-        />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;700;800&display=swap" rel="stylesheet" />
+        {/* Keep Manrope for auth pages if needed */}
+        <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet" />
       </head>
-      <body className="bg-background-dark text-slate-100">{children}</body>
+      <body className="bg-white text-black font-sans antialiased">{children}</body>
     </html>
   )
 }
+
+
+
+
+
+// import type { Metadata } from 'next'
+// import './globals.css'
+
+// export const metadata: Metadata = {
+//   title: 'Login | ManyRooms Studios',
+//   description: 'Access the ManyRooms Studio Management Platform',
+// }
+
+// export default function RootLayout({
+//   children,
+// }: {
+//   children: React.ReactNode
+// }) {
+//   return (
+//     <html lang="en" className="dark">
+//       <head>
+//         <link
+//           href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&display=swap"
+//           rel="stylesheet"
+//         />
+//       </head>
+//       <body className="bg-background-dark text-slate-100">{children}</body>
+//     </html>
+//   )
+// }
 
 
 
