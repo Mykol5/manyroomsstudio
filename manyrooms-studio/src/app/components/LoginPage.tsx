@@ -69,7 +69,7 @@ export default function LoginPage() {
                   </label>
                   <a
                     className="text-[10px] font-bold uppercase tracking-widest text-primary hover:text-primary/80 transition-colors"
-                    href="#"
+                    href="/forgot-password"
                   >
                     Forgot?
                   </a>
