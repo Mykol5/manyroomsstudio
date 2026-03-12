@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { EnvelopeIcon, ArrowLeftIcon, XMarkIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
+import { EnvelopeIcon, ArrowLeftIcon, ArrowRightIcon, XMarkIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
@@ -91,9 +91,7 @@ export default function ForgotPasswordPage() {
               >
                 <span>{isSubmitted ? 'Email Sent' : 'Send Reset Link'}</span>
                 {!isSubmitted && (
-                  <span className="material-symbols-outlined text-xl group-hover:translate-x-1 transition-transform">
-                    arrow_forward
-                  </span>
+                  <ArrowRightIcon className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 )}
               </button>
             </div>
