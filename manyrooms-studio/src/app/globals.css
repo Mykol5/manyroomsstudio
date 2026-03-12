@@ -42,6 +42,10 @@
   background: #262626;
   border-radius: 10px;
 }
+.cinematic-gradient {
+  background: radial-gradient(circle at top right, rgba(17, 82, 212, 0.08), transparent),
+              radial-gradient(circle at bottom left, rgba(17, 82, 212, 0.05), transparent);
+}
 
 
 
