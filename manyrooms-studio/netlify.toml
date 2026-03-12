@@ -1,0 +1,8 @@
+[build]
+  command = "yarn build"
+  publish = "out"  # Next.js exports to 'out' folder
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
