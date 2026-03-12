@@ -18,7 +18,7 @@ export default function SignupPage() {
   const [selectedRole, setSelectedRole] = useState('client');
 
   return (
-    <div className="flex min-h-screen w-full bg-background-dark text-white overflow-hidden">
+    <div className="auth-layout flex min-h-screen w-full bg-background-dark text-white overflow-hidden">
       {/* Left Side: Cinematic Visual */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-background-dark">
         <div className="absolute inset-0 z-10 bg-gradient-to-t from-background-dark via-transparent to-transparent opacity-80"></div>
@@ -264,8 +264,8 @@ export default function SignupPage() {
           <div className="mt-12 text-center">
             <p className="text-xs text-slate-600 leading-relaxed">
               By clicking create account, you agree to our <br/>
-              <a href="#" className="underline hover:text-slate-400">Terms of Service</a> and 
-              <a href="#" className="underline hover:text-slate-400 ml-1">Privacy Policy</a>.
+              <Link href="#" className="underline hover:text-slate-400">Terms of Service</Link> and 
+              <Link href="#" className="underline hover:text-slate-400 ml-1">Privacy Policy</Link>.
             </p>
           </div>
         </div>
