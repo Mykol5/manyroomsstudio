@@ -9,7 +9,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
 
   return (
-    <main className="min-h-screen flex items-center justify-center p-6 bg-cinematic">
+    <main className="auth-layout min-h-screen flex items-center justify-center p-6 bg-cinematic">
       {/* Main Login Container */}
       <div className="w-full max-w-[480px] animate-in fade-in zoom-in duration-700">
         {/* Brand Identity */}
@@ -67,12 +67,12 @@ export default function LoginPage() {
                   <label className="block text-[10px] font-bold uppercase tracking-widest text-slate-500">
                     Password
                   </label>
-                  <a
-                    className="text-[10px] font-bold uppercase tracking-widest text-primary hover:text-primary/80 transition-colors"
+                  <Link
                     href="/forgot-password"
+                    className="text-[10px] font-bold uppercase tracking-widest text-primary hover:text-primary/80 transition-colors"
                   >
                     Forgot?
-                  </a>
+                  </Link>
                 </div>
                 <div className="relative group input-glow rounded-lg">
                   <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-500 group-focus-within:text-primary transition-colors">
@@ -130,15 +130,15 @@ export default function LoginPage() {
 
         {/* Minimal Footer */}
         <div className="mt-8 flex justify-center gap-8">
-          <a className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-600 hover:text-slate-400 transition-colors" href="#">
+          <Link href="#" className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-600 hover:text-slate-400 transition-colors">
             Privacy
-          </a>
-          <a className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-600 hover:text-slate-400 transition-colors" href="#">
+          </Link>
+          <Link href="#" className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-600 hover:text-slate-400 transition-colors">
             Terms
-          </a>
-          <a className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-600 hover:text-slate-400 transition-colors" href="#">
+          </Link>
+          <Link href="#" className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-600 hover:text-slate-400 transition-colors">
             Support
-          </a>
+          </Link>
         </div>
       </div>
     </main>
