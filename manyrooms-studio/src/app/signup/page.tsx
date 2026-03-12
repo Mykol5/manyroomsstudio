@@ -3,13 +3,13 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { 
-  UserIcon, 
-  EnvelopeIcon, 
-  LockIcon, 
+import {
+  UserIcon,
+  EnvelopeIcon,
+  LockClosedIcon,
   EyeIcon,
   CheckCircleIcon,
-  LayersIcon 
+  Square2StackIcon
 } from '@heroicons/react/24/outline';
 import { CheckCircleIcon as CheckCircleSolid } from '@heroicons/react/24/solid';
 
@@ -33,7 +33,7 @@ export default function SignupPage() {
         <div className="relative z-20 flex flex-col justify-between p-16 w-full h-full">
           <div className="flex items-center gap-2">
             <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-              <LayersIcon className="w-6 h-6 text-white" />
+              <Square2StackIcon className="w-6 h-6 text-white" />
             </div>
             <span className="text-2xl font-extrabold tracking-tighter uppercase italic">ManyRooms</span>
           </div>
@@ -63,7 +63,7 @@ export default function SignupPage() {
         <div className="flex justify-between items-center px-8 lg:px-12 py-8">
           <div className="lg:hidden flex items-center gap-2">
             <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <LayersIcon className="w-4 h-4 text-white" />
+              <Square2StackIcon className="w-4 h-4 text-white" />
             </div>
           </div>
           <div className="flex-1 flex justify-end">
