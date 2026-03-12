@@ -1,0 +1,4 @@
+[build]
+  base = "manyrooms-studio"
+  command = "yarn build"
+  publish = ".next"
