@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { EnvelopeIcon, ClockIcon, EyeIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
+import Link from 'next/link';
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
