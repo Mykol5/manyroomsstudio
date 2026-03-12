@@ -9,7 +9,7 @@ export default function HomePage() {
   const [currentMonth] = useState('October 2023');
 
   return (
-    <>
+    <div className="home-layout">
       {/* BEGIN: Navigation */}
       <header className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
         <nav className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
@@ -96,7 +96,7 @@ export default function HomePage() {
 
           {/* Bold Headline */}
           <div className="text-center">
-            <h1 className="text-[clamp(3rem,12vw,10rem)] font-extrabold uppercase mb-8 leading-[0.9] tracking-[-0.04em]">
+            <h1 className="hero-title text-[clamp(3rem,12vw,10rem)] font-extrabold uppercase mb-8">
               Space For<br />Visionaries.
             </h1>
             <p className="max-w-xl mx-auto text-lg text-gray-500 font-medium leading-relaxed">
@@ -432,6 +432,6 @@ export default function HomePage() {
         </div>
       </footer>
       {/* END: Footer */}
-    </>
+    </div>
   );
 }
