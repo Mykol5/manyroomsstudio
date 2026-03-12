@@ -17,15 +17,12 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;700;800&display=swap" rel="stylesheet" />
-        {/* Keep Manrope for auth pages if needed */}
         <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet" />
       </head>
-      <body className="bg-white text-black font-sans antialiased">{children}</body>
+      <body>{children}</body>
     </html>
   )
 }
-
-
 
 
 
