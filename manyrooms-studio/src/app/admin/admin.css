@@ -1,0 +1,18 @@
+/* Admin dashboard specific styles */
+.admin-dashboard {
+  font-family: 'Inter', sans-serif;
+}
+
+.admin-dashboard .material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+.admin-dashboard .active-nav {
+  background-color: rgba(17, 82, 212, 0.1);
+  color: #1152d4;
+}
+
+/* Ensure dark mode works properly */
+.dark .admin-dashboard {
+  color-scheme: dark;
+}
