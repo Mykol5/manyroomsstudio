@@ -3,27 +3,6 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { 
-  GridViewIcon, 
-  DashboardIcon, 
-  VideoCameraIcon, 
-  UsersIcon, 
-  PaymentsIcon, 
-  SettingsIcon,
-  SearchIcon,
-  NotificationsIcon,
-  DownloadIcon,
-  MonetizationOnIcon,
-  AccountBalanceWalletIcon,
-  PersonCelebrateIcon,
-  AssignmentLateIcon,
-  PsychologyIcon,
-  CheckCircleIcon,
-  CloseIcon,
-  VisibilityIcon,
-  LogoutIcon,
-  TrendingUpIcon
-} from '@/components/icons'; // We'll create this
 import './admin.css';
 
 export default function AdminDashboard() {
