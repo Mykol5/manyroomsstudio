@@ -7,53 +7,35 @@ const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
 export async function POST(request: NextRequest) {
   try {
-    const { name, email, password, role } = await request.json();
+    const { email, password } = await request.json();
 
-    // Validate
-    if (!name || !email || !password) {
+    if (!email || !password) {
       return NextResponse.json(
-        { error: 'Missing required fields' },
+        { error: 'Email and password required' },
         { status: 400 }
       );
     }
 
-    // Check if user exists
-    const { data: existing } = await supabase
+    // Find user in Supabase database table
+    const { data: user, error } = await supabase
       .from('users')
-      .select('id')
+      .select('*')
       .eq('email', email)
       .single();
 
-    if (existing) {
+    if (error || !user) {
       return NextResponse.json(
-        { error: 'User already exists' },
-        { status: 400 }
+        { error: 'Invalid credentials' },
+        { status: 401 }
       );
     }
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Insert user directly into users table
-    const { data: user, error: insertError } = await supabase
-      .from('users')
-      .insert([
-        {
-          name,
-          email,
-          password: hashedPassword,
-          role: role || 'client',
-          created_at: new Date(),
-        }
-      ])
-      .select('id, name, email, role, created_at')
-      .single();
-
-    if (insertError) {
-      console.error('Supabase insert error:', insertError);
+    // Check password
+    const isValid = await bcrypt.compare(password, user.password);
+    if (!isValid) {
       return NextResponse.json(
-        { error: 'Failed to create user' },
-        { status: 500 }
+        { error: 'Invalid credentials' },
+        { status: 401 }
       );
     }
 
@@ -64,8 +46,11 @@ export async function POST(request: NextRequest) {
       { expiresIn: '7d' }
     );
 
+    // Return user without password
+    const { password: _, ...userWithoutPassword } = user;
+
     const response = NextResponse.json({
-      user
+      user: userWithoutPassword
     });
 
     response.cookies.set('token', token, {
@@ -79,7 +64,7 @@ export async function POST(request: NextRequest) {
     return response;
 
   } catch (error) {
-    console.error('Signup error:', error);
+    console.error('Login error:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

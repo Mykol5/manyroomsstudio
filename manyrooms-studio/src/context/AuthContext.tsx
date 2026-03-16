@@ -1,10 +1,14 @@
-// src/context/AuthContext.tsx
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
-import { User } from '@supabase/supabase-js';
+
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+}
 
 interface AuthContextType {
   user: User | null;
@@ -19,65 +23,78 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [userRole, setUserRole] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      setUserRole(session?.user?.user_metadata?.role || null);
-      setLoading(false);
-    });
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-      setUserRole(session?.user?.user_metadata?.role || null);
-    });
-
-    return () => subscription.unsubscribe();
+    checkAuth();
   }, []);
 
+  const checkAuth = async () => {
+    try {
+      const res = await fetch('/api/auth/me');
+      if (res.ok) {
+        const data = await res.json();
+        setUser(data.user);
+      }
+    } catch (error) {
+      console.error('Auth check failed:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const login = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
+    const res = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
     });
 
-    if (error) throw error;
-    
-    // Redirect will be handled by middleware
-    router.refresh();
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.error || 'Login failed');
+    }
+
+    setUser(data.user);
+    router.push(getDashboardByRole(data.user.role));
   };
 
   const signup = async (name: string, email: string, password: string, role: string) => {
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          name,
-          role, // Store role in metadata
-        },
-      },
+    const res = await fetch('/api/auth/signup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, password, role }),
     });
 
-    if (error) throw error;
-    
-    // You might want email confirmation or auto-login
-    router.push(`/login?message=Please check your email to confirm signup as ${role}`);
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.error || 'Signup failed');
+    }
+
+    setUser(data.user);
+    router.push(getDashboardByRole(data.user.role));
   };
 
   const logout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) throw error;
+    await fetch('/api/auth/logout', { method: 'POST' });
+    setUser(null);
     router.push('/login');
   };
 
+  const getDashboardByRole = (role: string) => {
+    switch (role) {
+      case 'admin': return '/admin';
+      case 'owner': return '/owner/dashboard';
+      case 'franchisee': return '/franchisee/dashboard';
+      default: return '/dashboard';
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, signup, logout, userRole }}>
+    <AuthContext.Provider value={{ user, loading, login, signup, logout, userRole: user?.role || null }}>
       {children}
     </AuthContext.Provider>
   );
