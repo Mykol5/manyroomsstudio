@@ -19,7 +19,7 @@ export default function FranchiseeDashboard() {
   return (
     <div className="p-8">
       <h1 className="text-3xl font-bold">Franchisee Dashboard</h1>
-      <p className="text-slate-400">Welcome back, {user?.user_metadata?.name}</p>
+      <p className="text-slate-400">Welcome back, {user?.name}</p>
       {/* Franchisee-specific content */}
     </div>
   );

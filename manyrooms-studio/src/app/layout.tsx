@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import './globals.css'
+import { AuthProvider } from '@/context/AuthContext'
 
 export const metadata: Metadata = {
   title: 'Login | ManyRooms Studios',
@@ -23,7 +24,9 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="bg-background-dark text-slate-100">{children}</body>
+      <body className="bg-background-dark text-slate-100">
+        <AuthProvider>{children}</AuthProvider>
+      </body>
     </html>
   )
 }
