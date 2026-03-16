@@ -1,3 +1,4 @@
+// src/context/AuthContext.tsx
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
@@ -11,12 +12,14 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   signup: (name: string, email: string, password: string, role: string) => Promise<void>;
   logout: () => Promise<void>;
+  userRole: string | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [userRole, setUserRole] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
@@ -24,12 +27,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
+      setUserRole(session?.user?.user_metadata?.role || null);
       setLoading(false);
     });
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
+      setUserRole(session?.user?.user_metadata?.role || null);
     });
 
     return () => subscription.unsubscribe();
@@ -42,7 +47,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     if (error) throw error;
-    router.push('/admin');
+    
+    // Redirect will be handled by middleware
+    router.refresh();
   };
 
   const signup = async (name: string, email: string, password: string, role: string) => {
@@ -52,14 +59,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       options: {
         data: {
           name,
-          role,
+          role, // Store role in metadata
         },
       },
     });
 
     if (error) throw error;
+    
     // You might want email confirmation or auto-login
-    router.push('/login?message=Check your email to confirm signup');
+    router.push(`/login?message=Please check your email to confirm signup as ${role}`);
   };
 
   const logout = async () => {
@@ -69,7 +77,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, signup, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, signup, logout, userRole }}>
       {children}
     </AuthContext.Provider>
   );
