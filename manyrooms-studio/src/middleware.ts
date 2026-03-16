@@ -1,97 +1,99 @@
 // src/middleware.ts
-import { createServerClient } from '@supabase/ssr'
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { verify } from 'jsonwebtoken';
 
-export async function middleware(req: NextRequest) {
-  const res = NextResponse.next()
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+
+// Define route types
+const routeMaps = {
+  // Routes that require authentication
+  protected: ['/admin', '/dashboard', '/owner', '/franchisee'],
+  // Routes that should redirect to dashboard if already authenticated
+  auth: ['/login', '/signup', '/forgot-password'],
+  // Public routes (no auth required, no redirect if authenticated)
+  public: ['/', '/home', '/about', '/contact'],
+};
+
+export function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
   
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return req.cookies.get(name)?.value
-        },
-        set(name: string, value: string, options: any) {
-          res.cookies.set({ name, value, ...options })
-        },
-        remove(name: string, options: any) {
-          res.cookies.set({ name, value: '', ...options })
-        },
-      },
-    }
-  )
-
-  const { data: { session } } = await supabase.auth.getSession()
-  const { pathname } = req.nextUrl
-
-  // Public paths (no auth required)
-  const publicPaths = ['/login', '/signup', '/forgot-password', '/', '/home']
-  const isPublicPath = publicPaths.includes(pathname)
-
-  // Auth paths (only for non-authenticated users)
-  const authPaths = ['/login', '/signup', '/forgot-password']
-  const isAuthPath = authPaths.includes(pathname)
-
-  // If no session and trying to access protected route
-  if (!session && !isPublicPath) {
-    const redirectUrl = new URL('/login', req.url)
-    redirectUrl.searchParams.set('redirectedFrom', pathname)
-    return NextResponse.redirect(redirectUrl)
-  }
-
-  // If has session and trying to access auth pages (login/signup/forgot)
-  if (session && isAuthPath) {
-    // Get user role from metadata
-    const role = session.user.user_metadata?.role || 'client'
-    
-    // Redirect based on role
-    const redirectUrl = getRoleBasedRedirect(role)
-    return NextResponse.redirect(new URL(redirectUrl, req.url))
-  }
-
-  // If has session and trying to access admin but is not admin
-  if (session && pathname.startsWith('/admin')) {
-    const role = session.user.user_metadata?.role || 'client'
-    
-    // Only admin can access admin panel
-    if (role !== 'admin') {
-      const redirectUrl = getRoleBasedRedirect(role)
-      return NextResponse.redirect(new URL(redirectUrl, req.url))
+  // Check for token
+  const token = request.cookies.get('token')?.value;
+  let user = null;
+  
+  if (token) {
+    try {
+      user = verify(token, JWT_SECRET);
+    } catch (error) {
+      // Invalid token - will be treated as not authenticated
     }
   }
 
-  // If has session and trying to access client dashboard but is not client
-  if (session && pathname.startsWith('/dashboard')) {
-    const role = session.user.user_metadata?.role || 'client'
-    
-    // Only clients access client dashboard
-    if (role !== 'client') {
-      const redirectUrl = getRoleBasedRedirect(role)
-      return NextResponse.redirect(new URL(redirectUrl, req.url))
-    }
+  // Check if path is public (no redirects needed)
+  if (routeMaps.public.some(route => pathname.startsWith(route))) {
+    return NextResponse.next();
   }
 
-  return res
+  // Check if path is auth route (login/signup/forgot)
+  if (routeMaps.auth.some(route => pathname.startsWith(route))) {
+    if (user) {
+      // Already logged in - redirect to appropriate dashboard
+      const role = (user as any).role;
+      return NextResponse.redirect(new URL(getDashboardByRole(role), request.url));
+    }
+    // Not logged in - allow access to auth page
+    return NextResponse.next();
+  }
+
+  // Check if path is protected
+  if (routeMaps.protected.some(route => pathname.startsWith(route))) {
+    if (!user) {
+      // Not logged in - redirect to login
+      const loginUrl = new URL('/login', request.url);
+      loginUrl.searchParams.set('redirect', pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+    
+    // Check role-based access
+    const userRole = (user as any).role;
+    if (pathname.startsWith('/admin') && userRole !== 'admin') {
+      return NextResponse.redirect(new URL(getDashboardByRole(userRole), request.url));
+    }
+    if (pathname.startsWith('/owner') && userRole !== 'owner') {
+      return NextResponse.redirect(new URL(getDashboardByRole(userRole), request.url));
+    }
+    if (pathname.startsWith('/franchisee') && userRole !== 'franchisee') {
+      return NextResponse.redirect(new URL(getDashboardByRole(userRole), request.url));
+    }
+    
+    // All good
+    return NextResponse.next();
+  }
+
+  // Default: allow request
+  return NextResponse.next();
 }
 
-// Helper function to get redirect path based on role
-function getRoleBasedRedirect(role: string): string {
+function getDashboardByRole(role: string): string {
   switch (role) {
-    case 'admin':
-      return '/admin'
-    case 'owner':
-      return '/owner/dashboard'
-    case 'franchisee':
-      return '/franchisee/dashboard'
-    case 'client':
-    default:
-      return '/dashboard'
+    case 'admin': return '/admin';
+    case 'owner': return '/owner/dashboard';
+    case 'franchisee': return '/franchisee/dashboard';
+    default: return '/dashboard';
   }
 }
 
+// Configure which routes trigger the middleware
 export const config = {
-  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|.*\\.png$).*)'],
-}
+  matcher: [
+    /*
+     * Match all request paths except:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - public folder files
+     */
+    '/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+  ],
+};
