@@ -7,7 +7,7 @@ import { MagnifyingGlassIcon, ChevronLeftIcon, ChevronRightIcon, PlayIcon } from
 import './home.css';
 
 export default function HomePage() {
-  const [currentMonth] = useState('October 2023');
+  const [currentMonth] = useState('March 2026');
 
   return (
     <div className="home-page">
