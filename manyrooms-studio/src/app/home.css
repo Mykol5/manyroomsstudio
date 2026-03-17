@@ -1,0 +1,50 @@
+/* Home page specific styles - completely isolated */
+.home-page {
+  background-color: #ffffff;
+  color: #0a0a0a;
+  font-family: "Plus Jakarta Sans", sans-serif;
+}
+
+.home-page .hero-title {
+  letter-spacing: -0.04em;
+  line-height: 0.9;
+}
+
+.home-page .text-outline {
+  -webkit-text-stroke: 1px black;
+  color: transparent;
+}
+
+.home-page .custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.home-page .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #000;
+}
+
+/* Override any global styles that might leak in */
+.home-page .bg-white {
+  background-color: #ffffff;
+}
+
+.home-page .text-gray-500 {
+  color: #6b7280;
+}
+
+.home-page .border-gray-100 {
+  border-color: #f3f4f6;
+}
+
+.home-page .bg-gray-50 {
+  background-color: #f9fafb;
+}
+
+.home-page button.bg-black {
+  background-color: #000000;
+  color: #ffffff;
+}
+
+.home-page button.bg-black:hover {
+  background-color: rgba(0, 0, 0, 0.9);
+}
