@@ -1,0 +1,38 @@
+/* Client Dashboard Specific Styles */
+.client-dashboard {
+  font-family: 'Manrope', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.client-dashboard .material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+}
+
+.client-dashboard .glass-card {
+  background: rgba(22, 27, 34, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.client-dashboard .editorial-shadow {
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+/* Custom scrollbar */
+.client-dashboard ::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+.client-dashboard ::-webkit-scrollbar-track {
+  background: #0a0a0a;
+}
+
+.client-dashboard ::-webkit-scrollbar-thumb {
+  background: #1152d4;
+  border-radius: 10px;
+}
+
+.client-dashboard ::-webkit-scrollbar-thumb:hover {
+  background: #1e63e8;
+}
