@@ -1,0 +1,47 @@
+/* Franchisee Dashboard Specific Styles */
+.franchisee-dashboard {
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.franchisee-dashboard .sidebar-active {
+  background-color: #1152d4;
+  color: white;
+}
+
+.franchisee-dashboard .custom-shadow {
+  box-shadow: 0 4px 20px -2px rgba(17, 82, 212, 0.05);
+}
+
+/* Custom scrollbar */
+.franchisee-dashboard ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.franchisee-dashboard ::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 10px;
+}
+
+.franchisee-dashboard ::-webkit-scrollbar-thumb {
+  background: #94a3b8;
+  border-radius: 10px;
+}
+
+.franchisee-dashboard ::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+/* Dark mode scrollbar */
+.dark .franchisee-dashboard ::-webkit-scrollbar-track {
+  background: #1e293b;
+}
+
+.dark .franchisee-dashboard ::-webkit-scrollbar-thumb {
+  background: #475569;
+}
+
+.dark .franchisee-dashboard ::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
