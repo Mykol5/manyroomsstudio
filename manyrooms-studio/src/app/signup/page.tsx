@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
   UserIcon,
   EnvelopeIcon,
@@ -25,6 +25,15 @@ export default function SignupPage() {
   
   const { signup } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // Check for role in URL parameters on page load
+  useEffect(() => {
+    const roleParam = searchParams.get('role');
+    if (roleParam && ['client', 'owner', 'franchisee'].includes(roleParam)) {
+      setSelectedRole(roleParam);
+    }
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -368,19 +377,64 @@ export default function SignupPage() {
 // import { useState } from 'react';
 // import Image from 'next/image';
 // import Link from 'next/link';
+// import { useRouter } from 'next/navigation';
 // import {
 //   UserIcon,
 //   EnvelopeIcon,
-//   LockClosedIcon,
 //   EyeIcon,
-//   CheckCircleIcon,
 //   Square2StackIcon
 // } from '@heroicons/react/24/outline';
 // import { CheckCircleIcon as CheckCircleSolid } from '@heroicons/react/24/solid';
+// import { useAuth } from '@/context/AuthContext';
 
 // export default function SignupPage() {
 //   const [showPassword, setShowPassword] = useState(false);
 //   const [selectedRole, setSelectedRole] = useState('client');
+//   const [name, setName] = useState('');
+//   const [email, setEmail] = useState('');
+//   const [password, setPassword] = useState('');
+//   const [error, setError] = useState('');
+//   const [loading, setLoading] = useState(false);
+//   const [successMessage, setSuccessMessage] = useState('');
+  
+//   const { signup } = useAuth();
+//   const router = useRouter();
+
+//   const handleSubmit = async (e: React.FormEvent) => {
+//     e.preventDefault();
+//     setError('');
+//     setSuccessMessage('');
+//     setLoading(true);
+
+//     try {
+//       await signup(name, email, password, selectedRole);
+//       setSuccessMessage('Account created! Please check your email to confirm your account.');
+      
+//       // Optional: Redirect to login after 3 seconds
+//       setTimeout(() => {
+//         router.push('/login');
+//       }, 3000);
+      
+//     } catch (err: any) {
+//       setError(err.message || 'Failed to create account');
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   // Calculate password strength
+//   const getPasswordStrength = () => {
+//     if (!password) return 0;
+//     let strength = 0;
+//     if (password.length >= 8) strength++;
+//     if (/[A-Z]/.test(password)) strength++;
+//     if (/[0-9]/.test(password)) strength++;
+//     if (/[^A-Za-z0-9]/.test(password)) strength++;
+//     return strength;
+//   };
+
+//   const passwordStrength = getPasswordStrength();
+//   const strengthText = ['Weak', 'Fair', 'Good', 'Strong'][passwordStrength] || 'Weak';
 
 //   return (
 //     <div className="flex min-h-screen w-full bg-background-dark text-white overflow-hidden">
@@ -448,7 +502,21 @@ export default function SignupPage() {
 //             <p className="text-slate-500">Select your path to get started with ManyRooms.</p>
 //           </div>
 
-//           <form className="space-y-8">
+//           {/* Error Message */}
+//           {error && (
+//             <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
+//               <p className="text-red-500 text-sm font-medium">{error}</p>
+//             </div>
+//           )}
+
+//           {/* Success Message */}
+//           {successMessage && (
+//             <div className="mb-6 p-4 bg-green-500/10 border border-green-500/20 rounded-lg">
+//               <p className="text-green-500 text-sm font-medium">{successMessage}</p>
+//             </div>
+//           )}
+
+//           <form onSubmit={handleSubmit} className="space-y-8">
 //             {/* Role Selection */}
 //             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 //               {/* Client Role */}
@@ -460,6 +528,7 @@ export default function SignupPage() {
 //                   checked={selectedRole === 'client'}
 //                   onChange={(e) => setSelectedRole(e.target.value)}
 //                   className="peer sr-only" 
+//                   required
 //                 />
 //                 <div className={`h-full p-4 rounded-xl border transition-all duration-200 
 //                   ${selectedRole === 'client' 
@@ -534,7 +603,10 @@ export default function SignupPage() {
 //                 <input 
 //                   type="text" 
 //                   placeholder="John Doe"
+//                   value={name}
+//                   onChange={(e) => setName(e.target.value)}
 //                   className="w-full bg-[#161616] border border-[#262626] rounded-lg px-4 py-4 text-white placeholder:text-slate-600 focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all" 
+//                   required
 //                 />
 //               </div>
 
@@ -545,7 +617,10 @@ export default function SignupPage() {
 //                 <input 
 //                   type="email" 
 //                   placeholder="john@manyrooms.studio"
+//                   value={email}
+//                   onChange={(e) => setEmail(e.target.value)}
 //                   className="w-full bg-[#161616] border border-[#262626] rounded-lg px-4 py-4 text-white placeholder:text-slate-600 focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all" 
+//                   required
 //                 />
 //               </div>
 
@@ -557,7 +632,11 @@ export default function SignupPage() {
 //                   <input 
 //                     type={showPassword ? 'text' : 'password'}
 //                     placeholder="••••••••"
+//                     value={password}
+//                     onChange={(e) => setPassword(e.target.value)}
 //                     className="w-full bg-[#161616] border border-[#262626] rounded-lg px-4 py-4 text-white placeholder:text-slate-600 focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all pr-12" 
+//                     required
+//                     minLength={6}
 //                   />
 //                   <button 
 //                     type="button"
@@ -569,20 +648,36 @@ export default function SignupPage() {
 //                 </div>
                 
 //                 {/* Password Strength Indicator */}
-//                 <div className="mt-2 flex gap-1 h-1">
-//                   <div className="flex-1 bg-primary rounded-full"></div>
-//                   <div className="flex-1 bg-primary rounded-full"></div>
-//                   <div className="flex-1 bg-primary rounded-full"></div>
-//                   <div className="flex-1 bg-[#262626] rounded-full"></div>
-//                 </div>
-//                 <p className="text-[10px] text-slate-500 mt-2 uppercase tracking-tighter">Strength: Strong</p>
+//                 {password && (
+//                   <>
+//                     <div className="mt-2 flex gap-1 h-1">
+//                       {[0, 1, 2, 3].map((index) => (
+//                         <div 
+//                           key={index}
+//                           className={`flex-1 rounded-full transition-all ${
+//                             index < passwordStrength 
+//                               ? 'bg-primary' 
+//                               : 'bg-[#262626]'
+//                           }`}
+//                         />
+//                       ))}
+//                     </div>
+//                     <p className="text-[10px] text-slate-500 mt-2 uppercase tracking-tighter">
+//                       Strength: {strengthText}
+//                     </p>
+//                   </>
+//                 )}
 //               </div>
 //             </div>
 
 //             {/* CTA */}
 //             <div className="pt-4">
-//               <button className="w-full bg-primary hover:bg-primary/90 text-white font-extrabold py-5 rounded-lg transition-all transform active:scale-[0.98] shadow-lg shadow-primary/20">
-//                 CREATE ACCOUNT
+//               <button 
+//                 type="submit"
+//                 disabled={loading}
+//                 className="w-full bg-primary hover:bg-primary/90 text-white font-extrabold py-5 rounded-lg transition-all transform active:scale-[0.98] shadow-lg shadow-primary/20 disabled:opacity-50 disabled:cursor-not-allowed"
+//               >
+//                 {loading ? 'CREATING ACCOUNT...' : 'CREATE ACCOUNT'}
 //               </button>
 //             </div>
 
@@ -638,3 +733,4 @@ export default function SignupPage() {
 //     </div>
 //   );
 // }
+

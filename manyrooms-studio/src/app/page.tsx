@@ -358,7 +358,7 @@ export default function HomePage() {
       {/* END: Availability Section */}
 
       {/* BEGIN: CTA Section */}
-      <section className="flex flex-col md:flex-row">
+      {/* <section className="flex flex-col md:flex-row">
         <div className="flex-1 bg-black text-white p-20 flex flex-col justify-center items-start border-r border-white/10 group cursor-pointer relative overflow-hidden">
           <div className="relative z-10">
             <h3 className="text-4xl font-extrabold mb-6">List Your Studio</h3>
@@ -384,7 +384,42 @@ export default function HomePage() {
             </svg>
           </div>
         </div>
-      </section>
+      </section> */}
+      {/* BEGIN: CTA Section */}
+<section className="flex flex-col md:flex-row">
+  <Link 
+    href="/signup?role=owner" 
+    className="flex-1 bg-black text-white p-20 flex flex-col justify-center items-start border-r border-white/10 group cursor-pointer relative overflow-hidden"
+  >
+    <div className="relative z-10">
+      <h3 className="text-4xl font-extrabold mb-6">List Your Studio</h3>
+      <p className="text-gray-400 mb-8 max-w-xs">Join our network of premium production spaces and reach high-tier clients.</p>
+      <span className="text-sm font-bold border-b-2 border-white pb-2">PARTNER WITH US</span>
+    </div>
+    <div className="absolute right-0 bottom-0 opacity-10 transform translate-x-1/4 translate-y-1/4 scale-150 group-hover:scale-125 transition-transform duration-1000">
+      <svg className="w-64 h-64" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z"></path>
+      </svg>
+    </div>
+  </Link>
+
+  <Link 
+    href="/signup?role=franchisee" 
+    className="flex-1 bg-white text-black p-20 flex flex-col justify-center items-start group cursor-pointer relative overflow-hidden"
+  >
+    <div className="relative z-10">
+      <h3 className="text-4xl font-extrabold mb-6">Become a Franchisee</h3>
+      <p className="text-gray-500 mb-8 max-w-xs">Bring the ManyRooms standard to your city with our end-to-end management system.</p>
+      <span className="text-sm font-bold border-b-2 border-black pb-2">LEARN MORE</span>
+    </div>
+    <div className="absolute right-0 bottom-0 opacity-5 transform translate-x-1/4 translate-y-1/4 scale-150 group-hover:scale-125 transition-transform duration-1000">
+      <svg className="w-64 h-64" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"></path>
+      </svg>
+    </div>
+  </Link>
+</section>
+{/* END: CTA Section */}
       {/* END: CTA Section */}
 
       {/* BEGIN: Footer */}
