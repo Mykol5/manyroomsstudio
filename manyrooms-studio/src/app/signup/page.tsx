@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -14,6 +14,14 @@ import { CheckCircleIcon as CheckCircleSolid } from '@heroicons/react/24/solid';
 import { useAuth } from '@/context/AuthContext';
 
 export default function SignupPage() {
+  return (
+    <Suspense fallback={<div className="flex min-h-screen w-full bg-background-dark" />}>
+      <SignupContent />
+    </Suspense>
+  );
+}
+
+function SignupContent() {
   const [showPassword, setShowPassword] = useState(false);
   const [selectedRole, setSelectedRole] = useState('client');
   const [name, setName] = useState('');
