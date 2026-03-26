@@ -1,0 +1,45 @@
+/* Owner Bookings Specific Styles */
+.owner-bookings {
+  font-family: 'Manrope', sans-serif;
+}
+
+/* Custom scrollbar */
+.owner-bookings ::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+.owner-bookings ::-webkit-scrollbar-track {
+  background: #0a0a0a;
+}
+
+.owner-bookings ::-webkit-scrollbar-thumb {
+  background: #1152d4;
+  border-radius: 10px;
+}
+
+/* Calendar grid animations */
+.calendar-slot {
+  transition: all 0.2s ease;
+}
+
+.calendar-slot:hover {
+  transform: translateY(-1px);
+}
+
+/* Time slot selection */
+.time-slot-selected {
+  animation: pulse 0.3s ease-out;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+  100% {
+    transform: scale(1);
+  }
+}

@@ -1,0 +1,45 @@
+/* Owner Dashboard Specific Styles */
+.owner-dashboard {
+  font-family: 'Manrope', sans-serif;
+}
+
+/* Custom scrollbar */
+.owner-dashboard ::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+.owner-dashboard ::-webkit-scrollbar-track {
+  background: #0a0a0a;
+}
+
+.owner-dashboard ::-webkit-scrollbar-thumb {
+  background: #1152d4;
+  border-radius: 10px;
+}
+
+/* Calendar hover effects */
+.calendar-day {
+  transition: all 0.2s ease;
+}
+
+.calendar-day:hover {
+  background: rgba(255, 255, 255, 0.05);
+  transform: translateY(-2px);
+}
+
+/* Activity list animations */
+.activity-item {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
