@@ -131,7 +131,7 @@ function SignupContent() {
           <div className="flex-1 flex justify-end">
             <p className="text-sm text-slate-500">
               Already have an account? 
-              <Link href="/" className="text-primary font-bold ml-1 hover:underline">
+              <Link href="/login" className="text-primary font-bold ml-1 hover:underline">
                 Log in
               </Link>
             </p>
