@@ -36,3 +36,36 @@
 .client-dashboard ::-webkit-scrollbar-thumb:hover {
   background: #1e63e8;
 }
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+/* Analytics page specific styles */
+.editorial-gradient {
+  background: linear-gradient(15deg, #000000 0%, #1a1a1a 100%);
+}
+
+.glass-panel {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(20px);
+}
+
+.font-headline {
+  font-family: 'Manrope', sans-serif;
+}
+
+.font-body {
+  font-family: 'Inter', sans-serif;
+}
+
+.font-label {
+  font-family: 'Inter', sans-serif;
+}
