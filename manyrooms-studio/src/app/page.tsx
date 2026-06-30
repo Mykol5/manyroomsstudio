@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { MagnifyingGlassIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
+import { MagnifyingGlassIcon, ChevronLeftIcon, ChevronRightIcon, Bars3Icon, XMarkIcon, GlobeAltIcon } from '@heroicons/react/24/outline';
 import { supabase } from '@/lib/supabase';
 import './home.css';
 import Chatbot from '@/components/Chatbot';
@@ -23,6 +23,9 @@ interface Studio {
 export default function HomePage() {
   const [featuredSpaces, setFeaturedSpaces] = useState<Studio[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
 
   const cities = [
     { name: "London", country: "United Kingdom", spaces: 42, image: "https://lh3.googleusercontent.com/aida-public/AB6AXuAQzGsNM6tt8bra9e6JJuvlzW5F-dY10kFOEoEPU82FFtKfbK0kBoI6ZwAK3W6tA2KPRvxhORyfk6ePqy6fh1fjy1WSY_MY54q1Xa-Hi8rIF4p5Zr4BAo7dKPyKmq_FrTJGouZdP_jw_99cNPj5oLhpBXYXcNDlpiJVVhaexjhLDMWZnnRoWymsjmR8dAM-EFq9RXwEH-X0ImvpmWcifVN6zInI9MCboIYThAIPbXP6IrdDiaPsUBylZo9ADtszhphSu6aNq-hha2j5" },
@@ -33,7 +36,21 @@ export default function HomePage() {
   // Fetch approved studios from Supabase
   useEffect(() => {
     fetchApprovedStudios();
+    // Trigger animation on mount
+    setTimeout(() => setIsVisible(true), 100);
   }, []);
+
+  // Prevent body scroll when mobile menu is open
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isMobileMenuOpen]);
 
   const fetchApprovedStudios = async () => {
     setLoading(true);
@@ -70,10 +87,12 @@ export default function HomePage() {
 
   return (
     <div className="home-page bg-brand-light text-brand-dark">
-      {/* Navigation - Same as spaces detail page */}
+      {/* Navigation */}
       <nav className="fixed top-0 w-full z-50 bg-brand-light/90 backdrop-blur-md border-b border-brand-dark/5 py-4 px-6">
         <div className="container mx-auto flex flex-wrap items-center justify-between gap-4">
           <Link href="/" className="text-xl font-medium tracking-widest uppercase">ManyRooms</Link>
+          
+          {/* Desktop Navigation */}
           <div className="hidden md:flex gap-8 text-xs uppercase tracking-widest font-medium">
             <Link href="/" className="hover:opacity-60 transition-opacity">Home</Link>
             <Link href="/spaces" className="hover:opacity-60 transition-opacity">Spaces</Link>
@@ -81,37 +100,209 @@ export default function HomePage() {
             <Link href="/how-it-works" className="hover:opacity-60 transition-opacity">How it works</Link>
             <Link href="/about" className="hover:opacity-60 transition-opacity">About</Link>
           </div>
+
           <div className="flex items-center gap-4">
-            <Link href="/signup?role=owner" className="text-xs uppercase tracking-widest hover:opacity-60 transition-opacity">List your space</Link>
-            <button className="bg-brand-dark text-white px-6 py-2 rounded-full text-xs uppercase tracking-widest">FIND A SPACE</button>
+            <Link href="/signup?role=owner" className="hidden md:block text-xs uppercase tracking-widest hover:opacity-60 transition-opacity">List your space</Link>
+            <button 
+              onClick={() => setIsModalOpen(true)}
+              className="hidden md:block bg-brand-dark text-white px-6 py-2 rounded-full text-xs uppercase tracking-widest hover:bg-black transition-all"
+            >
+              FIND A SPACE
+            </button>
+            
+            {/* Mobile Menu Button */}
+            <button 
+              onClick={() => setIsMobileMenuOpen(true)}
+              className="md:hidden p-2 hover:bg-brand-dark/5 rounded-full transition-all"
+            >
+              <Bars3Icon className="w-6 h-6" />
+            </button>
           </div>
         </div>
       </nav>
 
-      {/* Hero Section */}
+      {/* Mobile Menu - Slide from right */}
+      <div 
+        className={`fixed inset-0 z-[60] md:hidden transition-all duration-300 ${
+          isMobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+        }`}
+      >
+        {/* Backdrop */}
+        <div 
+          className="absolute inset-0 bg-black/50"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+        
+        {/* Menu Panel */}
+        <div 
+          className={`absolute top-0 right-0 h-full w-[300px] bg-brand-light shadow-2xl transition-transform duration-300 ${
+            isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
+          }`}
+        >
+          <div className="p-6">
+            <div className="flex justify-between items-center mb-10">
+              <span className="text-xl font-medium tracking-widest uppercase">ManyRooms</span>
+              <button 
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="p-2 hover:bg-brand-dark/5 rounded-full transition-all"
+              >
+                <XMarkIcon className="w-6 h-6" />
+              </button>
+            </div>
+
+            <nav className="flex flex-col gap-6">
+              <Link 
+                href="/" 
+                className="text-sm uppercase tracking-widest hover:opacity-60 transition-opacity"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Home
+              </Link>
+              <Link 
+                href="/spaces" 
+                className="text-sm uppercase tracking-widest hover:opacity-60 transition-opacity"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Spaces
+              </Link>
+              <Link 
+                href="/cities" 
+                className="text-sm uppercase tracking-widest hover:opacity-60 transition-opacity"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                Cities
+              </Link>
+              <Link 
+                href="/how-it-works" 
+                className="text-sm uppercase tracking-widest hover:opacity-60 transition-opacity"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                How it works
+              </Link>
+              <Link 
+                href="/about" 
+                className="text-sm uppercase tracking-widest hover:opacity-60 transition-opacity"
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                About
+              </Link>
+              
+              <div className="border-t border-brand-dark/10 pt-6 mt-2">
+                <Link 
+                  href="/signup?role=owner" 
+                  className="block text-sm uppercase tracking-widest hover:opacity-60 transition-opacity mb-4"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  List your space
+                </Link>
+                <Link 
+                  href="/login" 
+                  className="block text-sm uppercase tracking-widest hover:opacity-60 transition-opacity mb-4"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Log in
+                </Link>
+                <Link 
+                  href="/signup" 
+                  className="block text-sm uppercase tracking-widest hover:opacity-60 transition-opacity mb-4"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Sign up
+                </Link>
+                <Link 
+                  href="/support" 
+                  className="block text-sm uppercase tracking-widest hover:opacity-60 transition-opacity mb-4"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Contact Support
+                </Link>
+                <button 
+                  className="flex items-center gap-2 text-sm uppercase tracking-widest hover:opacity-60 transition-opacity"
+                >
+                  <GlobeAltIcon className="w-4 h-4" />
+                  Language
+                </button>
+              </div>
+            </nav>
+          </div>
+        </div>
+      </div>
+
+      {/* Modal - Desktop */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-[70] flex items-center justify-center px-4">
+          <div 
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => setIsModalOpen(false)}
+          />
+          <div className="relative bg-brand-light rounded-2xl shadow-2xl max-w-md w-full p-8 animate-in fade-in zoom-in duration-300">
+            <button 
+              onClick={() => setIsModalOpen(false)}
+              className="absolute top-4 right-4 p-2 hover:bg-brand-dark/5 rounded-full transition-all"
+            >
+              <XMarkIcon className="w-5 h-5" />
+            </button>
+            
+            <div className="text-center mb-8">
+              <h3 className="text-2xl font-serif mb-2">Welcome to ManyRooms</h3>
+              <p className="text-sm text-brand-dark/60">Find and book the perfect creative space</p>
+            </div>
+
+            <div className="space-y-4">
+              <Link 
+                href="/login" 
+                className="block w-full text-center bg-brand-dark text-white py-3 rounded-full text-sm font-semibold uppercase tracking-widest hover:bg-black transition-all"
+                onClick={() => setIsModalOpen(false)}
+              >
+                Log in
+              </Link>
+              <Link 
+                href="/signup" 
+                className="block w-full text-center border border-brand-dark/20 py-3 rounded-full text-sm font-semibold uppercase tracking-widest hover:bg-brand-dark/5 transition-all"
+                onClick={() => setIsModalOpen(false)}
+              >
+                Sign up
+              </Link>
+              <div className="border-t border-brand-dark/10 pt-4 mt-2">
+                <Link 
+                  href="/signup?role=owner" 
+                  className="block w-full text-center text-xs uppercase tracking-widest text-brand-dark/60 hover:text-brand-dark transition-colors"
+                  onClick={() => setIsModalOpen(false)}
+                >
+                  List your space
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Hero Section with Animation */}
       <section className="relative min-h-screen flex flex-col items-center justify-center text-white overflow-hidden bg-brand-dark pt-20">
         <div className="absolute inset-0 z-0">
           <Image
             alt="Creative Space"
-            className="w-full h-full object-cover opacity-60"
+            className="w-full h-full object-cover opacity-60 scale-105"
             src="https://lh3.googleusercontent.com/aida-public/AB6AXuAjL4_jjm2DcmHEaTKr1ky0ZMJTk4_nyQUen_87485kCgDWc-4MO5Yg4JP7yarEnVVFEUHjgp1rd-mlL_-RG5QDV82v7o-I1Z0MtsCqFN7n-Q2JKjap5pgLjdR5dIU5xTKTYwaBRuytY5ss4i7pJHqZ-2526pmlkwykJG28wyAyzzEYAnVOAAD6tEpVtm8KqJZ-NxqjwAzz5P44wxTPpWhJCwUGWDJHO_ImknqeLHF_euz2odHHv9xPJuQdWLoWLYKWcbdcdnHMaivR"
             width={1920}
             height={1080}
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-brand-dark/40 via-brand-dark/20 to-brand-dark"></div>
+          <div className="absolute inset-0 bg-gradient-to-b from-brand-dark/60 via-brand-dark/30 to-brand-dark"></div>
         </div>
 
         <div className="relative z-10 container mx-auto px-6 text-center">
-          <p className="uppercase text-xs tracking-widest mb-6 opacity-70">The Global Marketplace for Creative Spaces</p>
-          <h1 className="text-5xl md:text-7xl lg:text-8xl mb-8 leading-tight max-w-5xl mx-auto tracking-tight">
+          <p className={`uppercase text-xs tracking-widest mb-6 opacity-70 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+            The Global Marketplace for Creative Spaces
+          </p>
+          <h1 className={`text-5xl md:text-7xl lg:text-8xl mb-8 leading-tight max-w-5xl mx-auto tracking-tight transition-all duration-1000 delay-200 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
             Find and book the perfect creative space, anywhere in the world.
           </h1>
-          <p className="text-lg md:text-xl font-light opacity-80 max-w-2xl mx-auto mb-12">
+          <p className={`text-lg md:text-xl font-light opacity-80 max-w-2xl mx-auto mb-12 transition-all duration-1000 delay-400 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
             For creators, brands and production teams who need beautiful spaces - fast. Studios, podcast rooms and editorial locations across London, Dubai, Paris and beyond.
           </p>
 
           {/* Search Component */}
-          <div className="max-w-3xl mx-auto mb-12">
+          <div className={`max-w-3xl mx-auto mb-12 transition-all duration-1000 delay-600 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
             <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-full p-2 pl-6 flex items-center gap-4">
               <MagnifyingGlassIcon className="w-5 h-5 text-white/60" />
               <input
@@ -119,7 +310,10 @@ export default function HomePage() {
                 placeholder="Warm natural studio in London for a fashion shoot tomorrow"
                 type="text"
               />
-              <button className="bg-white text-brand-dark px-8 py-3 rounded-full text-sm font-semibold hover:bg-opacity-90 transition-all uppercase tracking-wider">
+              <button 
+                onClick={() => setIsModalOpen(true)}
+                className="bg-white text-brand-dark px-8 py-3 rounded-full text-sm font-semibold hover:bg-opacity-90 transition-all uppercase tracking-wider"
+              >
                 Discover
               </button>
             </div>
@@ -131,8 +325,11 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <button className="bg-white text-brand-dark px-10 py-4 rounded-full text-sm font-semibold uppercase tracking-widest flex items-center justify-center group">
+          <div className={`flex flex-col sm:flex-row justify-center gap-4 transition-all duration-1000 delay-800 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+            <button 
+              onClick={() => setIsModalOpen(true)}
+              className="bg-white text-brand-dark px-10 py-4 rounded-full text-sm font-semibold uppercase tracking-widest flex items-center justify-center group hover:bg-opacity-90 transition-all"
+            >
               Find a space
               <svg className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17 8l4 4m0 0l-4 4m4-4H3" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} /></svg>
             </button>
@@ -147,6 +344,7 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Rest of your sections remain the same */}
       {/* Intro Section */}
       <section className="bg-brand-light py-32 px-6">
         <div className="container mx-auto text-center">
@@ -232,7 +430,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Cities Section */}
+      {/* Rest of your sections (Cities, Process, AI Discovery, Testimonials, Host CTA) remain exactly the same */}
       <section className="bg-[#ECEAE6] py-32 px-6">
         <div className="container mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-16 gap-8">
@@ -269,7 +467,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Process Section */}
       <section className="bg-brand-light py-32 px-6">
         <div className="container mx-auto">
           <div className="text-center mb-24">
@@ -299,7 +496,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* AI Discovery */}
       <section className="bg-[#1a1a1a] text-white py-32 px-6 overflow-hidden">
         <div className="container mx-auto grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
           <div className="space-y-8">
@@ -348,7 +544,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Testimonials */}
       <section className="bg-brand-light py-32 px-6">
         <div className="container mx-auto">
           <div className="text-center mb-24">
@@ -385,7 +580,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Host CTA */}
       <section className="bg-brand-light pb-32 px-6">
         <div className="container mx-auto bg-white p-12 lg:p-20 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           <div className="aspect-[16/9] lg:aspect-square overflow-hidden rounded-xl">
@@ -423,6 +617,436 @@ export default function HomePage() {
     </div>
   );
 }
+
+
+
+
+
+// 'use client';
+
+// import { useState, useEffect } from 'react';
+// import Link from 'next/link';
+// import Image from 'next/image';
+// import { MagnifyingGlassIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
+// import { supabase } from '@/lib/supabase';
+// import './home.css';
+// import Chatbot from '@/components/Chatbot';
+// import Footer from '@/components/Footer';
+
+// interface Studio {
+//   id: string;
+//   name: string;
+//   city: string;
+//   state: string;
+//   hourly_rate: number;
+//   images: string[];
+//   status: string;
+//   description: string;
+// }
+
+// export default function HomePage() {
+//   const [featuredSpaces, setFeaturedSpaces] = useState<Studio[]>([]);
+//   const [loading, setLoading] = useState(true);
+
+//   const cities = [
+//     { name: "London", country: "United Kingdom", spaces: 42, image: "https://lh3.googleusercontent.com/aida-public/AB6AXuAQzGsNM6tt8bra9e6JJuvlzW5F-dY10kFOEoEPU82FFtKfbK0kBoI6ZwAK3W6tA2KPRvxhORyfk6ePqy6fh1fjy1WSY_MY54q1Xa-Hi8rIF4p5Zr4BAo7dKPyKmq_FrTJGouZdP_jw_99cNPj5oLhpBXYXcNDlpiJVVhaexjhLDMWZnnRoWymsjmR8dAM-EFq9RXwEH-X0ImvpmWcifVN6zInI9MCboIYThAIPbXP6IrdDiaPsUBylZo9ADtszhphSu6aNq-hha2j5" },
+//     { name: "Dubai", country: "United Arab Emirates", spaces: 18, image: "https://lh3.googleusercontent.com/aida-public/AB6AXuDmJAT1sfbhr48irtVxV4uxCCnvMiVwtxv_fZy5TbZIOdspOMUhjfDYC5JbVMv0eGAmtIVvAVQZLL3Fp0G7Ba2rL_8bJuXLh0Jphe6kz0SGgE1bUY6C-DqZS-ESmTH3oXyMZ98tQYw4fidLR6V4Zy5R5ZFm_1FjKx4CDlkrMbLlJ1l3A0068fVa5fxvgnWSbukBakc6Sy-DicUkgzUg01htnR7Zx7GmNyeiELEdhb0uNy0KbT8qyQouloyS_x5Ela1abgUCXmtQ2esS" },
+//     { name: "Paris", country: "France", spaces: 28, image: "https://lh3.googleusercontent.com/aida-public/AB6AXuD7Dxm5KX8FSFBgwkgzKpBu-05kwpVuPBMJzcfshXnXkn5NVxdLODVdBHuu3EMOqQvhDyobH4A_F8L157J1jQh9HoL9nuzE8Pu87j-Av0y-jX6ANXxy2zOnbvcOwkwlZW-54GszbvG-GxPFWORoEid1ezlxs1s8zOi0XzjZoS-xb0BqP1oZSQrftxNT2KkvSiJmKGHvHPRIEcySzSGnmtZ_NR6ovjqU63AVxYrDSip4PITJcVZ4mlSBy6QJTGTpYrVFsDecwIvEcvhf" },
+//   ];
+
+//   // Fetch approved studios from Supabase
+//   useEffect(() => {
+//     fetchApprovedStudios();
+//   }, []);
+
+//   const fetchApprovedStudios = async () => {
+//     setLoading(true);
+//     try {
+//       const { data, error } = await supabase
+//         .from('studios')
+//         .select('*')
+//         .eq('status', 'approved')
+//         .limit(6);
+
+//       if (error) throw error;
+//       setFeaturedSpaces(data || []);
+//     } catch (error) {
+//       console.error('Error fetching studios:', error);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   const getFirstImage = (images: string[]) => {
+//     if (!images || images.length === 0) return null;
+//     return images[0];
+//   };
+
+//   const formatPrice = (price: number) => {
+//     return `£${price}`;
+//   };
+
+//   const formatLocation = (city: string, state: string) => {
+//     if (city && state) return `${city} • ${state}`;
+//     if (city) return city;
+//     return 'Location TBD';
+//   };
+
+//   return (
+//     <div className="home-page bg-brand-light text-brand-dark">
+//       {/* Navigation - Same as spaces detail page */}
+//       <nav className="fixed top-0 w-full z-50 bg-brand-light/90 backdrop-blur-md border-b border-brand-dark/5 py-4 px-6">
+//         <div className="container mx-auto flex flex-wrap items-center justify-between gap-4">
+//           <Link href="/" className="text-xl font-medium tracking-widest uppercase">ManyRooms</Link>
+//           <div className="hidden md:flex gap-8 text-xs uppercase tracking-widest font-medium">
+//             <Link href="/" className="hover:opacity-60 transition-opacity">Home</Link>
+//             <Link href="/spaces" className="hover:opacity-60 transition-opacity">Spaces</Link>
+//             <Link href="/cities" className="hover:opacity-60 transition-opacity">Cities</Link>
+//             <Link href="/how-it-works" className="hover:opacity-60 transition-opacity">How it works</Link>
+//             <Link href="/about" className="hover:opacity-60 transition-opacity">About</Link>
+//           </div>
+//           <div className="flex items-center gap-4">
+//             <Link href="/signup?role=owner" className="text-xs uppercase tracking-widest hover:opacity-60 transition-opacity">List your space</Link>
+//             <button className="bg-brand-dark text-white px-6 py-2 rounded-full text-xs uppercase tracking-widest">FIND A SPACE</button>
+//           </div>
+//         </div>
+//       </nav>
+
+//       {/* Hero Section */}
+//       <section className="relative min-h-screen flex flex-col items-center justify-center text-white overflow-hidden bg-brand-dark pt-20">
+//         <div className="absolute inset-0 z-0">
+//           <Image
+//             alt="Creative Space"
+//             className="w-full h-full object-cover opacity-60"
+//             src="https://lh3.googleusercontent.com/aida-public/AB6AXuAjL4_jjm2DcmHEaTKr1ky0ZMJTk4_nyQUen_87485kCgDWc-4MO5Yg4JP7yarEnVVFEUHjgp1rd-mlL_-RG5QDV82v7o-I1Z0MtsCqFN7n-Q2JKjap5pgLjdR5dIU5xTKTYwaBRuytY5ss4i7pJHqZ-2526pmlkwykJG28wyAyzzEYAnVOAAD6tEpVtm8KqJZ-NxqjwAzz5P44wxTPpWhJCwUGWDJHO_ImknqeLHF_euz2odHHv9xPJuQdWLoWLYKWcbdcdnHMaivR"
+//             width={1920}
+//             height={1080}
+//           />
+//           <div className="absolute inset-0 bg-gradient-to-b from-brand-dark/40 via-brand-dark/20 to-brand-dark"></div>
+//         </div>
+
+//         <div className="relative z-10 container mx-auto px-6 text-center">
+//           <p className="uppercase text-xs tracking-widest mb-6 opacity-70">The Global Marketplace for Creative Spaces</p>
+//           <h1 className="text-5xl md:text-7xl lg:text-8xl mb-8 leading-tight max-w-5xl mx-auto tracking-tight">
+//             Find and book the perfect creative space, anywhere in the world.
+//           </h1>
+//           <p className="text-lg md:text-xl font-light opacity-80 max-w-2xl mx-auto mb-12">
+//             For creators, brands and production teams who need beautiful spaces - fast. Studios, podcast rooms and editorial locations across London, Dubai, Paris and beyond.
+//           </p>
+
+//           {/* Search Component */}
+//           <div className="max-w-3xl mx-auto mb-12">
+//             <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-full p-2 pl-6 flex items-center gap-4">
+//               <MagnifyingGlassIcon className="w-5 h-5 text-white/60" />
+//               <input
+//                 className="bg-transparent border-none focus:ring-0 text-white placeholder-white/50 w-full text-sm outline-none"
+//                 placeholder="Warm natural studio in London for a fashion shoot tomorrow"
+//                 type="text"
+//               />
+//               <button className="bg-white text-brand-dark px-8 py-3 rounded-full text-sm font-semibold hover:bg-opacity-90 transition-all uppercase tracking-wider">
+//                 Discover
+//               </button>
+//             </div>
+//             <div className="mt-4 flex flex-wrap justify-center gap-4 text-xs opacity-60 uppercase tracking-widest">
+//               <span>Try:</span>
+//               <a href="#" className="hover:text-white transition-colors underline decoration-white/30 underline-offset-4">Daylight studio in Shoreditch</a>
+//               <a href="#" className="hover:text-white transition-colors underline decoration-white/30 underline-offset-4">Podcast room in Mayfair</a>
+//               <a href="#" className="hover:text-white transition-colors underline decoration-white/30 underline-offset-4">Penthouse with skyline view</a>
+//             </div>
+//           </div>
+
+//           <div className="flex flex-col sm:flex-row justify-center gap-4">
+//             <button className="bg-white text-brand-dark px-10 py-4 rounded-full text-sm font-semibold uppercase tracking-widest flex items-center justify-center group">
+//               Find a space
+//               <svg className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17 8l4 4m0 0l-4 4m4-4H3" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} /></svg>
+//             </button>
+//             <button className="border border-white/30 bg-white/5 backdrop-blur-sm px-10 py-4 rounded-full text-sm font-semibold uppercase tracking-widest hover:bg-white/10 transition-all">
+//               Explore Cities
+//             </button>
+//           </div>
+//         </div>
+
+//         <div className="absolute bottom-8 left-8 text-[10px] tracking-widest opacity-40 uppercase">
+//           Est. 2019 • London
+//         </div>
+//       </section>
+
+//       {/* Intro Section */}
+//       <section className="bg-brand-light py-32 px-6">
+//         <div className="container mx-auto text-center">
+//           <h2 className="text-4xl md:text-6xl max-w-4xl mx-auto leading-tight">
+//             A new home for the world's most beautiful creative spaces. Designed for the people who shape <span className="italic font-bold">culture.</span>
+//           </h2>
+//           <div className="mt-16 text-xs tracking-widest opacity-40 uppercase">01 / Studio</div>
+//         </div>
+//       </section>
+
+//       {/* Featured Spaces */}
+//       <section className="bg-brand-light pb-32 px-6">
+//         <div className="container mx-auto">
+//           <div className="flex justify-between items-end mb-12">
+//             <div>
+//               <p className="text-xs uppercase tracking-widest opacity-40 mb-2">• Featured Spaces</p>
+//               <h3 className="text-4xl md:text-5xl">Hand-picked, this season.</h3>
+//             </div>
+//             <Link href="/spaces" className="text-xs uppercase tracking-widest border-b border-brand-dark/20 pb-1 hover:opacity-60 transition-opacity">View All ↗</Link>
+//           </div>
+
+//           {loading ? (
+//             <div className="flex justify-center items-center py-20">
+//               <div className="animate-pulse text-center">
+//                 <div className="w-16 h-16 bg-primary/20 rounded-full mx-auto mb-4"></div>
+//                 <p className="text-slate-500">Loading featured spaces...</p>
+//               </div>
+//             </div>
+//           ) : featuredSpaces.length === 0 ? (
+//             <div className="text-center py-20">
+//               <div className="w-20 h-20 mx-auto mb-6 text-slate-400">
+//                 <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+//                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+//                 </svg>
+//               </div>
+//               <h4 className="text-xl font-serif mb-2">No studios available yet</h4>
+//               <p className="text-slate-500 max-w-md mx-auto">
+//                 We're currently curating new creative spaces. Please check back soon for beautiful studios from around the world.
+//               </p>
+//             </div>
+//           ) : (
+//             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-16">
+//               {featuredSpaces.map((space) => {
+//                 const coverImage = getFirstImage(space.images);
+//                 return (
+//                   <Link key={space.id} href={`/spaces/${space.id}`} className="space-y-4 group cursor-pointer">
+//                     <div className="aspect-[4/5] overflow-hidden bg-gray-200 rounded-2xl">
+//                       {coverImage ? (
+//                         <img
+//                           alt={space.name}
+//                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+//                           src={coverImage}
+//                         />
+//                       ) : (
+//                         <div className="w-full h-full flex items-center justify-center bg-gray-100">
+//                           <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+//                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+//                           </svg>
+//                         </div>
+//                       )}
+//                     </div>
+//                     <div className="flex justify-between items-start">
+//                       <div>
+//                         <p className="text-[10px] uppercase tracking-widest opacity-50">{formatLocation(space.city, space.state)}</p>
+//                         <h4 className="text-2xl mt-1">{space.name}</h4>
+//                         <p className="text-sm font-light opacity-60 mt-2 line-clamp-2">{space.description || 'A beautiful creative space ready for your next project.'}</p>
+//                         <div className="flex gap-2 mt-4">
+//                           <span className="text-[9px] uppercase border border-brand-dark/10 px-2 py-1 tracking-tighter opacity-50">Natural Light</span>
+//                           <span className="text-[9px] uppercase border border-brand-dark/10 px-2 py-1 tracking-tighter opacity-50">Creative</span>
+//                         </div>
+//                       </div>
+//                       <div className="text-right">
+//                         <p className="text-[10px] uppercase tracking-widest opacity-50">From</p>
+//                         <p className="text-xl">{formatPrice(space.hourly_rate)}</p>
+//                         <p className="text-[10px] opacity-40">/ Hour</p>
+//                       </div>
+//                     </div>
+//                   </Link>
+//                 );
+//               })}
+//             </div>
+//           )}
+//         </div>
+//       </section>
+
+//       {/* Cities Section */}
+//       <section className="bg-[#ECEAE6] py-32 px-6">
+//         <div className="container mx-auto">
+//           <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-16 gap-8">
+//             <div>
+//               <p className="text-xs uppercase tracking-widest opacity-40 mb-2">02 / Cities</p>
+//               <h2 className="text-5xl md:text-7xl leading-none">Six cities.<br />A growing world.</h2>
+//             </div>
+//             <p className="max-w-xs text-sm font-light opacity-60 leading-relaxed">
+//               From the warm light of London townhouses to the sculpted skylines of Dubai – Many Rooms is curating the most beautiful creative spaces, city by city.
+//             </p>
+//           </div>
+//           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+//             {cities.map((city) => (
+//               <div key={city.name} className="relative group aspect-[4/3] overflow-hidden cursor-pointer rounded-2xl">
+//                 <Image
+//                   alt={city.name}
+//                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+//                   src={city.image}
+//                   width={600}
+//                   height={450}
+//                 />
+//                 <div className="absolute inset-0 bg-black/20 group-hover:bg-black/30 transition-colors"></div>
+//                 <div className="absolute bottom-8 left-8 text-white">
+//                   <p className="text-[10px] uppercase tracking-widest opacity-70">{city.country}</p>
+//                   <h4 className="text-3xl">{city.name}</h4>
+//                   <p className="text-[10px] uppercase tracking-widest mt-1">{city.spaces} curated spaces</p>
+//                 </div>
+//                 <div className="absolute bottom-8 right-8 text-white opacity-0 group-hover:opacity-100 transition-opacity">
+//                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17 8l4 4m0 0l-4 4m4-4H3" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} /></svg>
+//                 </div>
+//               </div>
+//             ))}
+//           </div>
+//         </div>
+//       </section>
+
+//       {/* Process Section */}
+//       <section className="bg-brand-light py-32 px-6">
+//         <div className="container mx-auto">
+//           <div className="text-center mb-24">
+//             <p className="text-xs uppercase tracking-widest opacity-40 mb-4">03 / Process</p>
+//             <h2 className="text-5xl md:text-6xl">A simpler way to find the room.</h2>
+//           </div>
+//           <div className="grid grid-cols-1 md:grid-cols-3 gap-16 max-w-6xl mx-auto">
+//             {[
+//               { step: "01", title: "Describe your vision", desc: "Search by city, style or tell us what you're shooting. Our AI surfaces spaces that match the brief.", icon: "search" },
+//               { step: "02", title: "Discover the right room", desc: "Editorial cards, full galleries, vibe tags and transparent capacity - so you know exactly what you're booking.", icon: "calendar" },
+//               { step: "03", title: "Enquire and create", desc: "Message hosts in seconds, confirm dates, and arrive on shoot day with everything in place.", icon: "chat" }
+//             ].map((item) => (
+//               <div key={item.step} className="space-y-6">
+//                 <div className="flex justify-between items-baseline border-b border-brand-dark/10 pb-4">
+//                   <span className="w-6 h-6 opacity-40">
+//                     {item.icon === "search" && <MagnifyingGlassIcon className="w-5 h-5" />}
+//                     {item.icon === "calendar" && <ChevronLeftIcon className="w-5 h-5" />}
+//                     {item.icon === "chat" && <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} /></svg>}
+//                   </span>
+//                   <span className="font-serif text-5xl italic opacity-20">{item.step}</span>
+//                 </div>
+//                 <h4 className="text-xl font-medium">{item.title}</h4>
+//                 <p className="text-sm opacity-60 leading-relaxed font-light">{item.desc}</p>
+//               </div>
+//             ))}
+//           </div>
+//         </div>
+//       </section>
+
+//       {/* AI Discovery */}
+//       <section className="bg-[#1a1a1a] text-white py-32 px-6 overflow-hidden">
+//         <div className="container mx-auto grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+//           <div className="space-y-8">
+//             <div className="inline-flex items-center gap-2 text-[10px] uppercase tracking-widest bg-white/10 px-3 py-1 rounded-full">
+//               <span className="w-1 h-1 bg-white rounded-full animate-pulse"></span>
+//               AI-Powered Discovery
+//             </div>
+//             <h2 className="text-5xl md:text-6xl leading-tight">Tell us the vibe.<br />We'll find the room.</h2>
+//             <p className="text-lg font-light opacity-60 max-w-md">
+//               Describe your shoot in your own words - light, mood, surfaces, city, timing - and let Many Rooms surface the spaces that fit. Smarter discovery for creators on the move.
+//             </p>
+//             <div className="space-y-4">
+//               {[
+//                 "A warm wood-panelled podcast room in central London for Thursday.",
+//                 "Daylight studio with high ceilings in Paris, suitable for fashion film."
+//               ].map((text, i) => (
+//                 <div key={i} className="bg-white/5 backdrop-blur-md border border-white/10 p-4 rounded-xl flex items-center gap-4 cursor-pointer hover:bg-white/10 transition-colors">
+//                   <svg className="w-4 h-4 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} /></svg>
+//                   <p className="text-sm font-light italic">{text}</p>
+//                 </div>
+//               ))}
+//             </div>
+//             <button className="bg-white text-brand-dark px-8 py-4 rounded-full text-sm font-semibold uppercase tracking-widest flex items-center gap-2 group">
+//               Try AI-Discovery
+//               <svg className="w-4 h-4 group-hover:rotate-45 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} /></svg>
+//             </button>
+//           </div>
+//           <div className="relative">
+//             <div className="aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl">
+//               <Image
+//                 alt="AI Match Result"
+//                 className="w-full h-full object-cover"
+//                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuD5MIZnoTzW-CyTF8G-EW9VeUjZffOY10npkSON7JaZ0EBgE-_jtmwMUMDaUNqK4VZetLgC2b-1VlXzIRMzlYh69VMyKLqZuL16Kamy1KN_KCcbciQlJxErNvSmahXpT2s8lidXQx4h9EuREKh20lSV2mFuw0k3ZNFjtvlns4Pu6b8n8gkHyOQP61jLmbqasRBMSCdpiQJ_xEg1Bg0_XgXzSA7_2g0Mj7w0tjk1QzYMwmr9ss6zBzmElV6iGEA-43GU1xUae7wkdCQB"
+//                 width={600}
+//                 height={750}
+//               />
+//             </div>
+//             <div className="absolute -bottom-6 -left-6 bg-white text-brand-dark p-6 shadow-xl max-w-xs rounded-lg">
+//               <div className="flex justify-between items-start mb-4">
+//                 <span className="text-[9px] uppercase tracking-widest font-bold text-green-600">Match • 96%</span>
+//               </div>
+//               <h5 className="text-lg font-serif">The Arch House</h5>
+//               <p className="text-[10px] uppercase tracking-widest opacity-40">London • Shoreditch</p>
+//             </div>
+//           </div>
+//         </div>
+//       </section>
+
+//       {/* Testimonials */}
+//       <section className="bg-brand-light py-32 px-6">
+//         <div className="container mx-auto">
+//           <div className="text-center mb-24">
+//             <h2 className="text-5xl md:text-6xl max-w-3xl mx-auto">Loved by creators and the brands they shape.</h2>
+//             <div className="mt-8 text-xs tracking-widest opacity-40 uppercase">04 / Trust</div>
+//           </div>
+//           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 border-t border-brand-dark/10 pt-16">
+//             {[
+//               { text: "Many Rooms has quietly become our first call for any shoot in London. The spaces are always the right kind of beautiful.", by: "Editorial Director • Independent Fashion Title" },
+//               { text: "We needed a podcast room in 48 hours. They surfaced three perfect options - booked, shot, edited within the week.", by: "Head of Brand • Consumer Tech Company" },
+//               { text: "The curation is what sets it apart. Every space feels like it belongs in a magazine.", by: "Photographer • London / New York" }
+//             ].map((testimonial, i) => (
+//               <div key={i} className="space-y-6">
+//                 <p className="text-xl font-light leading-relaxed">"{testimonial.text}"</p>
+//                 <div>
+//                   <p className="text-[10px] uppercase tracking-widest font-bold">{testimonial.by}</p>
+//                 </div>
+//               </div>
+//             ))}
+//           </div>
+//           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 mt-32 text-center border-t border-brand-dark/10 pt-16">
+//             {[
+//               { stat: "154", label: "Curated Spaces" },
+//               { stat: "6", label: "Cities" },
+//               { stat: "1.2k+", label: "Creators" },
+//               { stat: "4.9", label: "Avg. Rating" }
+//             ].map((item) => (
+//               <div key={item.label}>
+//                 <p className="text-5xl font-serif italic mb-2">{item.stat}</p>
+//                 <p className="text-[10px] uppercase tracking-widest opacity-50">{item.label}</p>
+//               </div>
+//             ))}
+//           </div>
+//         </div>
+//       </section>
+
+//       {/* Host CTA */}
+//       <section className="bg-brand-light pb-32 px-6">
+//         <div className="container mx-auto bg-white p-12 lg:p-20 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+//           <div className="aspect-[16/9] lg:aspect-square overflow-hidden rounded-xl">
+//             <Image
+//               alt="Studio Host"
+//               className="w-full h-full object-cover"
+//               src="https://lh3.googleusercontent.com/aida-public/AB6AXuCsMV2AON7Y2XYvsfBp4TE0_7CAjGklIVLBwFyU_gGpYEUGUn3nMtxYNBbJSsNKcIhZQU3q2f71G54sTtM0egSR9cbEkH1uCTt8c1rzW--hUtrLoxtbENZ5pzOxh_A445FkVoPqRqaVvJ3JHkuPpai458SE0H1zMQ_WZFdwL5hCZAAiC5t65iRg0kexGomRWgER0NjkA4LZT2wKbkwXV4woooyuqa34HNzVkZgifS_Kmy-iyOlUGHGqL4XvBvToiDDZIUg7RSNoV5K"
+//               width={600}
+//               height={600}
+//             />
+//           </div>
+//           <div className="space-y-8">
+//             <p className="text-xs uppercase tracking-widest opacity-40">• For Hosts</p>
+//             <h2 className="text-5xl md:text-6xl leading-tight">Own a creative space? Get seen. Get booked.</h2>
+//             <p className="text-lg font-light opacity-60">
+//               List your studio, location or apartment alongside the world's most beautiful creative spaces. We handle the curation, the audience and the bookings.
+//             </p>
+//             <div className="flex flex-wrap gap-4">
+//               <Link href="/signup?role=owner" className="bg-brand-dark text-white px-10 py-4 rounded-full text-sm font-semibold uppercase tracking-widest hover:bg-black transition-all">
+//                 List your space
+//               </Link>
+//               <button className="border border-brand-dark/10 px-10 py-4 rounded-full text-sm font-semibold uppercase tracking-widest hover:bg-gray-50 transition-all">
+//                 Learn more
+//               </button>
+//             </div>
+//           </div>
+//         </div>
+//       </section>
+
+//       {/* Footer */}
+//       <Footer />
+
+//       {/* Chatbot */}
+//       <Chatbot />
+//     </div>
+//   );
+// }
 
 
 
