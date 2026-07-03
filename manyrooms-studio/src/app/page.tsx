@@ -45,7 +45,8 @@ export default function HomePage() {
   const heroRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLDivElement>(null);
   const animationFrameRef = useRef<number>();
-  const [textColor, setTextColor] = useState('#191c1d'); // Default dark text
+  const [textColor, setTextColor] = useState('#191c1d');
+  const [isMobile, setIsMobile] = useState(false);
 
   const heroImages = [
     'https://lh3.googleusercontent.com/aida-public/AB6AXuA1nB8OSMDUsNkAjUgjSwpjlliLiXMo7iWRhJ5E3wEXUgozXJ_eCPqjykQK6KY94W_P1URI5aDnYvkgRxtFt78nYbYzvhf2D7V4lGIdHS3PTuJEVtPrLu9ux0BPCzdmUCHmcZ0oh61pvXHIVDffE_hQFuDUOkW1xuB_qzh9mf-ebhdQVZ__ubUhTs61wl3OYOB-MKIY3sS1Lw0HsERjRPaN9mJ3s5xn5iOSEw_wICJcT-tSP3FO9wbJcdUXmdzeaXoIEtrTlhhzNJN2',
@@ -55,55 +56,112 @@ export default function HomePage() {
     'https://lh3.googleusercontent.com/aida-public/AB6AXuDLkL_S-dw1DwN3C_25Bg1DkuiE4eStzko3W4oDgh-uQKrWWmbQNb8qx0xEEcqWJ2UrtMJl3GF2rbvtvt2G6yyZf0PyFp7G6J-gkcEkNv8m_KbQUky3KfZmt1R18XEJJlqQe5VKA1HgbLcaAmUHy0nM7zSTyaMh6MSTiVto7EjDhv1SPZ4x0RuvmLu7w532bPBwYZ9IyoSjxBUn8v77ZUSe_yE-mHRWCYYoqLKUQc2mEqxLKKTXlIUP3oYmxWXzVhnkz0EXuhLHLU9U'
   ];
 
-  // Animate cards continuously
+  // Check if mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Animate cards continuously - adjusted for mobile
   useEffect(() => {
     let time = 0;
     
     const animateCards = () => {
       time += 0.008;
       
-      setCardPositions([
-        {
-          x: -35 + Math.sin(time * 0.7) * 25,
-          y: -10 + Math.cos(time * 0.5) * 30,
-          rotate: -6 + Math.sin(time * 0.4) * 4,
-          scale: 0.85,
-          opacity: 0.85 + Math.sin(time * 0.6) * 0.1,
-          zIndex: Math.sin(time * 0.3) > 0 ? 2 : 1
-        },
-        {
-          x: Math.sin(time * 0.6) * 20,
-          y: 10 + Math.cos(time * 0.45) * 25,
-          rotate: Math.sin(time * 0.35) * 3,
-          scale: 0.95 + Math.sin(time * 0.5) * 0.05,
-          opacity: 1,
-          zIndex: 3
-        },
-        {
-          x: 30 + Math.cos(time * 0.65) * 25,
-          y: -5 + Math.sin(time * 0.55) * 30,
-          rotate: 5 + Math.cos(time * 0.45) * 3,
-          scale: 0.87,
-          opacity: 0.85 + Math.cos(time * 0.5) * 0.1,
-          zIndex: Math.cos(time * 0.3) > 0 ? 2 : 1
-        },
-        {
-          x: -20 + Math.cos(time * 0.75) * 30,
-          y: 20 + Math.sin(time * 0.6) * 35,
-          rotate: -3 + Math.cos(time * 0.5) * 3,
-          scale: 0.8,
-          opacity: 0.8 + Math.sin(time * 0.7) * 0.1,
-          zIndex: 1
-        },
-        {
-          x: 20 + Math.sin(time * 0.8) * 28,
-          y: -18 + Math.cos(time * 0.7) * 32,
-          rotate: 4 + Math.sin(time * 0.55) * 3,
-          scale: 0.83,
-          opacity: 0.8 + Math.cos(time * 0.65) * 0.1,
-          zIndex: 1
-        },
-      ]);
+      if (isMobile) {
+        // Smaller movements for mobile
+        setCardPositions([
+          {
+            x: -25 + Math.sin(time * 0.7) * 15,
+            y: -5 + Math.cos(time * 0.5) * 20,
+            rotate: -4 + Math.sin(time * 0.4) * 3,
+            scale: 0.7,
+            opacity: 0.8 + Math.sin(time * 0.6) * 0.1,
+            zIndex: Math.sin(time * 0.3) > 0 ? 2 : 1
+          },
+          {
+            x: Math.sin(time * 0.6) * 15,
+            y: 8 + Math.cos(time * 0.45) * 18,
+            rotate: Math.sin(time * 0.35) * 2,
+            scale: 0.82,
+            opacity: 1,
+            zIndex: 3
+          },
+          {
+            x: 22 + Math.cos(time * 0.65) * 15,
+            y: -3 + Math.sin(time * 0.55) * 20,
+            rotate: 4 + Math.cos(time * 0.45) * 2,
+            scale: 0.72,
+            opacity: 0.8 + Math.cos(time * 0.5) * 0.1,
+            zIndex: Math.cos(time * 0.3) > 0 ? 2 : 1
+          },
+          {
+            x: -15 + Math.cos(time * 0.75) * 18,
+            y: 15 + Math.sin(time * 0.6) * 22,
+            rotate: -2 + Math.cos(time * 0.5) * 2,
+            scale: 0.65,
+            opacity: 0.75 + Math.sin(time * 0.7) * 0.1,
+            zIndex: 1
+          },
+          {
+            x: 15 + Math.sin(time * 0.8) * 18,
+            y: -12 + Math.cos(time * 0.7) * 20,
+            rotate: 3 + Math.sin(time * 0.55) * 2,
+            scale: 0.68,
+            opacity: 0.75 + Math.cos(time * 0.65) * 0.1,
+            zIndex: 1
+          },
+        ]);
+      } else {
+        // Full movements for desktop
+        setCardPositions([
+          {
+            x: -35 + Math.sin(time * 0.7) * 25,
+            y: -10 + Math.cos(time * 0.5) * 30,
+            rotate: -6 + Math.sin(time * 0.4) * 4,
+            scale: 0.85,
+            opacity: 0.85 + Math.sin(time * 0.6) * 0.1,
+            zIndex: Math.sin(time * 0.3) > 0 ? 2 : 1
+          },
+          {
+            x: Math.sin(time * 0.6) * 20,
+            y: 10 + Math.cos(time * 0.45) * 25,
+            rotate: Math.sin(time * 0.35) * 3,
+            scale: 0.95 + Math.sin(time * 0.5) * 0.05,
+            opacity: 1,
+            zIndex: 3
+          },
+          {
+            x: 30 + Math.cos(time * 0.65) * 25,
+            y: -5 + Math.sin(time * 0.55) * 30,
+            rotate: 5 + Math.cos(time * 0.45) * 3,
+            scale: 0.87,
+            opacity: 0.85 + Math.cos(time * 0.5) * 0.1,
+            zIndex: Math.cos(time * 0.3) > 0 ? 2 : 1
+          },
+          {
+            x: -20 + Math.cos(time * 0.75) * 30,
+            y: 20 + Math.sin(time * 0.6) * 35,
+            rotate: -3 + Math.cos(time * 0.5) * 3,
+            scale: 0.8,
+            opacity: 0.8 + Math.sin(time * 0.7) * 0.1,
+            zIndex: 1
+          },
+          {
+            x: 20 + Math.sin(time * 0.8) * 28,
+            y: -18 + Math.cos(time * 0.7) * 32,
+            rotate: 4 + Math.sin(time * 0.55) * 3,
+            scale: 0.83,
+            opacity: 0.8 + Math.cos(time * 0.65) * 0.1,
+            zIndex: 1
+          },
+        ]);
+      }
       
       animationFrameRef.current = requestAnimationFrame(animateCards);
     };
@@ -115,7 +173,7 @@ export default function HomePage() {
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
-  }, []);
+  }, [isMobile]);
 
   // Check if text overlaps with dark images and invert text color
   useEffect(() => {
@@ -123,9 +181,7 @@ export default function HomePage() {
       if (!textRef.current || !heroRef.current) return;
       
       const textRect = textRef.current.getBoundingClientRect();
-      const heroRect = heroRef.current.getBoundingClientRect();
       
-      // Get all card elements
       const cards = heroRef.current.querySelectorAll('.hero-card');
       let isOverDarkArea = false;
       
@@ -133,7 +189,6 @@ export default function HomePage() {
         const cardRect = card.getBoundingClientRect();
         const cardZIndex = parseInt(card.getAttribute('data-zindex') || '0');
         
-        // Check if card overlaps with text area and is in front (zIndex >= 2)
         const overlapX = textRect.left < cardRect.right && textRect.right > cardRect.left;
         const overlapY = textRect.top < cardRect.bottom && textRect.bottom > cardRect.top;
         
@@ -145,7 +200,6 @@ export default function HomePage() {
       setTextColor(isOverDarkArea ? '#ffffff' : '#191c1d');
     };
     
-    // Run check on every animation frame
     const interval = setInterval(checkOverlap, 100);
     
     return () => clearInterval(interval);
@@ -212,14 +266,14 @@ export default function HomePage() {
 
   return (
     <div className="home-page bg-background text-on-background selection:bg-primary-fixed selection:text-on-primary-fixed">
-      {/* Navigation */}
-      <nav className="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-xl border-b border-outline-variant/30 shadow-sm transition-all duration-300">
-        <div className="flex justify-between items-center px-6 md:px-16 py-4 w-full max-w-[1440px] mx-auto">
-          <div className="flex items-center gap-8">
-            <Link href="/" className="group">
+      {/* Navigation - solid background on mobile */}
+      <nav className="fixed top-0 w-full z-50 bg-white/95 md:bg-surface/80 backdrop-blur-xl border-b border-outline-variant/30 shadow-sm transition-all duration-300">
+        <div className="flex justify-between items-center px-4 md:px-16 py-3 md:py-4 w-full max-w-[1440px] mx-auto">
+          <div className="flex items-center gap-4 md:gap-8">
+            <Link href="/" className="group flex-shrink-0">
               <img 
                 alt="ManyRooms Logo" 
-                className="h-10 md:h-12 w-auto object-contain transition-transform duration-300 group-hover:scale-105" 
+                className="h-8 md:h-12 w-auto object-contain transition-transform duration-300 group-hover:scale-105" 
                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuB9DZnYRdMuRfh66s2y0aufTN6zhyFmIsA5aK66cuCBeLINs4QoP8IyjpBAQjHuPpHixsYPB1HMPOBhT7mUKu2qy7il9h__oTnAUvQ8EU5qv270iXUsGRbz-PlJjGMU5ixs4CUyHd9GoHjR9KulnOy4sz-3QN2VkRzW39ONL6ynO2nSLAUh3VRvj_U51r7i6CxOGm9pnjSOVDUTZd2P3m_LTCAchKE5VwHb0k6YYjDoduMHQU4iyejUYtTsGr0VhJR4tasKZ-e6qrWQ"
               />
             </Link>
@@ -230,7 +284,7 @@ export default function HomePage() {
               <Link href="/about" className="text-on-surface-variant hover:text-primary transition-all py-1 hover:scale-105">Journal</Link>
             </div>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 md:gap-4">
             <Link 
               href="/signup?role=owner" 
               className="hidden md:flex bg-primary-container text-on-primary-container font-label-bold px-6 py-2 rounded-full hover:scale-105 transition-all hover:shadow-lg active:scale-95"
@@ -242,32 +296,33 @@ export default function HomePage() {
             </span>
             <button 
               onClick={() => setIsModalOpen(true)}
-              className="material-symbols-outlined text-primary cursor-pointer hover:scale-110 transition-transform p-2 hover:bg-primary-container/20 rounded-full"
+              className="material-symbols-outlined text-primary cursor-pointer hover:scale-110 transition-transform p-2 hover:bg-primary-container/20 rounded-full hidden md:block"
             >
               account_circle
             </button>
+            {/* Mobile menu button - solid background */}
             <button 
               onClick={() => setIsMobileMenuOpen(true)}
-              className="md:hidden p-2 hover:bg-primary/5 rounded-full transition-all"
+              className="md:hidden p-2 hover:bg-primary/10 rounded-full transition-all bg-surface-container-lowest shadow-sm border border-outline-variant/20"
             >
-              <Bars3Icon className="w-6 h-6" />
+              <Bars3Icon className="w-5 h-5 text-on-surface" />
             </button>
           </div>
         </div>
       </nav>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu - solid white background */}
       <div 
         className={`fixed inset-0 z-[60] md:hidden transition-all duration-300 ${
           isMobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
         }`}
       >
         <div 
-          className="absolute inset-0 bg-black/50"
+          className="absolute inset-0 bg-black/60 backdrop-blur-sm"
           onClick={() => setIsMobileMenuOpen(false)}
         />
         <div 
-          className={`absolute top-0 right-0 h-full w-[300px] bg-surface shadow-2xl transition-transform duration-300 ${
+          className={`absolute top-0 right-0 h-full w-[300px] bg-white shadow-2xl transition-transform duration-300 ${
             isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
           }`}
         >
@@ -276,24 +331,24 @@ export default function HomePage() {
               <span className="text-2xl font-bold text-primary">ManyRooms</span>
               <button 
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="p-2 hover:bg-primary/5 rounded-full transition-all"
+                className="p-2 hover:bg-gray-100 rounded-full transition-all"
               >
-                <XMarkIcon className="w-6 h-6" />
+                <XMarkIcon className="w-6 h-6 text-on-surface" />
               </button>
             </div>
 
             <nav className="flex flex-col gap-6">
-              <Link href="/" className="text-sm uppercase tracking-widest hover:opacity-60 transition-opacity" onClick={() => setIsMobileMenuOpen(false)}>Marketplace</Link>
-              <Link href="/spaces" className="text-sm uppercase tracking-widest hover:opacity-60 transition-opacity" onClick={() => setIsMobileMenuOpen(false)}>Studios</Link>
-              <Link href="/cities" className="text-sm uppercase tracking-widest hover:opacity-60 transition-opacity" onClick={() => setIsMobileMenuOpen(false)}>Vibes</Link>
-              <Link href="/about" className="text-sm uppercase tracking-widest hover:opacity-60 transition-opacity" onClick={() => setIsMobileMenuOpen(false)}>Journal</Link>
+              <Link href="/" className="text-base font-semibold text-on-surface hover:text-primary transition-colors" onClick={() => setIsMobileMenuOpen(false)}>Marketplace</Link>
+              <Link href="/spaces" className="text-base font-semibold text-on-surface hover:text-primary transition-colors" onClick={() => setIsMobileMenuOpen(false)}>Studios</Link>
+              <Link href="/cities" className="text-base font-semibold text-on-surface hover:text-primary transition-colors" onClick={() => setIsMobileMenuOpen(false)}>Vibes</Link>
+              <Link href="/about" className="text-base font-semibold text-on-surface hover:text-primary transition-colors" onClick={() => setIsMobileMenuOpen(false)}>Journal</Link>
               
-              <div className="border-t border-outline-variant/30 pt-6 mt-2">
-                <Link href="/signup?role=owner" className="block text-sm uppercase tracking-widest hover:opacity-60 transition-opacity mb-4" onClick={() => setIsMobileMenuOpen(false)}>List Studio</Link>
-                <Link href="/login" className="block text-sm uppercase tracking-widest hover:opacity-60 transition-opacity mb-4" onClick={() => setIsMobileMenuOpen(false)}>Log in</Link>
-                <Link href="/signup" className="block text-sm uppercase tracking-widest hover:opacity-60 transition-opacity mb-4" onClick={() => setIsMobileMenuOpen(false)}>Sign up</Link>
-                <Link href="/support" className="block text-sm uppercase tracking-widest hover:opacity-60 transition-opacity mb-4" onClick={() => setIsMobileMenuOpen(false)}>Contact Support</Link>
-                <button className="flex items-center gap-2 text-sm uppercase tracking-widest hover:opacity-60 transition-opacity">
+              <div className="border-t border-gray-200 pt-6 mt-2">
+                <Link href="/signup?role=owner" className="block text-base font-semibold text-on-surface hover:text-primary transition-colors mb-4" onClick={() => setIsMobileMenuOpen(false)}>List Studio</Link>
+                <Link href="/login" className="block text-base font-semibold text-on-surface hover:text-primary transition-colors mb-4" onClick={() => setIsMobileMenuOpen(false)}>Log in</Link>
+                <Link href="/signup" className="block text-base font-semibold text-on-surface hover:text-primary transition-colors mb-4" onClick={() => setIsMobileMenuOpen(false)}>Sign up</Link>
+                <Link href="/support" className="block text-base font-semibold text-on-surface hover:text-primary transition-colors mb-4" onClick={() => setIsMobileMenuOpen(false)}>Contact Support</Link>
+                <button className="flex items-center gap-2 text-base font-semibold text-on-surface hover:text-primary transition-colors">
                   <GlobeAltIcon className="w-4 h-4" />
                   Language
                 </button>
@@ -303,40 +358,67 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Login/Signup Modal */}
+      {/* Login/Signup Modal - solid white background */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[70] flex items-center justify-center px-4">
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setIsModalOpen(false)} />
-          <div className="relative bg-surface rounded-2xl shadow-2xl max-w-md w-full p-8 animate-in fade-in zoom-in duration-300">
-            <button onClick={() => setIsModalOpen(false)} className="absolute top-4 right-4 p-2 hover:bg-primary/5 rounded-full transition-all">
-              <XMarkIcon className="w-5 h-5" />
+          <div 
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={() => setIsModalOpen(false)}
+          />
+          <div className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 animate-in fade-in zoom-in duration-300 border border-gray-100">
+            <button 
+              onClick={() => setIsModalOpen(false)}
+              className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full transition-all"
+            >
+              <XMarkIcon className="w-5 h-5 text-gray-600" />
             </button>
             
             <div className="text-center mb-8">
-              <h3 className="text-2xl font-bold text-on-surface mb-2">Welcome to ManyRooms</h3>
-              <p className="text-sm text-on-surface-variant">Find and book the perfect creative space</p>
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">Welcome to ManyRooms</h3>
+              <p className="text-sm text-gray-600">Find and book the perfect creative space</p>
             </div>
 
             <div className="space-y-4">
-              <Link href="/login" className="block w-full text-center bg-primary text-on-primary py-3 rounded-full text-sm font-semibold uppercase tracking-widest hover:bg-primary/90 transition-all" onClick={() => setIsModalOpen(false)}>Log in</Link>
-              <Link href="/signup" className="block w-full text-center border border-outline/30 py-3 rounded-full text-sm font-semibold uppercase tracking-widest hover:bg-primary/5 transition-all" onClick={() => setIsModalOpen(false)}>Sign up</Link>
-              <div className="border-t border-outline-variant/30 pt-4 mt-2">
-                <Link href="/signup?role=owner" className="block w-full text-center text-xs uppercase tracking-widest text-on-surface-variant hover:text-primary transition-colors" onClick={() => setIsModalOpen(false)}>List your space</Link>
+              <Link 
+                href="/login" 
+                className="block w-full text-center bg-primary text-white py-3 rounded-full text-sm font-semibold uppercase tracking-widest hover:bg-primary/90 transition-all shadow-md"
+                onClick={() => setIsModalOpen(false)}
+              >
+                Log in
+              </Link>
+              <Link 
+                href="/signup" 
+                className="block w-full text-center border-2 border-gray-200 py-3 rounded-full text-sm font-semibold uppercase tracking-widest hover:bg-gray-50 hover:border-gray-300 transition-all text-gray-900"
+                onClick={() => setIsModalOpen(false)}
+              >
+                Sign up
+              </Link>
+              <div className="border-t border-gray-200 pt-4 mt-2">
+                <Link 
+                  href="/signup?role=owner" 
+                  className="block w-full text-center text-xs uppercase tracking-widest text-gray-500 hover:text-primary transition-colors"
+                  onClick={() => setIsModalOpen(false)}
+                >
+                  List your space
+                </Link>
               </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* 3D Animated Hero Section with moving cards */}
-      <section ref={heroRef} className="relative h-[90vh] md:h-[95vh] flex items-center justify-center px-6 md:px-16 overflow-hidden bg-surface">
+      {/* 3D Animated Hero Section - fixed mobile spacing */}
+      <section 
+        ref={heroRef} 
+        className="relative min-h-[85vh] md:h-[95vh] flex items-center justify-center px-4 md:px-16 overflow-hidden bg-surface pt-20 md:pt-0"
+      >
         {/* Moving image cards */}
-        <div className="absolute inset-0 z-0 pointer-events-none" style={{ perspective: '1500px' }}>
+        <div className="absolute inset-0 z-0 pointer-events-none" style={{ perspective: isMobile ? '800px' : '1500px' }}>
           <div className="relative w-full h-full flex items-center justify-center">
             {cardPositions.map((pos, index) => (
               <div
                 key={index}
-                className="hero-card absolute w-[200px] h-[280px] md:w-[300px] md:h-[400px] rounded-[32px] overflow-hidden shadow-2xl border border-white/20"
+                className="hero-card absolute w-[160px] h-[220px] md:w-[300px] md:h-[400px] rounded-[24px] md:rounded-[32px] overflow-hidden shadow-2xl border border-white/20"
                 data-zindex={pos.zIndex}
                 style={{
                   backgroundImage: `url('${heroImages[index % heroImages.length]}')`,
@@ -346,25 +428,27 @@ export default function HomePage() {
                   zIndex: pos.zIndex,
                   opacity: pos.opacity,
                   transition: 'transform 0.3s ease-out, opacity 0.3s ease-out',
-                  boxShadow: pos.zIndex >= 3 ? '0 40px 80px rgba(0,0,0,0.4)' : '0 20px 40px rgba(0,0,0,0.2)',
+                  boxShadow: pos.zIndex >= 3 ? '0 30px 60px rgba(0,0,0,0.4)' : '0 15px 30px rgba(0,0,0,0.2)',
                 }}
               />
             ))}
           </div>
           {/* Gradient overlay for text readability */}
-          <div className="absolute inset-0 bg-gradient-to-b from-white/20 via-transparent to-surface/80 pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-b from-white/30 via-transparent to-surface/90 pointer-events-none" />
         </div>
 
         {/* Hero text content with dynamic color */}
         <div 
           ref={textRef}
-          className={`relative z-20 text-center max-w-4xl mx-auto pt-20 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
+          className={`relative z-20 text-center max-w-4xl mx-auto transition-all duration-1000 ${
+            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+          } ${isMobile ? 'pt-8 pb-12' : 'pt-20'}`}
         >
-          <div className="mb-6 inline-block bg-secondary-container/90 backdrop-blur-sm px-5 py-2 rounded-full text-on-secondary-container font-label-bold pulse-glow">
+          <div className="mb-4 md:mb-6 inline-block bg-secondary-container/95 backdrop-blur-sm px-4 md:px-5 py-1.5 md:py-2 rounded-full text-on-secondary-container font-label-bold pulse-glow text-sm md:text-base">
             ✨ NEW: AI SPACE DISCOVERY
           </div>
           <h1 
-            className="text-[56px] md:text-[84px] font-display-lg leading-none mb-8 tracking-tighter transition-colors duration-500"
+            className="text-[40px] md:text-[84px] font-display-lg leading-[1.1] mb-4 md:mb-8 tracking-tighter transition-colors duration-500 px-2"
             style={{ 
               color: textColor,
               textShadow: textColor === '#ffffff' ? '0 2px 20px rgba(0,0,0,0.5)' : '0 2px 10px rgba(255,255,255,0.8)'
@@ -373,7 +457,7 @@ export default function HomePage() {
             Your Creative <span className="text-primary italic">Stage</span>,<br/>Redefined.
           </h1>
           <p 
-            className="text-[18px] md:text-[18px] max-w-xl mx-auto mb-12 font-body-lg transition-colors duration-500"
+            className="text-base md:text-[18px] max-w-md md:max-w-xl mx-auto mb-8 md:mb-12 font-body-lg transition-colors duration-500 px-4"
             style={{ 
               color: textColor === '#ffffff' ? 'rgba(255,255,255,0.9)' : '#424937',
               textShadow: textColor === '#ffffff' ? '0 1px 10px rgba(0,0,0,0.5)' : 'none'
@@ -383,23 +467,23 @@ export default function HomePage() {
           </p>
           
           {/* AI Visual Search Bar */}
-          <div className="glass max-w-2xl mx-auto rounded-3xl p-2 flex flex-col md:flex-row items-center shadow-2xl mt-12 border-2 border-white/60 hover:border-primary/30 transition-all duration-500">
-            <div className="flex-1 px-6 flex items-center gap-3 w-full">
-              <MagnifyingGlassIcon className="w-6 h-6 text-outline flex-shrink-0" />
+          <div className="glass max-w-md md:max-w-2xl mx-auto rounded-2xl md:rounded-3xl p-2 flex flex-col md:flex-row items-center shadow-2xl mt-8 md:mt-12 border-2 border-white/60 hover:border-primary/30 transition-all duration-500 mx-4 md:mx-auto">
+            <div className="flex-1 px-4 md:px-6 flex items-center gap-2 md:gap-3 w-full">
+              <MagnifyingGlassIcon className="w-5 h-5 md:w-6 md:h-6 text-outline flex-shrink-0" />
               <input 
-                className="w-full bg-transparent border-none focus:ring-0 text-on-surface py-4 font-body-md placeholder:text-outline/60 outline-none" 
+                className="w-full bg-transparent border-none focus:ring-0 text-on-surface py-3 md:py-4 text-sm md:text-base font-body-md placeholder:text-outline/60 outline-none" 
                 placeholder="Describe the mood, aesthetic, or upload an image..." 
                 type="text"
               />
             </div>
-            <div className="flex items-center gap-2 w-full md:w-auto p-2 md:p-0">
-              <label className="flex items-center justify-center w-14 h-14 rounded-2xl bg-surface-container-high cursor-pointer hover:bg-secondary-container transition-all group relative" title="Upload reference image">
+            <div className="flex items-center gap-2 w-full md:w-auto p-2 md:p-0 border-t md:border-t-0 border-white/20 mt-2 md:mt-0 pt-2 md:pt-0">
+              <label className="flex items-center justify-center w-10 h-10 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-surface-container-high cursor-pointer hover:bg-secondary-container transition-all group relative" title="Upload reference image">
                 <input className="hidden" type="file" accept="image/*"/>
-                <PhotoIcon className="w-6 h-6 text-on-surface-variant group-hover:text-secondary transition-colors" />
+                <PhotoIcon className="w-5 h-5 md:w-6 md:h-6 text-on-surface-variant group-hover:text-secondary transition-colors" />
               </label>
               <Link 
                 href="/spaces"
-                className="flex-1 md:flex-none bg-primary-fixed text-on-primary-fixed px-10 py-4 rounded-2xl font-label-bold hover:scale-105 active:scale-95 transition-all shadow-lg hover:shadow-xl whitespace-nowrap flex items-center gap-2 justify-center"
+                className="flex-1 md:flex-none bg-primary-fixed text-on-primary-fixed px-6 md:px-10 py-3 md:py-4 rounded-xl md:rounded-2xl font-label-bold hover:scale-105 active:scale-95 transition-all shadow-lg hover:shadow-xl whitespace-nowrap flex items-center gap-2 justify-center text-sm md:text-base"
               >
                 FIND SPACE
                 <span className="text-sm">→</span>
@@ -408,7 +492,7 @@ export default function HomePage() {
           </div>
           
           {/* Quick Stats */}
-          <div className="flex justify-center gap-8 md:gap-12 mt-16 text-center">
+          <div className="flex justify-center gap-6 md:gap-12 mt-12 md:mt-16 text-center">
             {[
               { value: '500+', label: 'UNIQUE SPACES', delay: 300, translateX: -50 },
               { value: '50+', label: 'CITIES', delay: 500, translateX: 0 },
@@ -423,9 +507,9 @@ export default function HomePage() {
                   transitionDelay: `${stat.delay}ms`
                 }}
               >
-                <p className="text-4xl font-display-sm text-primary">{stat.value}</p>
+                <p className="text-3xl md:text-4xl font-display-sm text-primary">{stat.value}</p>
                 <p 
-                  className="font-label-bold text-xs tracking-wider transition-colors duration-500"
+                  className="font-label-bold text-[10px] md:text-xs tracking-wider transition-colors duration-500"
                   style={{ color: textColor === '#ffffff' ? 'rgba(255,255,255,0.8)' : '#424937' }}
                 >
                   {stat.label}
@@ -437,56 +521,56 @@ export default function HomePage() {
       </section>
 
       {/* Search by Vibe Section */}
-      <section className="py-24 px-6 md:px-16 max-w-[1440px] mx-auto">
-        <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-4">
+      <section className="py-16 md:py-24 px-4 md:px-16 max-w-[1440px] mx-auto">
+        <div className="flex flex-col md:flex-row justify-between items-end mb-10 md:mb-16 gap-4">
           <div>
             <span className="font-label-bold text-primary tracking-widest uppercase text-xs">DISCOVER</span>
-            <h2 className="text-[48px] font-display-sm tracking-tighter mt-2">Search by Vibe</h2>
+            <h2 className="text-[36px] md:text-[48px] font-display-sm tracking-tighter mt-2">Search by Vibe</h2>
           </div>
-          <p className="text-[18px] text-on-surface-variant max-w-md">Our curated categories move beyond utility, focusing on the architectural soul of the space.</p>
+          <p className="text-base md:text-[18px] text-on-surface-variant max-w-md">Our curated categories move beyond utility, focusing on the architectural soul of the space.</p>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 h-auto md:h-[600px]">
-          <Link href="/spaces?vibe=brutalist" className="group relative overflow-hidden rounded-3xl md:col-span-2 min-h-[300px] floating-interaction cursor-pointer">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6 h-auto md:h-[600px]">
+          <Link href="/spaces?vibe=brutalist" className="group relative overflow-hidden rounded-2xl md:rounded-3xl md:col-span-2 min-h-[250px] md:min-h-[300px] floating-interaction cursor-pointer">
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent z-10"></div>
             <div className="absolute inset-0 bg-cover bg-center group-hover:scale-110 transition-transform duration-700" style={{ backgroundImage: `url('${heroImages[0]}')` }}></div>
-            <div className="absolute bottom-0 left-0 p-10 z-20">
-              <span className="bg-primary-container text-on-primary-container px-4 py-1 rounded-full font-label-bold mb-4 inline-block">🔥 TRENDING</span>
-              <h3 className="text-white text-3xl font-display-sm mb-2">Brutalist</h3>
-              <p className="text-white/80 font-body-md">Raw concrete, dramatic scale, and uncompromising geometry.</p>
-              <p className="text-primary-fixed font-label-bold mt-3 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">Explore 45 spaces <span>→</span></p>
+            <div className="absolute bottom-0 left-0 p-6 md:p-10 z-20">
+              <span className="bg-primary-container text-on-primary-container px-3 md:px-4 py-1 rounded-full font-label-bold mb-3 md:mb-4 inline-block text-xs md:text-sm">🔥 TRENDING</span>
+              <h3 className="text-white text-2xl md:text-3xl font-display-sm mb-2">Brutalist</h3>
+              <p className="text-white/80 font-body-md text-sm md:text-base">Raw concrete, dramatic scale, and uncompromising geometry.</p>
+              <p className="text-primary-fixed font-label-bold mt-3 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity text-sm">Explore 45 spaces <span>→</span></p>
             </div>
           </Link>
 
-          <Link href="/spaces?vibe=organic" className="group relative overflow-hidden rounded-3xl min-h-[300px] floating-interaction cursor-pointer">
+          <Link href="/spaces?vibe=organic" className="group relative overflow-hidden rounded-2xl md:rounded-3xl min-h-[250px] md:min-h-[300px] floating-interaction cursor-pointer">
             <div className="absolute inset-0 bg-tertiary-container/40 mix-blend-overlay z-10"></div>
             <div className="absolute inset-0 bg-cover bg-center group-hover:scale-110 transition-transform duration-700" style={{ backgroundImage: `url('${heroImages[3]}')` }}></div>
             <div className="absolute inset-0 flex items-center justify-center z-20">
               <div className="text-center">
-                <h3 className="text-tertiary text-3xl -rotate-6 bg-white/95 px-8 py-3 shadow-2xl rounded-2xl font-display-sm">Organic</h3>
-                <p className="text-tertiary/80 font-label-bold mt-4 opacity-0 group-hover:opacity-100 transition-opacity">Nature-meets-design</p>
+                <h3 className="text-tertiary text-2xl md:text-3xl -rotate-6 bg-white/95 px-6 md:px-8 py-2 md:py-3 shadow-2xl rounded-2xl font-display-sm">Organic</h3>
+                <p className="text-tertiary/80 font-label-bold mt-3 md:mt-4 opacity-0 group-hover:opacity-100 transition-opacity text-sm">Nature-meets-design</p>
               </div>
             </div>
           </Link>
 
-          <Link href="/spaces?vibe=scifi" className="group relative overflow-hidden rounded-3xl min-h-[300px] floating-interaction cursor-pointer">
+          <Link href="/spaces?vibe=scifi" className="group relative overflow-hidden rounded-2xl md:rounded-3xl min-h-[250px] md:min-h-[300px] floating-interaction cursor-pointer">
             <div className="absolute inset-0 bg-primary-fixed/30 mix-blend-color z-10"></div>
             <div className="absolute inset-0 bg-cover bg-center group-hover:scale-110 transition-transform duration-700" style={{ backgroundImage: `url('${heroImages[4]}')` }}></div>
-            <div className="absolute bottom-8 right-8 z-20 text-right">
-              <h3 className="text-primary-fixed neon-accent text-4xl font-headline-lg">Sci-Fi</h3>
-              <p className="text-white font-label-bold mt-2 opacity-0 group-hover:opacity-100 transition-opacity">Futuristic & cyberpunk</p>
-              <span className="text-white text-4xl mt-2 block">↗</span>
+            <div className="absolute bottom-6 md:bottom-8 right-6 md:right-8 z-20 text-right">
+              <h3 className="text-primary-fixed neon-accent text-3xl md:text-4xl font-headline-lg">Sci-Fi</h3>
+              <p className="text-white font-label-bold mt-2 opacity-0 group-hover:opacity-100 transition-opacity text-sm">Futuristic & cyberpunk</p>
+              <span className="text-white text-3xl md:text-4xl mt-2 block">↗</span>
             </div>
           </Link>
         </div>
       </section>
 
       {/* Featured Studios Section */}
-      <section className="bg-surface-container py-24 px-6 md:px-16 overflow-hidden">
+      <section className="bg-surface-container py-16 md:py-24 px-4 md:px-16 overflow-hidden">
         <div className="max-w-[1440px] mx-auto">
-          <div className="flex items-center gap-4 mb-12">
+          <div className="flex items-center gap-4 mb-8 md:mb-12">
             <div className="h-px bg-outline-variant flex-1"></div>
-            <h2 className="font-label-bold text-primary tracking-widest uppercase">Curated Collections</h2>
+            <h2 className="font-label-bold text-primary tracking-widest uppercase text-sm md:text-base">Curated Collections</h2>
             <div className="h-px bg-outline-variant flex-1"></div>
           </div>
 
@@ -503,16 +587,16 @@ export default function HomePage() {
               <p className="text-slate-500 max-w-md mx-auto">We're currently curating new creative spaces. Please check back soon.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
               {featuredSpaces.map((space, index) => {
                 const coverImage = getFirstImage(space.images);
                 return (
                   <Link 
                     key={space.id} 
                     href={`/spaces/${space.id}`}
-                    className={`group card-hover bg-surface-container-lowest rounded-[40px] overflow-hidden shadow-xl transition-all duration-500 ${index === 1 ? 'mt-12 md:-mt-8' : ''}`}
+                    className={`group card-hover bg-surface-container-lowest rounded-[32px] md:rounded-[40px] overflow-hidden shadow-xl transition-all duration-500 ${index === 1 ? 'md:mt-12 md:-mt-8' : ''}`}
                   >
-                    <div className="h-[400px] relative overflow-hidden">
+                    <div className="h-[300px] md:h-[400px] relative overflow-hidden">
                       {coverImage ? (
                         <img src={coverImage} alt={space.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
                       ) : (
@@ -520,24 +604,24 @@ export default function HomePage() {
                           <span className="material-symbols-outlined text-6xl text-gray-300">image</span>
                         </div>
                       )}
-                      <div className="absolute top-6 left-6 bg-primary-fixed text-on-primary-fixed px-4 py-2 rounded-2xl font-label-bold shadow-lg">
-                        ${space.hourly_rate}<span className="text-sm font-normal">/hr</span>
+                      <div className="absolute top-4 md:top-6 left-4 md:left-6 bg-primary-fixed text-on-primary-fixed px-3 md:px-4 py-1.5 md:py-2 rounded-2xl font-label-bold shadow-lg text-sm md:text-base">
+                        ${space.hourly_rate}<span className="text-xs md:text-sm font-normal">/hr</span>
                       </div>
-                      <div className="absolute top-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <span className="material-symbols-outlined text-white text-3xl drop-shadow-lg cursor-pointer hover:scale-110 transition-transform">favorite</span>
+                      <div className="absolute top-4 md:top-6 right-4 md:right-6 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <span className="material-symbols-outlined text-white text-2xl md:text-3xl drop-shadow-lg cursor-pointer hover:scale-110 transition-transform">favorite</span>
                       </div>
                     </div>
-                    <div className="p-8">
+                    <div className="p-6 md:p-8">
                       <div className="flex justify-between items-start mb-4">
                         <div>
-                          <h3 className="font-headline-lg mb-1">{space.name}</h3>
-                          <p className="text-on-surface-variant font-body-md flex items-center gap-1">
+                          <h3 className="font-headline-lg text-xl md:text-2xl mb-1">{space.name}</h3>
+                          <p className="text-on-surface-variant font-body-md flex items-center gap-1 text-sm md:text-base">
                             <span className="material-symbols-outlined text-sm">location_on</span> 
                             {space.city || 'Location TBD'}{space.state ? `, ${space.state}` : ''}
                           </p>
                         </div>
                         <div className="flex items-center gap-1">
-                          <span className="material-symbols-outlined text-primary text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+                          <span className="material-symbols-outlined text-primary text-lg md:text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
                           <span className="font-label-bold text-on-surface">4.9</span>
                         </div>
                       </div>
@@ -560,39 +644,41 @@ export default function HomePage() {
       </section>
 
       {/* Creative Talent Section */}
-      <section className="py-24 px-6 md:px-16 bg-surface overflow-hidden border-t border-outline-variant/20">
+      <section className="py-16 md:py-24 px-4 md:px-16 bg-surface overflow-hidden border-t border-outline-variant/20">
         <div className="max-w-[1440px] mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 md:gap-16 items-center">
             <div className="order-2 lg:order-1">
-              <div className="flex items-center gap-4 mb-6">
-                <span className="h-1 w-12 bg-primary"></span>
-                <span className="font-label-bold text-primary tracking-widest uppercase">Direct Talent Access</span>
+              <div className="flex items-center gap-4 mb-4 md:mb-6">
+                <span className="h-1 w-8 md:w-12 bg-primary"></span>
+                <span className="font-label-bold text-primary tracking-widest uppercase text-xs md:text-sm">Direct Talent Access</span>
               </div>
-              <h2 className="text-[48px] font-display-sm mb-8 leading-tight">Elevate Your Production with <span className="text-secondary italic">Pro Talent.</span></h2>
-              <p className="text-[18px] text-on-surface-variant mb-12 max-w-xl">Don't just book a room. Book a crew. Browse our verified roster of world-class photographers, award-winning videographers, and visionary stylists available to hire directly for your ManyRooms session.</p>
-              <div className="flex flex-wrap gap-4">
-                <Link href="/talent" className="bg-on-surface text-surface-bright px-10 py-4 rounded-2xl font-label-bold hover:bg-primary transition-all flex items-center gap-2 group">
+              <h2 className="text-[36px] md:text-[48px] font-display-sm mb-6 md:mb-8 leading-tight">Elevate Your Production with <span className="text-secondary italic">Pro Talent.</span></h2>
+              <p className="text-base md:text-[18px] text-on-surface-variant mb-8 md:mb-12 max-w-xl">
+                Don't just book a room. Book a crew. Browse our verified roster of world-class photographers, award-winning videographers, and visionary stylists available to hire directly for your ManyRooms session.
+              </p>
+              <div className="flex flex-wrap gap-3 md:gap-4">
+                <Link href="/talent" className="bg-on-surface text-surface-bright px-8 md:px-10 py-3 md:py-4 rounded-2xl font-label-bold hover:bg-primary transition-all flex items-center gap-2 group text-sm md:text-base">
                   BOOK TALENT <span className="group-hover:translate-x-1 transition-transform">→</span>
                 </Link>
-                <Link href="/talent/roster" className="border-2 border-outline-variant px-10 py-4 rounded-2xl font-label-bold hover:bg-surface-container transition-all">VIEW ROSTER</Link>
+                <Link href="/talent/roster" className="border-2 border-outline-variant px-8 md:px-10 py-3 md:py-4 rounded-2xl font-label-bold hover:bg-surface-container transition-all text-sm md:text-base">VIEW ROSTER</Link>
               </div>
             </div>
-            <div className="order-1 lg:order-2 grid grid-cols-2 gap-4">
-              <div className="space-y-4">
-                <div className="rounded-3xl overflow-hidden h-64 grayscale hover:grayscale-0 transition-all duration-700">
+            <div className="order-1 lg:order-2 grid grid-cols-2 gap-3 md:gap-4">
+              <div className="space-y-3 md:space-y-4">
+                <div className="rounded-2xl md:rounded-3xl overflow-hidden h-48 md:h-64 grayscale hover:grayscale-0 transition-all duration-700">
                   <img alt="Cinematographer" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBqVRpxo4MhgCJTOmoLFJrMhBb1Zp8u-Og4AZO-FKWm45UON77VQtBK1ETybSUriwPcMrydY3nXUhMP-ATH8yc-LkYDteZmR5Nc2yFii_kw0U0OsMOI0ATjehe1voRB6VaU-WaTLGLjDTr7of3uTpnYlIitA1Lu91XpSPC9soqhlB2IOAsXTqYhGkSARrDmJEPayjOw0VKs1s69Ssvu0JgdV3gp03GcbYzXJN7r5lccz5qRllgLRD7YqeX42bZpvlXNXcwrtE3KdtTl"/>
                 </div>
-                <div className="bg-secondary-container p-6 rounded-3xl">
-                  <h4 className="font-headline-lg text-on-secondary-container text-xl">Styling</h4>
-                  <p className="text-on-secondary-container/70 font-body-md mt-2">Avant-garde vision for every frame.</p>
+                <div className="bg-secondary-container p-4 md:p-6 rounded-2xl md:rounded-3xl">
+                  <h4 className="font-headline-lg text-on-secondary-container text-lg md:text-xl">Styling</h4>
+                  <p className="text-on-secondary-container/70 font-body-md mt-1 md:mt-2 text-sm md:text-base">Avant-garde vision for every frame.</p>
                 </div>
               </div>
-              <div className="space-y-4 pt-12">
-                <div className="bg-primary-container p-6 rounded-3xl">
-                  <h4 className="font-headline-lg text-on-primary-container text-xl">Capture</h4>
-                  <p className="text-on-primary-container/70 font-body-md mt-2">Industry-leading technical precision.</p>
+              <div className="space-y-3 md:space-y-4 pt-8 md:pt-12">
+                <div className="bg-primary-container p-4 md:p-6 rounded-2xl md:rounded-3xl">
+                  <h4 className="font-headline-lg text-on-primary-container text-lg md:text-xl">Capture</h4>
+                  <p className="text-on-primary-container/70 font-body-md mt-1 md:mt-2 text-sm md:text-base">Industry-leading technical precision.</p>
                 </div>
-                <div className="rounded-3xl overflow-hidden h-64 grayscale hover:grayscale-0 transition-all duration-700">
+                <div className="rounded-2xl md:rounded-3xl overflow-hidden h-48 md:h-64 grayscale hover:grayscale-0 transition-all duration-700">
                   <img alt="Photographer" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD-T3HwNPMOA4YzbZR15IXhJ6gaezh08zz4_hjk4kVXJ5plrO5bqilKuMQT0dgh_6pjcfPfW1Ijmv4ec5S7IHs4DetsdeqS_MQgyg8-KncC9Q1uXIcOE5nNSi0Fyv8xSmyNZZ20v0FPBjq3p3WWIhH1_PXUD2sfc7sIeAQke3PdsHv9Wk-pA1Ey4Uv1uI38Dpk4RRQzRT5Jmi06U01jufLPPZ07rof2JTBfd2YtAayHEjhmONuGFo9wvdfEVPubAdLZq9LC6DeBdfhD"/>
                 </div>
               </div>
@@ -602,44 +688,50 @@ export default function HomePage() {
       </section>
 
       {/* Creator Stories */}
-      <section className="py-24 px-6 md:px-16 bg-surface overflow-hidden border-t border-outline-variant/20">
+      <section className="py-16 md:py-24 px-4 md:px-16 bg-surface overflow-hidden border-t border-outline-variant/20">
         <div className="max-w-[1440px] mx-auto relative">
-          <div className="absolute -right-20 top-0 opacity-10 rotate-12 pointer-events-none">
+          <div className="absolute -right-20 top-0 opacity-10 rotate-12 pointer-events-none hidden md:block">
             <span className="text-[200px] text-primary font-display-lg">VOICES</span>
           </div>
-          <h2 className="text-[48px] font-display-sm mb-20 relative z-10">Creator Stories</h2>
-          <div className="flex flex-col md:flex-row items-center gap-16 relative">
+          <h2 className="text-[36px] md:text-[48px] font-display-sm mb-12 md:mb-20 relative z-10">Creator Stories</h2>
+          <div className="flex flex-col md:flex-row items-center gap-12 md:gap-16 relative">
             <div className="relative w-full md:w-1/2">
-              <div className="relative aspect-[4/5] rounded-[60px] overflow-hidden shadow-2xl">
+              <div className="relative aspect-[4/5] rounded-[40px] md:rounded-[60px] overflow-hidden shadow-2xl">
                 <img className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBqVRpxo4MhgCJTOmoLFJrMhBb1Zp8u-Og4AZO-FKWm45UON77VQtBK1ETybSUriwPcMrydY3nXUhMP-ATH8yc-LkYDteZmR5Nc2yFii_kw0U0OsMOI0ATjehe1voRB6VaU-WaTLGLjDTr7of3uTpnYlIitA1Lu91XpSPC9soqhlB2IOAsXTqYhGkSARrDmJEPayjOw0VKs1s69Ssvu0JgdV3gp03GcbYzXJN7r5lccz5qRllgLRD7YqeX42bZpvlXNXcwrtE3KdtTl" alt="Amara Chen"/>
                 <div className="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent"></div>
-                <div className="absolute bottom-12 left-12 right-12 text-white">
-                  <h4 className="text-3xl font-display-sm mb-1">Amara Chen</h4>
-                  <p className="font-label-bold text-primary-fixed uppercase tracking-widest">Global Cinematographer</p>
+                <div className="absolute bottom-8 md:bottom-12 left-8 md:left-12 right-8 md:right-12 text-white">
+                  <h4 className="text-2xl md:text-3xl font-display-sm mb-1">Amara Chen</h4>
+                  <p className="font-label-bold text-primary-fixed uppercase tracking-widest text-xs md:text-sm">Global Cinematographer</p>
                 </div>
               </div>
-              <div className="absolute -bottom-10 -right-4 md:-right-10 glass p-8 rounded-3xl max-w-xs shadow-2xl border-t-4 border-primary">
-                <p className="font-body-lg italic text-on-surface-variant mb-4">"ManyRooms doesn't just provide a space; it provides the canvas that pushes my vision further."</p>
-                <span className="text-primary text-4xl">❝</span>
+              <div className="absolute -bottom-6 md:-bottom-10 -right-2 md:-right-10 glass p-6 md:p-8 rounded-2xl md:rounded-3xl max-w-[250px] md:max-w-xs shadow-2xl border-t-4 border-primary">
+                <p className="text-sm md:font-body-lg italic text-on-surface-variant mb-3 md:mb-4">
+                  "ManyRooms doesn't just provide a space; it provides the canvas that pushes my vision further."
+                </p>
+                <span className="text-primary text-3xl md:text-4xl">❝</span>
               </div>
             </div>
 
-            <div className="w-full md:w-1/2 grid grid-cols-1 sm:grid-cols-2 gap-8">
-              <div className="bg-secondary-container p-12 rounded-[50px] flex flex-col justify-center gap-6 floating-interaction">
-                <div className="w-20 h-20 bg-white rounded-full overflow-hidden shadow-lg border-4 border-white">
+            <div className="w-full md:w-1/2 grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8">
+              <div className="bg-secondary-container p-8 md:p-12 rounded-[40px] md:rounded-[50px] flex flex-col justify-center gap-4 md:gap-6 floating-interaction">
+                <div className="w-16 h-16 md:w-20 md:h-20 bg-white rounded-full overflow-hidden shadow-lg border-4 border-white">
                   <img className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD-T3HwNPMOA4YzbZR15IXhJ6gaezh08zz4_hjk4kVXJ5plrO5bqilKuMQT0dgh_6pjcfPfW1Ijmv4ec5S7IHs4DetsdeqS_MQgyg8-KncC9Q1uXIcOE5nNSi0Fyv8xSmyNZZ20v0FPBjq3p3WWIhH1_PXUD2sfc7sIeAQke3PdsHv9Wk-pA1Ey4Uv1uI38Dpk4RRQzRT5Jmi06U01jufLPPZ07rof2JTBfd2YtAayHEjhmONuGFo9wvdfEVPubAdLZq9LC6DeBdfhD" alt="Marcus Vane"/>
                 </div>
-                <h4 className="font-headline-lg text-on-secondary-container">Marcus Vane</h4>
-                <p className="font-body-md text-on-secondary-container opacity-80">Editorial Photography Legend</p>
-                <button className="flex items-center gap-2 font-label-bold text-on-secondary-container group">READ STORY <span className="group-hover:translate-x-2 transition-transform">→</span></button>
+                <h4 className="font-headline-lg text-on-secondary-container text-lg md:text-xl">Marcus Vane</h4>
+                <p className="font-body-md text-on-secondary-container opacity-80 text-sm md:text-base">Editorial Photography Legend</p>
+                <button className="flex items-center gap-2 font-label-bold text-on-secondary-container group text-sm md:text-base">
+                  READ STORY <span className="group-hover:translate-x-2 transition-transform">→</span>
+                </button>
               </div>
-              <div className="bg-primary-container p-12 rounded-[50px] flex flex-col justify-center gap-6 mt-0 sm:mt-12 floating-interaction">
-                <div className="w-20 h-20 bg-white rounded-full overflow-hidden shadow-lg border-4 border-white">
+              <div className="bg-primary-container p-8 md:p-12 rounded-[40px] md:rounded-[50px] flex flex-col justify-center gap-4 md:gap-6 sm:mt-8 md:mt-12 floating-interaction">
+                <div className="w-16 h-16 md:w-20 md:h-20 bg-white rounded-full overflow-hidden shadow-lg border-4 border-white">
                   <img className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB8yR0fx9aF-smQaY2NFdyOzW0frJaoqEFJf23bKJn6HmD6AMnL4b8s6uK6LJXX0pE5R0eozRdwNA6UMijGqPrTugvgOyVqvuhN8M3ueGqEfXgV8Lsq2ZUm48_11dtRBWZXgflk8aTDHzf5gFWgpOzKL5mNgp3Z2qhQn-s75gRTCXCt93F2EBXd8jLzQBMODpb85NkV6ZjJY4pTpzUuaVo15E3XfCUkZs080wIYIyqtR2sqU9BflPf2DXsyReE3NfjTiTEt74-tqC2T" alt="Sofia Rossi"/>
                 </div>
-                <h4 className="font-headline-lg text-on-primary-container">Sofia Rossi</h4>
-                <p className="font-body-md text-on-primary-container opacity-80">Creative Director, Aura Studio</p>
-                <button className="flex items-center gap-2 font-label-bold text-on-primary-container group">WATCH TOUR <span className="group-hover:translate-x-2 transition-transform">▶</span></button>
+                <h4 className="font-headline-lg text-on-primary-container text-lg md:text-xl">Sofia Rossi</h4>
+                <p className="font-body-md text-on-primary-container opacity-80 text-sm md:text-base">Creative Director, Aura Studio</p>
+                <button className="flex items-center gap-2 font-label-bold text-on-primary-container group text-sm md:text-base">
+                  WATCH TOUR <span className="group-hover:translate-x-2 transition-transform">▶</span>
+                </button>
               </div>
             </div>
           </div>
@@ -647,15 +739,15 @@ export default function HomePage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-24 px-6 md:px-16">
-        <div className="max-w-[1440px] mx-auto bg-gradient-to-br from-primary to-secondary rounded-[60px] p-12 md:p-32 text-center text-white relative overflow-hidden shadow-2xl">
+      <section className="py-16 md:py-24 px-4 md:px-16">
+        <div className="max-w-[1440px] mx-auto bg-gradient-to-br from-primary to-secondary rounded-[40px] md:rounded-[60px] p-8 md:p-32 text-center text-white relative overflow-hidden shadow-2xl">
           <div className="absolute inset-0 opacity-20" style={{ background: 'radial-gradient(circle at center, var(--tw-gradient-from) 0%, transparent 70%)' }}></div>
           <div className="relative z-10">
-            <h2 className="text-white mb-8 text-[48px] md:text-[84px] font-display-lg leading-tight">Ready to launch your next masterpiece?</h2>
-            <p className="text-lg text-white/80 max-w-2xl mx-auto mb-12">Join the world's most innovative creative collective. From brutalist lofts to neon-soaked labs, your perfect stage is waiting.</p>
-            <div className="flex flex-col md:flex-row gap-6 justify-center">
-              <Link href="/signup" className="bg-primary-fixed text-on-primary-fixed px-12 py-5 rounded-2xl font-label-bold text-lg hover:scale-105 transition-transform shadow-xl">Join the Collective</Link>
-              <button className="glass text-white px-12 py-5 rounded-2xl font-label-bold text-lg hover:bg-white/10 transition-colors">Speak to an Agent</button>
+            <h2 className="text-white mb-6 md:mb-8 text-[36px] md:text-[84px] font-display-lg leading-tight">Ready to launch your next masterpiece?</h2>
+            <p className="text-base md:text-lg text-white/80 max-w-2xl mx-auto mb-8 md:mb-12">Join the world's most innovative creative collective. From brutalist lofts to neon-soaked labs, your perfect stage is waiting.</p>
+            <div className="flex flex-col md:flex-row gap-4 md:gap-6 justify-center">
+              <Link href="/signup" className="bg-primary-fixed text-on-primary-fixed px-10 md:px-12 py-4 md:py-5 rounded-2xl font-label-bold text-base md:text-lg hover:scale-105 transition-transform shadow-xl">Join the Collective</Link>
+              <button className="glass text-white px-10 md:px-12 py-4 md:py-5 rounded-2xl font-label-bold text-base md:text-lg hover:bg-white/10 transition-colors">Speak to an Agent</button>
             </div>
           </div>
         </div>
@@ -701,6 +793,712 @@ export default function HomePage() {
     </div>
   );
 }
+
+
+
+// 'use client';
+
+// import { useState, useEffect, useRef } from 'react';
+// import Link from 'next/link';
+// import { MagnifyingGlassIcon, Bars3Icon, XMarkIcon, GlobeAltIcon, PhotoIcon } from '@heroicons/react/24/outline';
+// import { supabase } from '@/lib/supabase';
+// import './home.css';
+// import Chatbot from '@/components/Chatbot';
+// import Footer from '@/components/Footer';
+
+// interface Studio {
+//   id: string;
+//   name: string;
+//   city: string;
+//   state: string;
+//   hourly_rate: number;
+//   images: string[];
+//   status: string;
+//   description: string;
+// }
+
+// interface CardPosition {
+//   x: number;
+//   y: number;
+//   rotate: number;
+//   scale: number;
+//   opacity: number;
+//   zIndex: number;
+// }
+
+// export default function HomePage() {
+//   const [featuredSpaces, setFeaturedSpaces] = useState<Studio[]>([]);
+//   const [loading, setLoading] = useState(true);
+//   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+//   const [isModalOpen, setIsModalOpen] = useState(false);
+//   const [isVisible, setIsVisible] = useState(false);
+//   const [cardPositions, setCardPositions] = useState<CardPosition[]>([
+//     { x: -40, y: -10, rotate: -8, scale: 0.85, opacity: 0.9, zIndex: 1 },
+//     { x: 0, y: 15, rotate: 2, scale: 1, opacity: 1, zIndex: 3 },
+//     { x: 40, y: -5, rotate: 6, scale: 0.88, opacity: 0.9, zIndex: 2 },
+//     { x: -25, y: 25, rotate: -4, scale: 0.82, opacity: 0.85, zIndex: 1 },
+//     { x: 25, y: -20, rotate: 3, scale: 0.87, opacity: 0.85, zIndex: 2 },
+//   ]);
+  
+//   const heroRef = useRef<HTMLDivElement>(null);
+//   const textRef = useRef<HTMLDivElement>(null);
+//   const animationFrameRef = useRef<number>();
+//   const [textColor, setTextColor] = useState('#191c1d'); // Default dark text
+
+//   const heroImages = [
+//     'https://lh3.googleusercontent.com/aida-public/AB6AXuA1nB8OSMDUsNkAjUgjSwpjlliLiXMo7iWRhJ5E3wEXUgozXJ_eCPqjykQK6KY94W_P1URI5aDnYvkgRxtFt78nYbYzvhf2D7V4lGIdHS3PTuJEVtPrLu9ux0BPCzdmUCHmcZ0oh61pvXHIVDffE_hQFuDUOkW1xuB_qzh9mf-ebhdQVZ__ubUhTs61wl3OYOB-MKIY3sS1Lw0HsERjRPaN9mJ3s5xn5iOSEw_wICJcT-tSP3FO9wbJcdUXmdzeaXoIEtrTlhhzNJN2',
+//     'https://lh3.googleusercontent.com/aida-public/AB6AXuDo9P8cWMtlxC-vTKW_d789xE15ySyxsMb_U8Qe2iYrUWUJBlZ11z5sKoQQW5e-jeLwqaQOM0Kgb7ebgD6PqdUAKnW2S18GHubom8jAuDBqLBKkgP-ja77FpNibRKYP2eTFbt1LWmw_r-Tcwy29nP0kT3ERHsQ7AALtSKG623o-AmbEdIQSysiYVdkv3wzhPfpeuqsQUGNGfe0yYSqFPrzrb85t6zX4hO_Sp7K94b89goSxv0XdXC3e8wP-E5VGz5gk57zVVUbwzSDM',
+//     'https://lh3.googleusercontent.com/aida-public/AB6AXuDSwmSKLUnWOMsQ3GugJdlOZS5BByKJaiEs61TyG209DcA2Bqys9Or3aAbjaOFLiR8KH9xts5is8WOCU89o8TxY4EuPTx3Y7eINF0W0JjMW8ZZ5xYUZB5ThUYmjzzq6EERLeNzzD0U1o50RoOSqZqR1kCc67u55wSoCa7qKpALt43g75uDvONV3VOrCUDZoDHw_1nvmvMdKyGSZQvV-ffQc-yIuf-LaLoT3SWHaSi85V5-kEkwfNlO-MZv8WnnM-HWMlBvx5TYjJB6F',
+//     'https://lh3.googleusercontent.com/aida-public/AB6AXuAtaHsD_Ee0OXgccRwyuBHMMGBF5R9Wv7zL6xdfFmVFYNTibEc531TN2DKYpRcRHkWa6LNR-2FEaFzFCKoH7alTA6ZN4q7jb2vYuVe8qo4dKOIRupQxXdeWuFfgP-ZD-bYdZ4y83gObwQRQga8Gb2f8GOaemUrFtQcqt_0rcQZ_GS3KH-aiNPL50ZBFTzVERvqcftQZLBU1XEGVqm59af7kBpaAV0rreAUxgHeTcLcawMQ__wUXvyFc0Ko9pGwkWWs9A1g6uMKIjl5F',
+//     'https://lh3.googleusercontent.com/aida-public/AB6AXuDLkL_S-dw1DwN3C_25Bg1DkuiE4eStzko3W4oDgh-uQKrWWmbQNb8qx0xEEcqWJ2UrtMJl3GF2rbvtvt2G6yyZf0PyFp7G6J-gkcEkNv8m_KbQUky3KfZmt1R18XEJJlqQe5VKA1HgbLcaAmUHy0nM7zSTyaMh6MSTiVto7EjDhv1SPZ4x0RuvmLu7w532bPBwYZ9IyoSjxBUn8v77ZUSe_yE-mHRWCYYoqLKUQc2mEqxLKKTXlIUP3oYmxWXzVhnkz0EXuhLHLU9U'
+//   ];
+
+//   // Animate cards continuously
+//   useEffect(() => {
+//     let time = 0;
+    
+//     const animateCards = () => {
+//       time += 0.008;
+      
+//       setCardPositions([
+//         {
+//           x: -35 + Math.sin(time * 0.7) * 25,
+//           y: -10 + Math.cos(time * 0.5) * 30,
+//           rotate: -6 + Math.sin(time * 0.4) * 4,
+//           scale: 0.85,
+//           opacity: 0.85 + Math.sin(time * 0.6) * 0.1,
+//           zIndex: Math.sin(time * 0.3) > 0 ? 2 : 1
+//         },
+//         {
+//           x: Math.sin(time * 0.6) * 20,
+//           y: 10 + Math.cos(time * 0.45) * 25,
+//           rotate: Math.sin(time * 0.35) * 3,
+//           scale: 0.95 + Math.sin(time * 0.5) * 0.05,
+//           opacity: 1,
+//           zIndex: 3
+//         },
+//         {
+//           x: 30 + Math.cos(time * 0.65) * 25,
+//           y: -5 + Math.sin(time * 0.55) * 30,
+//           rotate: 5 + Math.cos(time * 0.45) * 3,
+//           scale: 0.87,
+//           opacity: 0.85 + Math.cos(time * 0.5) * 0.1,
+//           zIndex: Math.cos(time * 0.3) > 0 ? 2 : 1
+//         },
+//         {
+//           x: -20 + Math.cos(time * 0.75) * 30,
+//           y: 20 + Math.sin(time * 0.6) * 35,
+//           rotate: -3 + Math.cos(time * 0.5) * 3,
+//           scale: 0.8,
+//           opacity: 0.8 + Math.sin(time * 0.7) * 0.1,
+//           zIndex: 1
+//         },
+//         {
+//           x: 20 + Math.sin(time * 0.8) * 28,
+//           y: -18 + Math.cos(time * 0.7) * 32,
+//           rotate: 4 + Math.sin(time * 0.55) * 3,
+//           scale: 0.83,
+//           opacity: 0.8 + Math.cos(time * 0.65) * 0.1,
+//           zIndex: 1
+//         },
+//       ]);
+      
+//       animationFrameRef.current = requestAnimationFrame(animateCards);
+//     };
+    
+//     animationFrameRef.current = requestAnimationFrame(animateCards);
+    
+//     return () => {
+//       if (animationFrameRef.current) {
+//         cancelAnimationFrame(animationFrameRef.current);
+//       }
+//     };
+//   }, []);
+
+//   // Check if text overlaps with dark images and invert text color
+//   useEffect(() => {
+//     const checkOverlap = () => {
+//       if (!textRef.current || !heroRef.current) return;
+      
+//       const textRect = textRef.current.getBoundingClientRect();
+//       const heroRect = heroRef.current.getBoundingClientRect();
+      
+//       // Get all card elements
+//       const cards = heroRef.current.querySelectorAll('.hero-card');
+//       let isOverDarkArea = false;
+      
+//       cards.forEach((card) => {
+//         const cardRect = card.getBoundingClientRect();
+//         const cardZIndex = parseInt(card.getAttribute('data-zindex') || '0');
+        
+//         // Check if card overlaps with text area and is in front (zIndex >= 2)
+//         const overlapX = textRect.left < cardRect.right && textRect.right > cardRect.left;
+//         const overlapY = textRect.top < cardRect.bottom && textRect.bottom > cardRect.top;
+        
+//         if (overlapX && overlapY && cardZIndex >= 2) {
+//           isOverDarkArea = true;
+//         }
+//       });
+      
+//       setTextColor(isOverDarkArea ? '#ffffff' : '#191c1d');
+//     };
+    
+//     // Run check on every animation frame
+//     const interval = setInterval(checkOverlap, 100);
+    
+//     return () => clearInterval(interval);
+//   }, [cardPositions]);
+
+//   // Fetch approved studios from Supabase
+//   useEffect(() => {
+//     fetchApprovedStudios();
+//     setTimeout(() => setIsVisible(true), 100);
+//   }, []);
+
+//   // Prevent body scroll when mobile menu is open
+//   useEffect(() => {
+//     if (isMobileMenuOpen) {
+//       document.body.style.overflow = 'hidden';
+//     } else {
+//       document.body.style.overflow = 'unset';
+//     }
+//     return () => {
+//       document.body.style.overflow = 'unset';
+//     };
+//   }, [isMobileMenuOpen]);
+
+//   // Scroll animation
+//   useEffect(() => {
+//     const handleScroll = () => {
+//       const nav = document.querySelector('nav');
+//       if (nav) {
+//         if (window.scrollY > 50) {
+//           nav.classList.add('py-2', 'shadow-md');
+//           nav.classList.remove('py-4', 'shadow-sm');
+//         } else {
+//           nav.classList.add('py-4', 'shadow-sm');
+//           nav.classList.remove('py-2', 'shadow-md');
+//         }
+//       }
+//     };
+//     window.addEventListener('scroll', handleScroll);
+//     return () => window.removeEventListener('scroll', handleScroll);
+//   }, []);
+
+//   const fetchApprovedStudios = async () => {
+//     setLoading(true);
+//     try {
+//       const { data, error } = await supabase
+//         .from('studios')
+//         .select('*')
+//         .eq('status', 'approved')
+//         .limit(3);
+
+//       if (error) throw error;
+//       setFeaturedSpaces(data || []);
+//     } catch (error) {
+//       console.error('Error fetching studios:', error);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   const getFirstImage = (images: string[]) => {
+//     if (!images || images.length === 0) return null;
+//     return images[0];
+//   };
+
+//   return (
+//     <div className="home-page bg-background text-on-background selection:bg-primary-fixed selection:text-on-primary-fixed">
+//       {/* Navigation */}
+//       <nav className="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-xl border-b border-outline-variant/30 shadow-sm transition-all duration-300">
+//         <div className="flex justify-between items-center px-6 md:px-16 py-4 w-full max-w-[1440px] mx-auto">
+//           <div className="flex items-center gap-8">
+//             <Link href="/" className="group">
+//               <img 
+//                 alt="ManyRooms Logo" 
+//                 className="h-10 md:h-12 w-auto object-contain transition-transform duration-300 group-hover:scale-105" 
+//                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuB9DZnYRdMuRfh66s2y0aufTN6zhyFmIsA5aK66cuCBeLINs4QoP8IyjpBAQjHuPpHixsYPB1HMPOBhT7mUKu2qy7il9h__oTnAUvQ8EU5qv270iXUsGRbz-PlJjGMU5ixs4CUyHd9GoHjR9KulnOy4sz-3QN2VkRzW39ONL6ynO2nSLAUh3VRvj_U51r7i6CxOGm9pnjSOVDUTZd2P3m_LTCAchKE5VwHb0k6YYjDoduMHQU4iyejUYtTsGr0VhJR4tasKZ-e6qrWQ"
+//               />
+//             </Link>
+//             <div className="hidden md:flex gap-6">
+//               <Link href="/" className="text-primary font-bold border-b-2 border-primary py-1 transition-all hover:scale-105">Marketplace</Link>
+//               <Link href="/spaces" className="text-on-surface-variant hover:text-primary transition-all py-1 hover:scale-105">Studios</Link>
+//               <Link href="/cities" className="text-on-surface-variant hover:text-primary transition-all py-1 hover:scale-105">Vibes</Link>
+//               <Link href="/about" className="text-on-surface-variant hover:text-primary transition-all py-1 hover:scale-105">Journal</Link>
+//             </div>
+//           </div>
+//           <div className="flex items-center gap-4">
+//             <Link 
+//               href="/signup?role=owner" 
+//               className="hidden md:flex bg-primary-container text-on-primary-container font-label-bold px-6 py-2 rounded-full hover:scale-105 transition-all hover:shadow-lg active:scale-95"
+//             >
+//               List Studio
+//             </Link>
+//             <span className="material-symbols-outlined text-primary cursor-pointer hover:scale-110 transition-transform p-2 hover:bg-primary-container/20 rounded-full hidden md:block">
+//               favorite
+//             </span>
+//             <button 
+//               onClick={() => setIsModalOpen(true)}
+//               className="material-symbols-outlined text-primary cursor-pointer hover:scale-110 transition-transform p-2 hover:bg-primary-container/20 rounded-full"
+//             >
+//               account_circle
+//             </button>
+//             <button 
+//               onClick={() => setIsMobileMenuOpen(true)}
+//               className="md:hidden p-2 hover:bg-primary/5 rounded-full transition-all"
+//             >
+//               <Bars3Icon className="w-6 h-6" />
+//             </button>
+//           </div>
+//         </div>
+//       </nav>
+
+//       {/* Mobile Menu */}
+//       <div 
+//         className={`fixed inset-0 z-[60] md:hidden transition-all duration-300 ${
+//           isMobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+//         }`}
+//       >
+//         <div 
+//           className="absolute inset-0 bg-black/50"
+//           onClick={() => setIsMobileMenuOpen(false)}
+//         />
+//         <div 
+//           className={`absolute top-0 right-0 h-full w-[300px] bg-surface shadow-2xl transition-transform duration-300 ${
+//             isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'
+//           }`}
+//         >
+//           <div className="p-6">
+//             <div className="flex justify-between items-center mb-10">
+//               <span className="text-2xl font-bold text-primary">ManyRooms</span>
+//               <button 
+//                 onClick={() => setIsMobileMenuOpen(false)}
+//                 className="p-2 hover:bg-primary/5 rounded-full transition-all"
+//               >
+//                 <XMarkIcon className="w-6 h-6" />
+//               </button>
+//             </div>
+
+//             <nav className="flex flex-col gap-6">
+//               <Link href="/" className="text-sm uppercase tracking-widest hover:opacity-60 transition-opacity" onClick={() => setIsMobileMenuOpen(false)}>Marketplace</Link>
+//               <Link href="/spaces" className="text-sm uppercase tracking-widest hover:opacity-60 transition-opacity" onClick={() => setIsMobileMenuOpen(false)}>Studios</Link>
+//               <Link href="/cities" className="text-sm uppercase tracking-widest hover:opacity-60 transition-opacity" onClick={() => setIsMobileMenuOpen(false)}>Vibes</Link>
+//               <Link href="/about" className="text-sm uppercase tracking-widest hover:opacity-60 transition-opacity" onClick={() => setIsMobileMenuOpen(false)}>Journal</Link>
+              
+//               <div className="border-t border-outline-variant/30 pt-6 mt-2">
+//                 <Link href="/signup?role=owner" className="block text-sm uppercase tracking-widest hover:opacity-60 transition-opacity mb-4" onClick={() => setIsMobileMenuOpen(false)}>List Studio</Link>
+//                 <Link href="/login" className="block text-sm uppercase tracking-widest hover:opacity-60 transition-opacity mb-4" onClick={() => setIsMobileMenuOpen(false)}>Log in</Link>
+//                 <Link href="/signup" className="block text-sm uppercase tracking-widest hover:opacity-60 transition-opacity mb-4" onClick={() => setIsMobileMenuOpen(false)}>Sign up</Link>
+//                 <Link href="/support" className="block text-sm uppercase tracking-widest hover:opacity-60 transition-opacity mb-4" onClick={() => setIsMobileMenuOpen(false)}>Contact Support</Link>
+//                 <button className="flex items-center gap-2 text-sm uppercase tracking-widest hover:opacity-60 transition-opacity">
+//                   <GlobeAltIcon className="w-4 h-4" />
+//                   Language
+//                 </button>
+//               </div>
+//             </nav>
+//           </div>
+//         </div>
+//       </div>
+
+//       {/* Login/Signup Modal */}
+//       {isModalOpen && (
+//         <div className="fixed inset-0 z-[70] flex items-center justify-center px-4">
+//           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setIsModalOpen(false)} />
+//           <div className="relative bg-surface rounded-2xl shadow-2xl max-w-md w-full p-8 animate-in fade-in zoom-in duration-300">
+//             <button onClick={() => setIsModalOpen(false)} className="absolute top-4 right-4 p-2 hover:bg-primary/5 rounded-full transition-all">
+//               <XMarkIcon className="w-5 h-5" />
+//             </button>
+            
+//             <div className="text-center mb-8">
+//               <h3 className="text-2xl font-bold text-on-surface mb-2">Welcome to ManyRooms</h3>
+//               <p className="text-sm text-on-surface-variant">Find and book the perfect creative space</p>
+//             </div>
+
+//             <div className="space-y-4">
+//               <Link href="/login" className="block w-full text-center bg-primary text-on-primary py-3 rounded-full text-sm font-semibold uppercase tracking-widest hover:bg-primary/90 transition-all" onClick={() => setIsModalOpen(false)}>Log in</Link>
+//               <Link href="/signup" className="block w-full text-center border border-outline/30 py-3 rounded-full text-sm font-semibold uppercase tracking-widest hover:bg-primary/5 transition-all" onClick={() => setIsModalOpen(false)}>Sign up</Link>
+//               <div className="border-t border-outline-variant/30 pt-4 mt-2">
+//                 <Link href="/signup?role=owner" className="block w-full text-center text-xs uppercase tracking-widest text-on-surface-variant hover:text-primary transition-colors" onClick={() => setIsModalOpen(false)}>List your space</Link>
+//               </div>
+//             </div>
+//           </div>
+//         </div>
+//       )}
+
+//       {/* 3D Animated Hero Section with moving cards */}
+//       <section ref={heroRef} className="relative h-[90vh] md:h-[95vh] flex items-center justify-center px-6 md:px-16 overflow-hidden bg-surface">
+//         {/* Moving image cards */}
+//         <div className="absolute inset-0 z-0 pointer-events-none" style={{ perspective: '1500px' }}>
+//           <div className="relative w-full h-full flex items-center justify-center">
+//             {cardPositions.map((pos, index) => (
+//               <div
+//                 key={index}
+//                 className="hero-card absolute w-[200px] h-[280px] md:w-[300px] md:h-[400px] rounded-[32px] overflow-hidden shadow-2xl border border-white/20"
+//                 data-zindex={pos.zIndex}
+//                 style={{
+//                   backgroundImage: `url('${heroImages[index % heroImages.length]}')`,
+//                   backgroundSize: 'cover',
+//                   backgroundPosition: 'center',
+//                   transform: `translate(${pos.x}%, ${pos.y}%) rotate(${pos.rotate}deg) scale(${pos.scale})`,
+//                   zIndex: pos.zIndex,
+//                   opacity: pos.opacity,
+//                   transition: 'transform 0.3s ease-out, opacity 0.3s ease-out',
+//                   boxShadow: pos.zIndex >= 3 ? '0 40px 80px rgba(0,0,0,0.4)' : '0 20px 40px rgba(0,0,0,0.2)',
+//                 }}
+//               />
+//             ))}
+//           </div>
+//           {/* Gradient overlay for text readability */}
+//           <div className="absolute inset-0 bg-gradient-to-b from-white/20 via-transparent to-surface/80 pointer-events-none" />
+//         </div>
+
+//         {/* Hero text content with dynamic color */}
+//         <div 
+//           ref={textRef}
+//           className={`relative z-20 text-center max-w-4xl mx-auto pt-20 transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
+//         >
+//           <div className="mb-6 inline-block bg-secondary-container/90 backdrop-blur-sm px-5 py-2 rounded-full text-on-secondary-container font-label-bold pulse-glow">
+//             ✨ NEW: AI SPACE DISCOVERY
+//           </div>
+//           <h1 
+//             className="text-[56px] md:text-[84px] font-display-lg leading-none mb-8 tracking-tighter transition-colors duration-500"
+//             style={{ 
+//               color: textColor,
+//               textShadow: textColor === '#ffffff' ? '0 2px 20px rgba(0,0,0,0.5)' : '0 2px 10px rgba(255,255,255,0.8)'
+//             }}
+//           >
+//             Your Creative <span className="text-primary italic">Stage</span>,<br/>Redefined.
+//           </h1>
+//           <p 
+//             className="text-[18px] md:text-[18px] max-w-xl mx-auto mb-12 font-body-lg transition-colors duration-500"
+//             style={{ 
+//               color: textColor === '#ffffff' ? 'rgba(255,255,255,0.9)' : '#424937',
+//               textShadow: textColor === '#ffffff' ? '0 1px 10px rgba(0,0,0,0.5)' : 'none'
+//             }}
+//           >
+//             Discover extraordinary spaces. Book instantly. Create without limits.
+//           </p>
+          
+//           {/* AI Visual Search Bar */}
+//           <div className="glass max-w-2xl mx-auto rounded-3xl p-2 flex flex-col md:flex-row items-center shadow-2xl mt-12 border-2 border-white/60 hover:border-primary/30 transition-all duration-500">
+//             <div className="flex-1 px-6 flex items-center gap-3 w-full">
+//               <MagnifyingGlassIcon className="w-6 h-6 text-outline flex-shrink-0" />
+//               <input 
+//                 className="w-full bg-transparent border-none focus:ring-0 text-on-surface py-4 font-body-md placeholder:text-outline/60 outline-none" 
+//                 placeholder="Describe the mood, aesthetic, or upload an image..." 
+//                 type="text"
+//               />
+//             </div>
+//             <div className="flex items-center gap-2 w-full md:w-auto p-2 md:p-0">
+//               <label className="flex items-center justify-center w-14 h-14 rounded-2xl bg-surface-container-high cursor-pointer hover:bg-secondary-container transition-all group relative" title="Upload reference image">
+//                 <input className="hidden" type="file" accept="image/*"/>
+//                 <PhotoIcon className="w-6 h-6 text-on-surface-variant group-hover:text-secondary transition-colors" />
+//               </label>
+//               <Link 
+//                 href="/spaces"
+//                 className="flex-1 md:flex-none bg-primary-fixed text-on-primary-fixed px-10 py-4 rounded-2xl font-label-bold hover:scale-105 active:scale-95 transition-all shadow-lg hover:shadow-xl whitespace-nowrap flex items-center gap-2 justify-center"
+//               >
+//                 FIND SPACE
+//                 <span className="text-sm">→</span>
+//               </Link>
+//             </div>
+//           </div>
+          
+//           {/* Quick Stats */}
+//           <div className="flex justify-center gap-8 md:gap-12 mt-16 text-center">
+//             {[
+//               { value: '500+', label: 'UNIQUE SPACES', delay: 300, translateX: -50 },
+//               { value: '50+', label: 'CITIES', delay: 500, translateX: 0 },
+//               { value: '10K+', label: 'CREATORS', delay: 700, translateX: 50 }
+//             ].map((stat, i) => (
+//               <div 
+//                 key={i}
+//                 className="transition-all duration-700"
+//                 style={{ 
+//                   opacity: isVisible ? 1 : 0, 
+//                   transform: isVisible ? 'translateX(0)' : `translateX(${stat.translateX}px)`,
+//                   transitionDelay: `${stat.delay}ms`
+//                 }}
+//               >
+//                 <p className="text-4xl font-display-sm text-primary">{stat.value}</p>
+//                 <p 
+//                   className="font-label-bold text-xs tracking-wider transition-colors duration-500"
+//                   style={{ color: textColor === '#ffffff' ? 'rgba(255,255,255,0.8)' : '#424937' }}
+//                 >
+//                   {stat.label}
+//                 </p>
+//               </div>
+//             ))}
+//           </div>
+//         </div>
+//       </section>
+
+//       {/* Search by Vibe Section */}
+//       <section className="py-24 px-6 md:px-16 max-w-[1440px] mx-auto">
+//         <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-4">
+//           <div>
+//             <span className="font-label-bold text-primary tracking-widest uppercase text-xs">DISCOVER</span>
+//             <h2 className="text-[48px] font-display-sm tracking-tighter mt-2">Search by Vibe</h2>
+//           </div>
+//           <p className="text-[18px] text-on-surface-variant max-w-md">Our curated categories move beyond utility, focusing on the architectural soul of the space.</p>
+//         </div>
+        
+//         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 h-auto md:h-[600px]">
+//           <Link href="/spaces?vibe=brutalist" className="group relative overflow-hidden rounded-3xl md:col-span-2 min-h-[300px] floating-interaction cursor-pointer">
+//             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent z-10"></div>
+//             <div className="absolute inset-0 bg-cover bg-center group-hover:scale-110 transition-transform duration-700" style={{ backgroundImage: `url('${heroImages[0]}')` }}></div>
+//             <div className="absolute bottom-0 left-0 p-10 z-20">
+//               <span className="bg-primary-container text-on-primary-container px-4 py-1 rounded-full font-label-bold mb-4 inline-block">🔥 TRENDING</span>
+//               <h3 className="text-white text-3xl font-display-sm mb-2">Brutalist</h3>
+//               <p className="text-white/80 font-body-md">Raw concrete, dramatic scale, and uncompromising geometry.</p>
+//               <p className="text-primary-fixed font-label-bold mt-3 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">Explore 45 spaces <span>→</span></p>
+//             </div>
+//           </Link>
+
+//           <Link href="/spaces?vibe=organic" className="group relative overflow-hidden rounded-3xl min-h-[300px] floating-interaction cursor-pointer">
+//             <div className="absolute inset-0 bg-tertiary-container/40 mix-blend-overlay z-10"></div>
+//             <div className="absolute inset-0 bg-cover bg-center group-hover:scale-110 transition-transform duration-700" style={{ backgroundImage: `url('${heroImages[3]}')` }}></div>
+//             <div className="absolute inset-0 flex items-center justify-center z-20">
+//               <div className="text-center">
+//                 <h3 className="text-tertiary text-3xl -rotate-6 bg-white/95 px-8 py-3 shadow-2xl rounded-2xl font-display-sm">Organic</h3>
+//                 <p className="text-tertiary/80 font-label-bold mt-4 opacity-0 group-hover:opacity-100 transition-opacity">Nature-meets-design</p>
+//               </div>
+//             </div>
+//           </Link>
+
+//           <Link href="/spaces?vibe=scifi" className="group relative overflow-hidden rounded-3xl min-h-[300px] floating-interaction cursor-pointer">
+//             <div className="absolute inset-0 bg-primary-fixed/30 mix-blend-color z-10"></div>
+//             <div className="absolute inset-0 bg-cover bg-center group-hover:scale-110 transition-transform duration-700" style={{ backgroundImage: `url('${heroImages[4]}')` }}></div>
+//             <div className="absolute bottom-8 right-8 z-20 text-right">
+//               <h3 className="text-primary-fixed neon-accent text-4xl font-headline-lg">Sci-Fi</h3>
+//               <p className="text-white font-label-bold mt-2 opacity-0 group-hover:opacity-100 transition-opacity">Futuristic & cyberpunk</p>
+//               <span className="text-white text-4xl mt-2 block">↗</span>
+//             </div>
+//           </Link>
+//         </div>
+//       </section>
+
+//       {/* Featured Studios Section */}
+//       <section className="bg-surface-container py-24 px-6 md:px-16 overflow-hidden">
+//         <div className="max-w-[1440px] mx-auto">
+//           <div className="flex items-center gap-4 mb-12">
+//             <div className="h-px bg-outline-variant flex-1"></div>
+//             <h2 className="font-label-bold text-primary tracking-widest uppercase">Curated Collections</h2>
+//             <div className="h-px bg-outline-variant flex-1"></div>
+//           </div>
+
+//           {loading ? (
+//             <div className="flex justify-center items-center py-20">
+//               <div className="animate-pulse text-center">
+//                 <div className="w-16 h-16 bg-primary/20 rounded-full mx-auto mb-4"></div>
+//                 <p className="text-slate-500">Loading featured spaces...</p>
+//               </div>
+//             </div>
+//           ) : featuredSpaces.length === 0 ? (
+//             <div className="text-center py-20">
+//               <h4 className="text-xl font-serif mb-2">No studios available yet</h4>
+//               <p className="text-slate-500 max-w-md mx-auto">We're currently curating new creative spaces. Please check back soon.</p>
+//             </div>
+//           ) : (
+//             <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+//               {featuredSpaces.map((space, index) => {
+//                 const coverImage = getFirstImage(space.images);
+//                 return (
+//                   <Link 
+//                     key={space.id} 
+//                     href={`/spaces/${space.id}`}
+//                     className={`group card-hover bg-surface-container-lowest rounded-[40px] overflow-hidden shadow-xl transition-all duration-500 ${index === 1 ? 'mt-12 md:-mt-8' : ''}`}
+//                   >
+//                     <div className="h-[400px] relative overflow-hidden">
+//                       {coverImage ? (
+//                         <img src={coverImage} alt={space.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+//                       ) : (
+//                         <div className="w-full h-full flex items-center justify-center bg-gray-100">
+//                           <span className="material-symbols-outlined text-6xl text-gray-300">image</span>
+//                         </div>
+//                       )}
+//                       <div className="absolute top-6 left-6 bg-primary-fixed text-on-primary-fixed px-4 py-2 rounded-2xl font-label-bold shadow-lg">
+//                         ${space.hourly_rate}<span className="text-sm font-normal">/hr</span>
+//                       </div>
+//                       <div className="absolute top-6 right-6 opacity-0 group-hover:opacity-100 transition-opacity">
+//                         <span className="material-symbols-outlined text-white text-3xl drop-shadow-lg cursor-pointer hover:scale-110 transition-transform">favorite</span>
+//                       </div>
+//                     </div>
+//                     <div className="p-8">
+//                       <div className="flex justify-between items-start mb-4">
+//                         <div>
+//                           <h3 className="font-headline-lg mb-1">{space.name}</h3>
+//                           <p className="text-on-surface-variant font-body-md flex items-center gap-1">
+//                             <span className="material-symbols-outlined text-sm">location_on</span> 
+//                             {space.city || 'Location TBD'}{space.state ? `, ${space.state}` : ''}
+//                           </p>
+//                         </div>
+//                         <div className="flex items-center gap-1">
+//                           <span className="material-symbols-outlined text-primary text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+//                           <span className="font-label-bold text-on-surface">4.9</span>
+//                         </div>
+//                       </div>
+//                       <div className="flex gap-2 flex-wrap">
+//                         <span className="bg-surface-container-high text-on-surface-variant px-3 py-1 rounded-full text-xs font-label-bold">DAYLIGHT</span>
+//                         <span className="bg-surface-container-high text-on-surface-variant px-3 py-1 rounded-full text-xs font-label-bold">CREATIVE</span>
+//                         {space.description && (
+//                           <span className="bg-surface-container-high text-on-surface-variant px-3 py-1 rounded-full text-xs font-label-bold">
+//                             {space.description.length > 20 ? space.description.substring(0, 20) + '...' : space.description}
+//                           </span>
+//                         )}
+//                       </div>
+//                     </div>
+//                   </Link>
+//                 );
+//               })}
+//             </div>
+//           )}
+//         </div>
+//       </section>
+
+//       {/* Creative Talent Section */}
+//       <section className="py-24 px-6 md:px-16 bg-surface overflow-hidden border-t border-outline-variant/20">
+//         <div className="max-w-[1440px] mx-auto">
+//           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+//             <div className="order-2 lg:order-1">
+//               <div className="flex items-center gap-4 mb-6">
+//                 <span className="h-1 w-12 bg-primary"></span>
+//                 <span className="font-label-bold text-primary tracking-widest uppercase">Direct Talent Access</span>
+//               </div>
+//               <h2 className="text-[48px] font-display-sm mb-8 leading-tight">Elevate Your Production with <span className="text-secondary italic">Pro Talent.</span></h2>
+//               <p className="text-[18px] text-on-surface-variant mb-12 max-w-xl">Don't just book a room. Book a crew. Browse our verified roster of world-class photographers, award-winning videographers, and visionary stylists available to hire directly for your ManyRooms session.</p>
+//               <div className="flex flex-wrap gap-4">
+//                 <Link href="/talent" className="bg-on-surface text-surface-bright px-10 py-4 rounded-2xl font-label-bold hover:bg-primary transition-all flex items-center gap-2 group">
+//                   BOOK TALENT <span className="group-hover:translate-x-1 transition-transform">→</span>
+//                 </Link>
+//                 <Link href="/talent/roster" className="border-2 border-outline-variant px-10 py-4 rounded-2xl font-label-bold hover:bg-surface-container transition-all">VIEW ROSTER</Link>
+//               </div>
+//             </div>
+//             <div className="order-1 lg:order-2 grid grid-cols-2 gap-4">
+//               <div className="space-y-4">
+//                 <div className="rounded-3xl overflow-hidden h-64 grayscale hover:grayscale-0 transition-all duration-700">
+//                   <img alt="Cinematographer" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBqVRpxo4MhgCJTOmoLFJrMhBb1Zp8u-Og4AZO-FKWm45UON77VQtBK1ETybSUriwPcMrydY3nXUhMP-ATH8yc-LkYDteZmR5Nc2yFii_kw0U0OsMOI0ATjehe1voRB6VaU-WaTLGLjDTr7of3uTpnYlIitA1Lu91XpSPC9soqhlB2IOAsXTqYhGkSARrDmJEPayjOw0VKs1s69Ssvu0JgdV3gp03GcbYzXJN7r5lccz5qRllgLRD7YqeX42bZpvlXNXcwrtE3KdtTl"/>
+//                 </div>
+//                 <div className="bg-secondary-container p-6 rounded-3xl">
+//                   <h4 className="font-headline-lg text-on-secondary-container text-xl">Styling</h4>
+//                   <p className="text-on-secondary-container/70 font-body-md mt-2">Avant-garde vision for every frame.</p>
+//                 </div>
+//               </div>
+//               <div className="space-y-4 pt-12">
+//                 <div className="bg-primary-container p-6 rounded-3xl">
+//                   <h4 className="font-headline-lg text-on-primary-container text-xl">Capture</h4>
+//                   <p className="text-on-primary-container/70 font-body-md mt-2">Industry-leading technical precision.</p>
+//                 </div>
+//                 <div className="rounded-3xl overflow-hidden h-64 grayscale hover:grayscale-0 transition-all duration-700">
+//                   <img alt="Photographer" className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD-T3HwNPMOA4YzbZR15IXhJ6gaezh08zz4_hjk4kVXJ5plrO5bqilKuMQT0dgh_6pjcfPfW1Ijmv4ec5S7IHs4DetsdeqS_MQgyg8-KncC9Q1uXIcOE5nNSi0Fyv8xSmyNZZ20v0FPBjq3p3WWIhH1_PXUD2sfc7sIeAQke3PdsHv9Wk-pA1Ey4Uv1uI38Dpk4RRQzRT5Jmi06U01jufLPPZ07rof2JTBfd2YtAayHEjhmONuGFo9wvdfEVPubAdLZq9LC6DeBdfhD"/>
+//                 </div>
+//               </div>
+//             </div>
+//           </div>
+//         </div>
+//       </section>
+
+//       {/* Creator Stories */}
+//       <section className="py-24 px-6 md:px-16 bg-surface overflow-hidden border-t border-outline-variant/20">
+//         <div className="max-w-[1440px] mx-auto relative">
+//           <div className="absolute -right-20 top-0 opacity-10 rotate-12 pointer-events-none">
+//             <span className="text-[200px] text-primary font-display-lg">VOICES</span>
+//           </div>
+//           <h2 className="text-[48px] font-display-sm mb-20 relative z-10">Creator Stories</h2>
+//           <div className="flex flex-col md:flex-row items-center gap-16 relative">
+//             <div className="relative w-full md:w-1/2">
+//               <div className="relative aspect-[4/5] rounded-[60px] overflow-hidden shadow-2xl">
+//                 <img className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBqVRpxo4MhgCJTOmoLFJrMhBb1Zp8u-Og4AZO-FKWm45UON77VQtBK1ETybSUriwPcMrydY3nXUhMP-ATH8yc-LkYDteZmR5Nc2yFii_kw0U0OsMOI0ATjehe1voRB6VaU-WaTLGLjDTr7of3uTpnYlIitA1Lu91XpSPC9soqhlB2IOAsXTqYhGkSARrDmJEPayjOw0VKs1s69Ssvu0JgdV3gp03GcbYzXJN7r5lccz5qRllgLRD7YqeX42bZpvlXNXcwrtE3KdtTl" alt="Amara Chen"/>
+//                 <div className="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent"></div>
+//                 <div className="absolute bottom-12 left-12 right-12 text-white">
+//                   <h4 className="text-3xl font-display-sm mb-1">Amara Chen</h4>
+//                   <p className="font-label-bold text-primary-fixed uppercase tracking-widest">Global Cinematographer</p>
+//                 </div>
+//               </div>
+//               <div className="absolute -bottom-10 -right-4 md:-right-10 glass p-8 rounded-3xl max-w-xs shadow-2xl border-t-4 border-primary">
+//                 <p className="font-body-lg italic text-on-surface-variant mb-4">"ManyRooms doesn't just provide a space; it provides the canvas that pushes my vision further."</p>
+//                 <span className="text-primary text-4xl">❝</span>
+//               </div>
+//             </div>
+
+//             <div className="w-full md:w-1/2 grid grid-cols-1 sm:grid-cols-2 gap-8">
+//               <div className="bg-secondary-container p-12 rounded-[50px] flex flex-col justify-center gap-6 floating-interaction">
+//                 <div className="w-20 h-20 bg-white rounded-full overflow-hidden shadow-lg border-4 border-white">
+//                   <img className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD-T3HwNPMOA4YzbZR15IXhJ6gaezh08zz4_hjk4kVXJ5plrO5bqilKuMQT0dgh_6pjcfPfW1Ijmv4ec5S7IHs4DetsdeqS_MQgyg8-KncC9Q1uXIcOE5nNSi0Fyv8xSmyNZZ20v0FPBjq3p3WWIhH1_PXUD2sfc7sIeAQke3PdsHv9Wk-pA1Ey4Uv1uI38Dpk4RRQzRT5Jmi06U01jufLPPZ07rof2JTBfd2YtAayHEjhmONuGFo9wvdfEVPubAdLZq9LC6DeBdfhD" alt="Marcus Vane"/>
+//                 </div>
+//                 <h4 className="font-headline-lg text-on-secondary-container">Marcus Vane</h4>
+//                 <p className="font-body-md text-on-secondary-container opacity-80">Editorial Photography Legend</p>
+//                 <button className="flex items-center gap-2 font-label-bold text-on-secondary-container group">READ STORY <span className="group-hover:translate-x-2 transition-transform">→</span></button>
+//               </div>
+//               <div className="bg-primary-container p-12 rounded-[50px] flex flex-col justify-center gap-6 mt-0 sm:mt-12 floating-interaction">
+//                 <div className="w-20 h-20 bg-white rounded-full overflow-hidden shadow-lg border-4 border-white">
+//                   <img className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB8yR0fx9aF-smQaY2NFdyOzW0frJaoqEFJf23bKJn6HmD6AMnL4b8s6uK6LJXX0pE5R0eozRdwNA6UMijGqPrTugvgOyVqvuhN8M3ueGqEfXgV8Lsq2ZUm48_11dtRBWZXgflk8aTDHzf5gFWgpOzKL5mNgp3Z2qhQn-s75gRTCXCt93F2EBXd8jLzQBMODpb85NkV6ZjJY4pTpzUuaVo15E3XfCUkZs080wIYIyqtR2sqU9BflPf2DXsyReE3NfjTiTEt74-tqC2T" alt="Sofia Rossi"/>
+//                 </div>
+//                 <h4 className="font-headline-lg text-on-primary-container">Sofia Rossi</h4>
+//                 <p className="font-body-md text-on-primary-container opacity-80">Creative Director, Aura Studio</p>
+//                 <button className="flex items-center gap-2 font-label-bold text-on-primary-container group">WATCH TOUR <span className="group-hover:translate-x-2 transition-transform">▶</span></button>
+//               </div>
+//             </div>
+//           </div>
+//         </div>
+//       </section>
+
+//       {/* CTA Section */}
+//       <section className="py-24 px-6 md:px-16">
+//         <div className="max-w-[1440px] mx-auto bg-gradient-to-br from-primary to-secondary rounded-[60px] p-12 md:p-32 text-center text-white relative overflow-hidden shadow-2xl">
+//           <div className="absolute inset-0 opacity-20" style={{ background: 'radial-gradient(circle at center, var(--tw-gradient-from) 0%, transparent 70%)' }}></div>
+//           <div className="relative z-10">
+//             <h2 className="text-white mb-8 text-[48px] md:text-[84px] font-display-lg leading-tight">Ready to launch your next masterpiece?</h2>
+//             <p className="text-lg text-white/80 max-w-2xl mx-auto mb-12">Join the world's most innovative creative collective. From brutalist lofts to neon-soaked labs, your perfect stage is waiting.</p>
+//             <div className="flex flex-col md:flex-row gap-6 justify-center">
+//               <Link href="/signup" className="bg-primary-fixed text-on-primary-fixed px-12 py-5 rounded-2xl font-label-bold text-lg hover:scale-105 transition-transform shadow-xl">Join the Collective</Link>
+//               <button className="glass text-white px-12 py-5 rounded-2xl font-label-bold text-lg hover:bg-white/10 transition-colors">Speak to an Agent</button>
+//             </div>
+//           </div>
+//         </div>
+//       </section>
+
+//       <Footer />
+//       <Chatbot />
+
+//       <style jsx>{`
+//         .glass { 
+//           background: rgba(255, 255, 255, 0.75); 
+//           backdrop-filter: blur(20px); 
+//           border: 1px solid rgba(255, 255, 255, 0.3); 
+//         }
+//         .neon-accent { 
+//           text-shadow: 0 0 15px rgba(181, 246, 87, 0.6); 
+//         }
+//         .floating-interaction { 
+//           transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+//         }
+//         .floating-interaction:hover { 
+//           transform: translateY(-8px) scale(1.02); 
+//           z-index: 30; 
+//         }
+//         .card-hover { 
+//           transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+//         }
+//         .card-hover:hover { 
+//           transform: translateY(-12px); 
+//           box-shadow: 0 30px 60px rgba(0,0,0,0.15); 
+//         }
+//         .pulse-glow {
+//           animation: pulse-glow 3s ease-in-out infinite;
+//         }
+//         @keyframes pulse-glow {
+//           0%, 100% { box-shadow: 0 0 20px rgba(181, 246, 87, 0.3); }
+//           50% { box-shadow: 0 0 40px rgba(181, 246, 87, 0.6); }
+//         }
+//         .hero-card {
+//           will-change: transform;
+//         }
+//       `}</style>
+//     </div>
+//   );
+// }
 
 
 
