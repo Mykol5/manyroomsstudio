@@ -1251,14 +1251,15 @@
 // }
 
 
+
 'use client';
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
-import { useParams } from 'next/navigation';
-import { MapPinIcon, UsersIcon, ArrowRightIcon, PhotoIcon, HeartIcon, ShareIcon, StarIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
+import { useParams, useRouter } from 'next/navigation';
+import { MapPinIcon, ArrowRightIcon, PhotoIcon, StarIcon, XMarkIcon, CheckCircleIcon, EnvelopeIcon, UserIcon, LockClosedIcon, PhoneIcon } from '@heroicons/react/24/outline';
 import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/context/AuthContext';
 import Chatbot from '@/components/Chatbot';
 import Footer from '@/components/Footer';
 
@@ -1280,21 +1281,44 @@ interface Studio {
 
 export default function StudioDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const id = params.id as string;
+  const { user, loading: authLoading } = useAuth();
+  
   const [studio, setStudio] = useState<Studio | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [date, setDate] = useState('');
-  const [guests, setGuests] = useState(4);
-  const [brief, setBrief] = useState('');
+  const [eventDate, setEventDate] = useState('');
   const [relatedStudios, setRelatedStudios] = useState<Studio[]>([]);
   const [ownerName, setOwnerName] = useState('');
+
+  // Booking modal states
+  const [showBookingModal, setShowBookingModal] = useState(false);
+  const [bookingStep, setBookingStep] = useState<'login' | 'register' | 'details' | 'success'>('details');
+  const [guestName, setGuestName] = useState('');
+  const [guestEmail, setGuestEmail] = useState('');
+  const [guestPhone, setGuestPhone] = useState('');
+  const [guestsCount, setGuestsCount] = useState(4);
+  const [brief, setBrief] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [bookingError, setBookingError] = useState('');
 
   useEffect(() => {
     if (id) {
       fetchStudio();
     }
   }, [id]);
+
+  // Pre-fill user data when authenticated
+  useEffect(() => {
+    if (user) {
+      setGuestName(user.user_metadata?.name || '');
+      setGuestEmail(user.email || '');
+      setBookingStep('details');
+    }
+  }, [user]);
 
   const fetchStudio = async () => {
     setLoading(true);
@@ -1323,7 +1347,6 @@ export default function StudioDetailPage() {
 
       setStudio(studioData);
 
-      // Fetch owner name
       if (studioData.owner_id) {
         const { data: owner } = await supabase
           .from('users')
@@ -1333,7 +1356,7 @@ export default function StudioDetailPage() {
         if (owner) setOwnerName(owner.name || 'Studio Owner');
       }
 
-      const { data: relatedData, error: relatedError } = await supabase
+      const { data: relatedData } = await supabase
         .from('studios')
         .select('*')
         .eq('status', 'approved')
@@ -1341,9 +1364,7 @@ export default function StudioDetailPage() {
         .neq('id', id)
         .limit(3);
 
-      if (!relatedError && relatedData) {
-        setRelatedStudios(relatedData);
-      }
+      if (relatedData) setRelatedStudios(relatedData);
 
     } catch (err: any) {
       console.error('Error fetching studio:', err);
@@ -1353,32 +1374,214 @@ export default function StudioDetailPage() {
     }
   };
 
-  const getMainImage = () => {
-    if (!studio?.images || studio.images.length === 0) return null;
-    return studio.images[0];
-  };
-
-  const getSmallImage1 = () => {
-    if (!studio?.images || studio.images.length < 2) return null;
-    return studio.images[1];
-  };
-
-  const getSmallImage2 = () => {
-    if (!studio?.images || studio.images.length < 3) return null;
-    return studio.images[2];
-  };
-
-  const formatPrice = (price: number) => {
-    return `$${price}`;
-  };
-
+  const getMainImage = () => studio?.images?.[0] || null;
+  const getSmallImage1 = () => studio?.images?.[1] || null;
+  const getSmallImage2 = () => studio?.images?.[2] || null;
+  const formatPrice = (price: number) => `$${price}`;
+  
   const formatLocation = () => {
     if (!studio) return '';
-    const parts = [studio.city, studio.state].filter(Boolean);
-    return parts.join(', ');
+    return [studio.city, studio.state].filter(Boolean).join(', ');
   };
 
-  if (loading) {
+  const handleBookingStart = () => {
+    if (user) {
+      setGuestName(user.user_metadata?.name || '');
+      setGuestEmail(user.email || '');
+      setBookingStep('details');
+    } else {
+      setBookingStep('login');
+    }
+    setShowBookingModal(true);
+    setBookingError('');
+  };
+
+  const handleLogin = async () => {
+    setBookingError('');
+    
+    if (!guestEmail || !password) {
+      setBookingError('Please enter both email and password');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: guestEmail, password }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Invalid credentials');
+      }
+
+      // AuthContext will pick up the cookie on next render
+      // But we can proceed with the details step immediately
+      setGuestName(data.user?.user_metadata?.name || guestName);
+      setGuestEmail(data.user?.email || guestEmail);
+      setBookingStep('details');
+      
+      // Refresh the page to update auth state
+      window.location.reload();
+    } catch (err: any) {
+      setBookingError(err.message || 'Login failed');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleRegister = async () => {
+    setBookingError('');
+    
+    if (!guestName.trim()) {
+      setBookingError('Please enter your full name');
+      return;
+    }
+    if (!guestEmail.trim()) {
+      setBookingError('Please enter your email');
+      return;
+    }
+    if (!password || password.length < 6) {
+      setBookingError('Password must be at least 6 characters');
+      return;
+    }
+    if (password !== confirmPassword) {
+      setBookingError('Passwords do not match');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const res = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          name: guestName, 
+          email: guestEmail, 
+          password, 
+          phone: guestPhone,
+          role: 'client' 
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Registration failed');
+      }
+
+      setBookingStep('details');
+      
+      // Refresh to update auth state
+      window.location.reload();
+    } catch (err: any) {
+      setBookingError(err.message || 'Registration failed');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleBookingSubmit = async () => {
+    setBookingError('');
+    
+    if (!eventDate) {
+      setBookingError('Please select an event date');
+      return;
+    }
+    if (!guestName.trim()) {
+      setBookingError('Please enter your name');
+      return;
+    }
+    if (!guestEmail.trim()) {
+      setBookingError('Please enter your email');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const enquiryData = {
+        studio_id: studio?.id,
+        guest_name: guestName,
+        guest_email: guestEmail,
+        guest_phone: guestPhone || null,
+        event_date: eventDate,
+        guests_count: guestsCount,
+        brief: brief || `Booking enquiry for ${studio?.name}`,
+        status: 'pending',
+        created_at: new Date().toISOString(),
+        expires_at: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString()
+      };
+
+      const { data: enquiry, error: enquiryError } = await supabase
+        .from('enquiries')
+        .insert(enquiryData)
+        .select()
+        .single();
+
+      if (enquiryError) throw enquiryError;
+
+      // If user is authenticated, create booking record
+      if (user) {
+        const bookingCode = `MR-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+        
+        await supabase.from('bookings').insert({
+          enquiry_id: enquiry.id,
+          user_id: user.id,
+          studio_id: studio?.id,
+          booking_code: bookingCode,
+          total_amount: studio ? studio.hourly_rate * 4 : 0,
+          status: 'pending_payment',
+          created_at: new Date().toISOString()
+        });
+      }
+
+      setBookingStep('success');
+    } catch (err: any) {
+      console.error('Booking failed:', err);
+      setBookingError(err.message || 'Failed to complete booking');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleViewDashboard = () => {
+    resetBooking();
+    router.push('/dashboard');
+  };
+
+  const resetBooking = () => {
+    setShowBookingModal(false);
+    setBookingStep('details');
+    setGuestName(user?.user_metadata?.name || '');
+    setGuestEmail(user?.email || '');
+    setGuestPhone('');
+    setGuestsCount(4);
+    setBrief('');
+    setPassword('');
+    setConfirmPassword('');
+    setBookingError('');
+  };
+
+  const switchToRegister = () => {
+    setBookingError('');
+    setPassword('');
+    setConfirmPassword('');
+    setBookingStep('register');
+  };
+
+  const switchToLogin = () => {
+    setBookingError('');
+    setPassword('');
+    setBookingStep('login');
+  };
+
+  if (loading || authLoading) {
     return (
       <div className="min-h-screen bg-[#f8f9fa] flex items-center justify-center">
         <div className="animate-pulse text-center">
@@ -1427,43 +1630,37 @@ export default function StudioDetailPage() {
             <Link href="/about" className="text-[#424937] hover:text-[#446900] transition-colors font-body-md">Journal</Link>
           </div>
           <div className="flex items-center gap-4">
-            <div className="flex gap-2">
-              <button className="p-2 text-[#424937] hover:text-[#446900] transition-colors">
-                <span className="material-symbols-outlined">favorite</span>
+            {user ? (
+              <div className="flex items-center gap-3">
+                <span className="text-sm text-[#424937] hidden md:block">{user.user_metadata?.name}</span>
+                <Link href="/dashboard" className="hidden md:block bg-[#191c1d] text-white font-label-bold px-6 py-2.5 rounded-full hover:scale-105 transition-transform">
+                  Dashboard
+                </Link>
+              </div>
+            ) : (
+              <button onClick={() => { setBookingStep('login'); setShowBookingModal(true); }} className="hidden md:block bg-[#beff5f] text-[#111f00] font-label-bold px-6 py-2.5 rounded-full hover:scale-105 transition-transform">
+                Sign In
               </button>
-              <button className="p-2 text-[#424937] hover:text-[#446900] transition-colors">
-                <span className="material-symbols-outlined">account_circle</span>
-              </button>
-            </div>
-            <Link 
-              href="/signup?role=owner"
-              className="hidden md:block bg-[#beff5f] text-[#111f00] font-label-bold px-6 py-2.5 rounded-full hover:scale-105 transition-transform active:scale-95"
-            >
-              List Studio
-            </Link>
+            )}
           </div>
         </div>
       </nav>
 
       <main className="pt-24 pb-12">
         <div className="max-w-[1440px] mx-auto px-6 md:px-16">
-          {/* Dynamic Header & Quick Actions */}
+          {/* Header */}
           <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
             <div className="space-y-4">
               <div className="flex flex-wrap gap-3">
-                <span className="bg-[#beff5f] text-[#111f00] font-label-bold text-[10px] px-3 py-1 rounded-full uppercase tracking-widest">
-                  Featured Studio
-                </span>
+                <span className="bg-[#beff5f] text-[#111f00] font-label-bold text-[10px] px-3 py-1 rounded-full uppercase tracking-widest">Featured Studio</span>
                 <span className="bg-[#e4d7fd] text-[#665c7c] font-label-bold text-[10px] px-3 py-1 rounded-full uppercase tracking-widest flex items-center gap-1">
-                  <span className="material-symbols-outlined text-[12px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span> 4.98 (124 Reviews)
+                  <StarIcon className="w-3 h-3 fill-current" /> 4.98 (124 Reviews)
                 </span>
               </div>
-              <h1 className="text-[48px] md:text-[84px] font-display-sm md:font-display-lg leading-[56px] md:leading-[92px] tracking-[-0.02em] md:tracking-[-0.04em] font-extrabold -ml-1">
-                {studio.name}
-              </h1>
+              <h1 className="text-[48px] md:text-[84px] font-extrabold leading-[56px] md:leading-[92px] tracking-tight">{studio.name}</h1>
               <div className="flex items-center gap-2 text-[#424937]">
-                <span className="material-symbols-outlined">location_on</span>
-                <span className="text-lg">{formatLocation()} • Creative Quarter</span>
+                <MapPinIcon className="w-5 h-5" />
+                <span className="text-lg">{formatLocation()}</span>
               </div>
             </div>
             <div className="flex gap-4">
@@ -1476,59 +1673,35 @@ export default function StudioDetailPage() {
             </div>
           </header>
 
-          {/* Immersive Hero Gallery */}
-          <section className="grid grid-cols-12 gap-4 h-[500px] md:h-[750px] mb-24 overflow-hidden rounded-3xl group">
+          {/* Gallery */}
+          <section className="grid grid-cols-12 gap-4 h-[500px] md:h-[750px] mb-24 overflow-hidden rounded-3xl">
             <div className="col-span-12 md:col-span-8 relative overflow-hidden h-full">
               {mainImage ? (
-                <img 
-                  src={mainImage}
-                  alt={studio.name}
-                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
-                />
+                <img src={mainImage} alt={studio.name} className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" />
               ) : (
-                <div className="w-full h-full flex items-center justify-center bg-gray-100">
-                  <PhotoIcon className="w-16 h-16 text-gray-400" />
-                </div>
+                <div className="w-full h-full flex items-center justify-center bg-gray-100"><PhotoIcon className="w-16 h-16 text-gray-400" /></div>
               )}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
             </div>
             <div className="hidden md:grid col-span-4 grid-rows-2 gap-4 h-full">
               <div className="relative overflow-hidden">
                 {smallImage1 ? (
-                  <img 
-                    src={smallImage1}
-                    alt={`${studio.name} view 2`}
-                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
-                  />
+                  <img src={smallImage1} alt={`${studio.name} view 2`} className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-gray-100">
-                    <PhotoIcon className="w-12 h-12 text-gray-400" />
-                  </div>
+                  <div className="w-full h-full flex items-center justify-center bg-gray-100"><PhotoIcon className="w-12 h-12 text-gray-400" /></div>
                 )}
               </div>
               <div className="relative overflow-hidden">
                 {smallImage2 ? (
-                  <img 
-                    src={smallImage2}
-                    alt={`${studio.name} view 3`}
-                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
-                  />
+                  <img src={smallImage2} alt={`${studio.name} view 3`} className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-gray-100">
-                    <PhotoIcon className="w-12 h-12 text-gray-400" />
-                  </div>
+                  <div className="w-full h-full flex items-center justify-center bg-gray-100"><PhotoIcon className="w-12 h-12 text-gray-400" /></div>
                 )}
-                <button className="absolute bottom-6 right-6 bg-white/90 backdrop-blur-md px-6 py-3 rounded-full font-label-bold flex items-center gap-2 shadow-lg hover:scale-105 transition-transform active:scale-95">
-                  <span className="material-symbols-outlined">grid_view</span> View all {studio.images?.length || 0} photos
-                </button>
               </div>
             </div>
           </section>
 
           <div className="grid grid-cols-1 md:grid-cols-12 gap-6 relative">
-            {/* Main Content Left */}
             <div className="md:col-span-7 lg:col-span-8 space-y-24">
-              {/* Studio Story & Vibe */}
               <section>
                 <div className="flex items-center gap-4 mb-6">
                   <div className="h-px flex-1 bg-[#c2c9b1]/30"></div>
@@ -1536,270 +1709,2415 @@ export default function StudioDetailPage() {
                   <div className="h-px flex-1 bg-[#c2c9b1]/30"></div>
                 </div>
                 <div className="mb-12">
-                  <h2 className="text-[32px] font-headline-lg mb-6">Industrial Brutalist meets High-Fashion.</h2>
+                  <h2 className="text-[32px] font-bold mb-6">Industrial Brutalist meets High-Fashion.</h2>
                   <p className="text-lg text-[#424937] leading-relaxed max-w-2xl mb-8">
-                    {studio.description || 'A beautiful creative space ready for your next project. Designed for high-end editorial shoots, cinematic productions, and immersive brand activations.'}
+                    {studio.description || 'A beautiful creative space ready for your next project.'}
                   </p>
                   <div className="flex flex-wrap gap-2">
                     {studio.amenities && studio.amenities.slice(0, 5).map((item) => (
-                      <span key={item} className="bg-[#e7e8e9] px-4 py-2 rounded-full font-label-bold text-xs uppercase">
-                        {item}
-                      </span>
+                      <span key={item} className="bg-[#e7e8e9] px-4 py-2 rounded-full font-label-bold text-xs uppercase">{item}</span>
                     ))}
-                    <span className="bg-[#e7e8e9] px-4 py-2 rounded-full font-label-bold text-xs uppercase">Premium Space</span>
                   </div>
                 </div>
               </section>
 
-              {/* Equipment & Amenities */}
               <section>
-                <h2 className="text-[32px] font-headline-lg mb-8">Gear & Essentials</h2>
+                <h2 className="text-[32px] font-bold mb-8">Gear & Essentials</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   {studio.amenities && studio.amenities.map((item) => (
-                    <div key={item} className="flex items-start gap-4 p-6 bg-[#f3f4f5] rounded-2xl border border-[#c2c9b1]/10 hover:border-[#446900]/30 transition-all group">
-                      <span className="material-symbols-outlined text-[#446900] bg-[#beff5f] p-3 rounded-xl group-hover:scale-110 transition-transform">
-                        check_box_outline_blank
-                      </span>
-                      <div>
-                        <h4 className="font-label-bold mb-1">{item}</h4>
-                        <p className="text-sm text-[#424937]">Professional grade equipment included.</p>
-                      </div>
+                    <div key={item} className="flex items-start gap-4 p-6 bg-[#f3f4f5] rounded-2xl border border-[#c2c9b1]/10 hover:border-[#446900]/30 transition-all">
+                      <span className="material-symbols-outlined text-[#446900] bg-[#beff5f] p-3 rounded-xl">check_box_outline_blank</span>
+                      <div><h4 className="font-bold mb-1">{item}</h4><p className="text-sm text-[#424937]">Professional grade.</p></div>
                     </div>
                   ))}
                 </div>
               </section>
 
-              {/* Host Profile & Reviews */}
               <section className="p-8 md:p-12 rounded-3xl bg-[#e4d7fd]/30 border border-[#e4d7fd]">
                 <div className="flex flex-col md:flex-row gap-8 items-start">
-                  <div className="w-24 h-24 rounded-full overflow-hidden shrink-0 ring-4 ring-white shadow-xl">
-                    <div className="w-full h-full bg-[#446900] flex items-center justify-center text-white text-3xl font-bold">
-                      {ownerName.charAt(0) || 'S'}
-                    </div>
+                  <div className="w-24 h-24 rounded-full overflow-hidden shrink-0 ring-4 ring-white shadow-xl bg-[#446900] flex items-center justify-center text-white text-3xl font-bold">
+                    {ownerName ? ownerName.charAt(0) : 'S'}
                   </div>
                   <div className="space-y-4">
-                    <h2 className="text-[32px] font-headline-lg">Hosted by {ownerName || 'Studio Owner'}</h2>
-                    <p className="text-base text-[#424937]">Creative Director & Curator. Dedicated to ensuring every creator has the tools and atmosphere needed to excel.</p>
-                    <div className="flex gap-4">
-                      <button className="bg-[#191c1d] text-[#f8f9fa] px-6 py-2.5 rounded-full font-label-bold text-sm hover:opacity-90 transition-opacity">
-                        Contact Host
-                      </button>
-                      <div className="flex items-center gap-2 text-[#424937] font-label-bold">
-                        <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span> Identity Verified
-                      </div>
-                    </div>
+                    <h2 className="text-[32px] font-bold">Hosted by {ownerName || 'Studio Owner'}</h2>
+                    <p className="text-base text-[#424937]">Creative Director & Curator.</p>
+                    <button className="bg-[#191c1d] text-[#f8f9fa] px-6 py-2.5 rounded-full font-bold text-sm">Contact Host</button>
                   </div>
                 </div>
-                <div className="mt-12 space-y-8">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-1 text-[#446900]">
-                        <StarIcon className="w-5 h-5 fill-current" />
-                        <StarIcon className="w-5 h-5 fill-current" />
-                        <StarIcon className="w-5 h-5 fill-current" />
-                        <StarIcon className="w-5 h-5 fill-current" />
-                        <StarIcon className="w-5 h-5 fill-current" />
-                      </div>
-                      <p className="text-base italic">"The lighting in this space is unreal. We didn't even need our secondary rig for the first half of the shoot."</p>
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-[#e1e3e4]"></div>
-                        <span className="font-label-bold text-xs uppercase">Marcus T., Vogue Italia</span>
-                      </div>
-                    </div>
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-1 text-[#446900]">
-                        <StarIcon className="w-5 h-5 fill-current" />
-                        <StarIcon className="w-5 h-5 fill-current" />
-                        <StarIcon className="w-5 h-5 fill-current" />
-                        <StarIcon className="w-5 h-5 fill-current" />
-                        <StarIcon className="w-5 h-5 fill-current" />
-                      </div>
-                      <p className="text-base italic">"Incredible textures. The brick and concrete mix is perfect for streetwear looks. Efficient load-in and great coffee nearby!"</p>
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-[#e1e3e4]"></div>
-                        <span className="font-label-bold text-xs uppercase">Sarah L., Creative Agency</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </section>
-
-              {/* Location Map */}
-              <section>
-                <div className="flex items-center justify-between mb-8">
-                  <h2 className="text-[32px] font-headline-lg">Where you'll be</h2>
-                  <span className="font-label-bold text-[#446900]">{studio.city}, {studio.state}</span>
-                </div>
-                <div className="w-full h-96 rounded-3xl overflow-hidden shadow-inner grayscale contrast-125 border border-[#c2c9b1] relative group">
-                  <div className="absolute inset-0 bg-[#446900]/5 pointer-events-none z-10"></div>
-                  <div className="w-full h-full bg-[#edeeef] flex items-center justify-center">
-                    <div className="text-center">
-                      <MapPinIcon className="w-12 h-12 text-[#446900] mx-auto mb-2" />
-                      <p className="text-[#424937]">{formatLocation()}</p>
-                    </div>
-                  </div>
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
-                    <div className="w-12 h-12 bg-[#beff5f] rounded-full flex items-center justify-center shadow-2xl animate-bounce">
-                      <span className="material-symbols-outlined text-[#111f00] font-bold">location_on</span>
-                    </div>
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 bg-[#446900]/20 rounded-full animate-ping"></div>
-                  </div>
-                </div>
-                <p className="mt-6 text-base text-[#424937]">Located in the heart of the creative hub. Walking distance from major stations. Surrounded by world-class coffee shops and supply stores.</p>
               </section>
             </div>
 
-            {/* Sticky Booking Sidebar */}
             <aside className="md:col-span-5 lg:col-span-4">
               <div className="sticky top-28 space-y-6">
-                <div className="bg-white/70 backdrop-blur-[20px] border border-white/40 shadow-[0_20px_40px_-15px_rgba(99,89,121,0.1)] p-8 rounded-[32px]">
+                <div className="bg-white/70 backdrop-blur-[20px] border border-white/40 shadow-lg p-8 rounded-[32px]">
                   <div className="flex justify-between items-end mb-8">
                     <div>
-                      <span className="text-[#424937] font-label-bold text-xs uppercase tracking-widest block mb-1">Starting from</span>
+                      <span className="text-[#424937] font-label-bold text-xs uppercase tracking-widest">Starting from</span>
                       <div className="flex items-baseline gap-1">
                         <span className="text-3xl font-extrabold">{formatPrice(studio.hourly_rate)}</span>
                         <span className="text-[#424937]">/ hour</span>
                       </div>
                     </div>
-                    <div className="bg-[#beff5f] px-3 py-1 rounded-full text-[10px] font-extrabold uppercase">Top Rated</div>
                   </div>
 
-                  <div className="space-y-4 mb-8">
-                    <div className="grid grid-cols-1 gap-2">
-                      <label className="font-label-bold text-xs uppercase text-[#424937] ml-2">Date</label>
-                      <div className="relative">
-                        <input 
-                          type="date" 
-                          value={date}
-                          onChange={(e) => setDate(e.target.value)}
-                          className="w-full bg-[#f3f4f5] border-0 rounded-2xl py-4 px-6 focus:ring-2 focus:ring-[#beff5f] transition-all outline-none"
-                        />
-                        <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-[#424937] pointer-events-none">calendar_today</span>
-                      </div>
+                  <div className="space-y-4 mb-6">
+                    <div>
+                      <label className="font-bold text-xs uppercase text-[#424937] ml-2">Event Date</label>
+                      <input 
+                        type="date" 
+                        value={eventDate}
+                        onChange={(e) => setEventDate(e.target.value)}
+                        className="w-full bg-[#f3f4f5] border-0 rounded-2xl py-4 px-6 focus:ring-2 focus:ring-[#beff5f] outline-none mt-1"
+                      />
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <label className="font-label-bold text-xs uppercase text-[#424937] ml-2">Start</label>
-                        <select className="w-full bg-[#f3f4f5] border-0 rounded-2xl py-4 px-4 focus:ring-2 focus:ring-[#beff5f] appearance-none outline-none">
-                          <option>09:00 AM</option>
-                          <option>10:00 AM</option>
-                          <option>11:00 AM</option>
-                        </select>
-                      </div>
-                      <div className="space-y-2">
-                        <label className="font-label-bold text-xs uppercase text-[#424937] ml-2">End</label>
-                        <select className="w-full bg-[#f3f4f5] border-0 rounded-2xl py-4 px-4 focus:ring-2 focus:ring-[#beff5f] appearance-none outline-none">
-                          <option>01:00 PM</option>
-                          <option>02:00 PM</option>
-                          <option>03:00 PM</option>
-                        </select>
-                      </div>
+                    <div>
+                      <label className="font-bold text-xs uppercase text-[#424937] ml-2">Number of Guests</label>
+                      <select 
+                        value={guestsCount}
+                        onChange={(e) => setGuestsCount(parseInt(e.target.value))}
+                        className="w-full bg-[#f3f4f5] border-0 rounded-2xl py-4 px-6 focus:ring-2 focus:ring-[#beff5f] outline-none mt-1"
+                      >
+                        {[1,2,3,4,5,6,7,8,9,10,15,20].map(n => (
+                          <option key={n} value={n}>{n} {n === 1 ? 'Guest' : 'Guests'}</option>
+                        ))}
+                      </select>
                     </div>
                   </div>
 
-                  <div className="space-y-3 mb-8 border-t border-[#c2c9b1]/20 pt-6">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-[#424937]">${studio.hourly_rate} x 4 hours</span>
-                      <span>${studio.hourly_rate * 4}</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-[#424937]">Cleaning Fee</span>
-                      <span>$45</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-[#424937]">ManyRooms Service Fee</span>
-                      <span>$32</span>
-                    </div>
-                    <div className="flex justify-between font-bold text-lg pt-2">
-                      <span>Total</span>
-                      <span className="text-[#446900]">${studio.hourly_rate * 4 + 77}</span>
-                    </div>
-                  </div>
-
-                  <button className="w-full bg-[#beff5f] text-[#111f00] font-display-sm text-lg py-5 rounded-2xl hover:scale-[1.02] transition-all shadow-[0_10px_30px_-5px_rgba(190,255,95,0.4)] active:scale-95">
+                  <button 
+                    onClick={handleBookingStart}
+                    className="w-full bg-[#beff5f] text-[#111f00] font-bold text-lg py-5 rounded-2xl hover:scale-[1.02] transition-all shadow-lg active:scale-95"
+                  >
                     Request to Book
                   </button>
-                  <p className="text-center text-[10px] text-[#424937] mt-4 uppercase font-label-bold tracking-tighter">You won't be charged yet</p>
-                </div>
-
-                <div className="bg-[#edeeef] p-6 rounded-[24px] flex items-center gap-4">
-                  <span className="material-symbols-outlined text-[#446900] text-3xl">verified_user</span>
-                  <div className="text-xs">
-                    <p className="font-bold mb-1">ManyRooms Protection</p>
-                    <p className="text-[#424937]">Every booking includes damage protection and host liability insurance.</p>
-                  </div>
+                  <p className="text-center text-[10px] text-[#424937] mt-4 uppercase">You won't be charged yet</p>
                 </div>
               </div>
             </aside>
           </div>
 
-          {/* You may also love section */}
           {relatedStudios.length > 0 && (
             <div className="mt-24">
-              <div className="flex items-center justify-between mb-8">
-                <h3 className="text-[32px] font-headline-lg">You may also love</h3>
-                <Link href="/spaces" className="text-xs uppercase tracking-widest border-b border-[#191c1d]/20 pb-1 hover:opacity-60 transition-opacity flex items-center gap-1">
-                  VIEW ALL <ArrowRightIcon className="w-3 h-3" />
-                </Link>
-              </div>
+              <h3 className="text-[32px] font-bold mb-8">You may also love</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {relatedStudios.map((s) => (
                   <Link key={s.id} href={`/spaces/${s.id}`} className="group">
                     <div className="aspect-[4/5] overflow-hidden rounded-xl mb-4">
-                      {s.images && s.images[0] ? (
-                        <img
-                          src={s.images[0]}
-                          alt={s.name}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                        />
+                      {s.images?.[0] ? (
+                        <img src={s.images[0]} alt={s.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-gray-100">
-                          <PhotoIcon className="w-12 h-12 text-gray-400" />
-                        </div>
+                        <div className="w-full h-full bg-gray-100 flex items-center justify-center"><PhotoIcon className="w-12 h-12 text-gray-400" /></div>
                       )}
                     </div>
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <p className="text-[10px] uppercase tracking-widest text-[#424937]">{s.city}, {s.state}</p>
-                        <h4 className="text-xl font-bold mt-1 group-hover:opacity-70 transition-opacity">{s.name}</h4>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-[10px] uppercase tracking-widest text-[#424937]">From</p>
-                        <p className="text-lg font-medium">{formatPrice(s.hourly_rate)}</p>
-                        <p className="text-[10px] text-[#424937]">/ hour</p>
-                      </div>
+                    <div className="flex justify-between">
+                      <div><p className="text-[10px] uppercase text-[#424937]">{s.city}, {s.state}</p><h4 className="text-xl font-bold">{s.name}</h4></div>
+                      <div className="text-right"><p className="text-[10px] uppercase text-[#424937]">From</p><p className="text-lg font-medium">{formatPrice(s.hourly_rate)}</p></div>
                     </div>
                   </Link>
                 ))}
               </div>
             </div>
           )}
-
-          {/* FAQ Section */}
-          <div className="mt-24 pt-12 border-t border-[#c2c9b1]/10">
-            <h3 className="text-[32px] font-headline-lg mb-8">Frequently Asked</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {[
-                { q: "What's included in the hire fee?", a: "All standard equipment listed in the amenities section. Additional production support can be arranged separately." },
-                { q: "Can I view the space before booking?", a: "Yes, viewing requests can be arranged with the host. Please mention this in your enquiry." },
-                { q: "What's your cancellation policy?", a: "Cancellations made 48+ hours before booking are fully refundable." },
-                { q: "Do you offer production support?", a: "Yes, experienced crew and equipment hire can be arranged upon request." }
-              ].map((faq) => (
-                <div key={faq.q}>
-                  <p className="font-bold mb-2">{faq.q}</p>
-                  <p className="text-sm text-[#424937]">{faq.a}</p>
-                </div>
-              ))}
-            </div>
-          </div>
         </div>
       </main>
 
-      {/* Footer */}
+      {/* Booking Modal */}
+      {showBookingModal && (
+        <div className="fixed inset-0 z-[80] flex items-center justify-center px-4">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={resetBooking} />
+          <div className="relative bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 max-h-[90vh] overflow-y-auto">
+            <button onClick={resetBooking} className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full">
+              <XMarkIcon className="w-5 h-5" />
+            </button>
+
+            {/* Login Step */}
+            {bookingStep === 'login' && (
+              <div className="space-y-6">
+                <div className="text-center mb-6">
+                  <div className="w-16 h-16 bg-[#e4d7fd] rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <LockClosedIcon className="w-8 h-8 text-[#665c7c]" />
+                  </div>
+                  <h3 className="text-2xl font-bold mb-2">Sign In to Book</h3>
+                  <p className="text-sm text-gray-600">Sign in to your account or create one</p>
+                </div>
+
+                {bookingError && (
+                  <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">{bookingError}</div>
+                )}
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-semibold mb-1">Email</label>
+                    <div className="relative">
+                      <EnvelopeIcon className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                      <input type="email" value={guestEmail} onChange={(e) => setGuestEmail(e.target.value)} placeholder="you@example.com" className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 pl-12 pr-4 focus:ring-2 focus:ring-[#beff5f] outline-none" />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold mb-1">Password</label>
+                    <div className="relative">
+                      <LockClosedIcon className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                      <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Your password" className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 pl-12 pr-4 focus:ring-2 focus:ring-[#beff5f] outline-none" />
+                    </div>
+                  </div>
+                </div>
+
+                <button onClick={handleLogin} disabled={isSubmitting} className="w-full bg-[#191c1d] text-white py-4 rounded-2xl font-bold hover:bg-gray-800 transition-all disabled:opacity-50">
+                  {isSubmitting ? 'Signing in...' : 'Sign In'}
+                </button>
+
+                <div className="text-center">
+                  <p className="text-sm text-gray-500">
+                    Don't have an account?{' '}
+                    <button onClick={switchToRegister} className="text-[#446900] font-semibold hover:underline">Create one</button>
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Register Step */}
+            {bookingStep === 'register' && (
+              <div className="space-y-6">
+                <div className="text-center mb-6">
+                  <div className="w-16 h-16 bg-[#beff5f] rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <UserIcon className="w-8 h-8 text-[#111f00]" />
+                  </div>
+                  <h3 className="text-2xl font-bold mb-2">Create Account</h3>
+                  <p className="text-sm text-gray-600">Register to book and track your enquiries</p>
+                </div>
+
+                {bookingError && (
+                  <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">{bookingError}</div>
+                )}
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-semibold mb-1">Full Name *</label>
+                    <div className="relative">
+                      <UserIcon className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                      <input type="text" value={guestName} onChange={(e) => setGuestName(e.target.value)} placeholder="Your full name" className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 pl-12 pr-4 focus:ring-2 focus:ring-[#beff5f] outline-none" />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold mb-1">Email Address *</label>
+                    <div className="relative">
+                      <EnvelopeIcon className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                      <input type="email" value={guestEmail} onChange={(e) => setGuestEmail(e.target.value)} placeholder="you@example.com" className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 pl-12 pr-4 focus:ring-2 focus:ring-[#beff5f] outline-none" />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold mb-1">Phone Number</label>
+                    <div className="relative">
+                      <PhoneIcon className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                      <input type="tel" value={guestPhone} onChange={(e) => setGuestPhone(e.target.value)} placeholder="+1 234 567 890" className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 pl-12 pr-4 focus:ring-2 focus:ring-[#beff5f] outline-none" />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold mb-1">Password * (min. 6 characters)</label>
+                    <div className="relative">
+                      <LockClosedIcon className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                      <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Create a password" className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 pl-12 pr-4 focus:ring-2 focus:ring-[#beff5f] outline-none" />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold mb-1">Confirm Password *</label>
+                    <div className="relative">
+                      <LockClosedIcon className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                      <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Confirm your password" className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 pl-12 pr-4 focus:ring-2 focus:ring-[#beff5f] outline-none" />
+                    </div>
+                  </div>
+                </div>
+
+                <button onClick={handleRegister} disabled={isSubmitting} className="w-full bg-[#beff5f] text-[#111f00] py-4 rounded-2xl font-bold hover:scale-[1.02] transition-all disabled:opacity-50">
+                  {isSubmitting ? 'Creating Account...' : 'Create Account & Continue'}
+                </button>
+
+                <p className="text-center text-sm text-gray-500">
+                  Already have an account?{' '}
+                  <button onClick={switchToLogin} className="text-[#446900] font-semibold hover:underline">Sign in</button>
+                </p>
+              </div>
+            )}
+
+            {/* Details Step */}
+            {bookingStep === 'details' && (
+              <div className="space-y-6">
+                <div className="text-center mb-6">
+                  <div className="w-16 h-16 bg-[#beff5f] rounded-2xl flex items-center justify-center mx-auto mb-4">
+                    <span className="material-symbols-outlined text-3xl text-[#111f00]">event</span>
+                  </div>
+                  <h3 className="text-2xl font-bold mb-2">Book {studio.name}</h3>
+                  <p className="text-sm text-gray-600">Review details and send enquiry</p>
+                  {user && <p className="text-xs text-[#446900] mt-1">Signed in as {user.email}</p>}
+                </div>
+
+                {bookingError && (
+                  <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">{bookingError}</div>
+                )}
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-semibold mb-1">Full Name *</label>
+                    <input type="text" value={guestName} onChange={(e) => setGuestName(e.target.value)} className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 px-4 focus:ring-2 focus:ring-[#beff5f] outline-none" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold mb-1">Email *</label>
+                    <input type="email" value={guestEmail} onChange={(e) => setGuestEmail(e.target.value)} className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 px-4 focus:ring-2 focus:ring-[#beff5f] outline-none" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold mb-1">Phone</label>
+                    <input type="tel" value={guestPhone} onChange={(e) => setGuestPhone(e.target.value)} className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 px-4 focus:ring-2 focus:ring-[#beff5f] outline-none" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold mb-1">Brief / Message</label>
+                    <textarea value={brief} onChange={(e) => setBrief(e.target.value)} placeholder="Tell the host about your project..." rows={3} className="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 focus:ring-2 focus:ring-[#beff5f] outline-none resize-none" />
+                  </div>
+                  <div className="bg-[#f3f4f5] p-4 rounded-xl text-sm">
+                    <p><strong>Date:</strong> {eventDate || 'Not selected'}</p>
+                    <p><strong>Guests:</strong> {guestsCount}</p>
+                    <p><strong>Studio:</strong> {studio?.name}</p>
+                  </div>
+                </div>
+
+                <button onClick={handleBookingSubmit} disabled={isSubmitting} className="w-full bg-[#beff5f] text-[#111f00] py-4 rounded-2xl font-bold hover:scale-[1.02] transition-all disabled:opacity-50">
+                  {isSubmitting ? 'Sending...' : 'Send Enquiry'}
+                </button>
+              </div>
+            )}
+
+            {/* Success Step */}
+            {bookingStep === 'success' && (
+              <div className="text-center space-y-6 py-8">
+                <div className="w-20 h-20 bg-[#beff5f] rounded-full flex items-center justify-center mx-auto">
+                  <CheckCircleIcon className="w-10 h-10 text-[#111f00]" />
+                </div>
+                <h3 className="text-2xl font-bold mb-2">Enquiry Sent! 🎉</h3>
+                <p className="text-gray-600">Your enquiry has been sent to <strong>{ownerName || 'the studio owner'}</strong>.</p>
+                <div className="bg-[#f3f4f5] p-6 rounded-2xl text-left space-y-3">
+                  <div className="flex items-center gap-3">
+                    <EnvelopeIcon className="w-5 h-5 text-[#446900]" />
+                    <p className="text-sm">Check <strong>{guestEmail}</strong> for updates</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="material-symbols-outlined text-[#446900]">schedule</span>
+                    <p className="text-sm">Awaiting response from studio owner</p>
+                  </div>
+                </div>
+                <div className="flex gap-3">
+                  <button onClick={resetBooking} className="flex-1 border border-gray-200 py-3 rounded-2xl font-semibold hover:bg-gray-50">Close</button>
+                  <button onClick={handleViewDashboard} className="flex-1 bg-[#191c1d] text-white py-3 rounded-2xl font-semibold hover:bg-gray-800 text-center">
+                    View Dashboard
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       <Footer />
-    
-      {/* Chatbot */}
       <Chatbot />
     </div>
   );
 }
+
+
+// 'use client';
+
+// import { useState, useEffect } from 'react';
+// import Link from 'next/link';
+// import { useParams, useRouter } from 'next/navigation';
+// import { MapPinIcon, ArrowRightIcon, PhotoIcon, StarIcon, XMarkIcon, CheckCircleIcon, EnvelopeIcon, UserIcon, LockClosedIcon, PhoneIcon, UsersIcon } from '@heroicons/react/24/outline';
+// import { supabase } from '@/lib/supabase';
+// import Chatbot from '@/components/Chatbot';
+// import Footer from '@/components/Footer';
+
+// interface Studio {
+//   id: string;
+//   name: string;
+//   city: string;
+//   state: string;
+//   country: string;
+//   description: string;
+//   hourly_rate: number;
+//   capacity: number;
+//   amenities: string[];
+//   images: string[];
+//   status: string;
+//   created_at: string;
+//   owner_id: string;
+// }
+
+// export default function StudioDetailPage() {
+//   const params = useParams();
+//   const router = useRouter();
+//   const id = params.id as string;
+//   const [studio, setStudio] = useState<Studio | null>(null);
+//   const [loading, setLoading] = useState(true);
+//   const [error, setError] = useState('');
+//   const [eventDate, setEventDate] = useState('');
+//   const [relatedStudios, setRelatedStudios] = useState<Studio[]>([]);
+//   const [ownerName, setOwnerName] = useState('');
+//   const [ownerEmail, setOwnerEmail] = useState('');
+
+//   // Booking modal states
+//   const [showBookingModal, setShowBookingModal] = useState(false);
+//   const [bookingStep, setBookingStep] = useState<'details' | 'register' | 'success'>('details');
+//   const [guestName, setGuestName] = useState('');
+//   const [guestEmail, setGuestEmail] = useState('');
+//   const [guestPhone, setGuestPhone] = useState('');
+//   const [guestsCount, setGuestsCount] = useState(4);
+//   const [brief, setBrief] = useState('');
+//   const [password, setPassword] = useState('');
+//   const [isSubmitting, setIsSubmitting] = useState(false);
+//   const [bookingError, setBookingError] = useState('');
+//   const [bookingSuccess, setBookingSuccess] = useState(false);
+
+//   useEffect(() => {
+//     if (id) {
+//       fetchStudio();
+//     }
+//   }, [id]);
+
+//   const fetchStudio = async () => {
+//     setLoading(true);
+//     setError('');
+    
+//     try {
+//       const { data: studioData, error: studioError } = await supabase
+//         .from('studios')
+//         .select('*')
+//         .eq('id', id)
+//         .single();
+
+//       if (studioError) throw studioError;
+      
+//       if (!studioData) {
+//         setError('Studio not found');
+//         setLoading(false);
+//         return;
+//       }
+
+//       if (studioData.status !== 'approved') {
+//         setError('This studio is not yet available for booking');
+//         setLoading(false);
+//         return;
+//       }
+
+//       setStudio(studioData);
+
+//       // Fetch owner details
+//       if (studioData.owner_id) {
+//         const { data: owner } = await supabase
+//           .from('users')
+//           .select('name, email')
+//           .eq('id', studioData.owner_id)
+//           .single();
+//         if (owner) {
+//           setOwnerName(owner.name || 'Studio Owner');
+//           setOwnerEmail(owner.email || '');
+//         }
+//       }
+
+//       const { data: relatedData } = await supabase
+//         .from('studios')
+//         .select('*')
+//         .eq('status', 'approved')
+//         .eq('city', studioData.city)
+//         .neq('id', id)
+//         .limit(3);
+
+//       if (relatedData) {
+//         setRelatedStudios(relatedData);
+//       }
+
+//     } catch (err: any) {
+//       console.error('Error fetching studio:', err);
+//       setError(err.message || 'Failed to load studio');
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   const getMainImage = () => {
+//     if (!studio?.images || studio.images.length === 0) return null;
+//     return studio.images[0];
+//   };
+
+//   const getSmallImage1 = () => {
+//     if (!studio?.images || studio.images.length < 2) return null;
+//     return studio.images[1];
+//   };
+
+//   const getSmallImage2 = () => {
+//     if (!studio?.images || studio.images.length < 3) return null;
+//     return studio.images[2];
+//   };
+
+//   const formatPrice = (price: number) => {
+//     return `$${price}`;
+//   };
+
+//   const formatLocation = () => {
+//     if (!studio) return '';
+//     const parts = [studio.city, studio.state].filter(Boolean);
+//     return parts.join(', ');
+//   };
+
+//   const handleBookingSubmit = async () => {
+//     setBookingError('');
+    
+//     if (bookingStep === 'details') {
+//       // Validate details
+//       if (!eventDate) {
+//         setBookingError('Please select an event date');
+//         return;
+//       }
+//       if (!guestName.trim()) {
+//         setBookingError('Please enter your name');
+//         return;
+//       }
+//       if (!guestEmail.trim()) {
+//         setBookingError('Please enter your email');
+//         return;
+//       }
+//       setBookingStep('register');
+//       return;
+//     }
+
+//     if (bookingStep === 'register') {
+//       if (!password || password.length < 6) {
+//         setBookingError('Password must be at least 6 characters');
+//         return;
+//       }
+
+//       setIsSubmitting(true);
+
+//       try {
+//         // Step 1: Create user account with Supabase Auth
+//         const { data: authData, error: authError } = await supabase.auth.signUp({
+//           email: guestEmail,
+//           password: password,
+//           options: {
+//             data: {
+//               name: guestName,
+//               phone: guestPhone,
+//               role: 'renter'
+//             }
+//           }
+//         });
+
+//         if (authError) {
+//           // If user already exists, try signing in
+//           if (authError.message.includes('already registered') || authError.message.includes('already exists')) {
+//             const { error: signInError } = await supabase.auth.signInWithPassword({
+//               email: guestEmail,
+//               password: password,
+//             });
+            
+//             if (signInError) {
+//               setBookingError('Email already registered. Please use a different email or sign in with your existing account.');
+//               setIsSubmitting(false);
+//               return;
+//             }
+//           } else {
+//             throw authError;
+//           }
+//         }
+
+//         // Get current user
+//         const { data: { user } } = await supabase.auth.getUser();
+        
+//         if (!user) {
+//           throw new Error('Failed to authenticate');
+//         }
+
+//         // Step 2: Create user profile in users table
+//         const { error: profileError } = await supabase
+//           .from('users')
+//           .upsert({
+//             id: user.id,
+//             email: guestEmail,
+//             name: guestName,
+//             phone: guestPhone || null,
+//             role: 'renter',
+//             created_at: new Date().toISOString()
+//           }, {
+//             onConflict: 'id'
+//           });
+
+//         if (profileError) {
+//           console.error('Profile error:', profileError);
+//           // Continue anyway - profile is not critical
+//         }
+
+//         // Step 3: Create enquiry (booking request)
+//         const { data: enquiryData, error: enquiryError } = await supabase
+//           .from('enquiries')
+//           .insert({
+//             studio_id: studio?.id,
+//             guest_name: guestName,
+//             guest_email: guestEmail,
+//             guest_phone: guestPhone || null,
+//             event_date: eventDate,
+//             guests_count: guestsCount,
+//             brief: brief || `Booking enquiry for ${studio?.name}`,
+//             status: 'pending',
+//             created_at: new Date().toISOString(),
+//             expires_at: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString() // 2 days
+//           })
+//           .select()
+//           .single();
+
+//         if (enquiryError) {
+//           console.error('Enquiry error:', enquiryError);
+//           throw enquiryError;
+//         }
+
+//         // Step 4: Create booking record linked to enquiry
+//         const bookingCode = `MR-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+        
+//         const { error: bookingError } = await supabase
+//           .from('bookings')
+//           .insert({
+//             enquiry_id: enquiryData.id,
+//             user_id: user.id,
+//             studio_id: studio?.id,
+//             booking_code: bookingCode,
+//             total_amount: studio ? studio.hourly_rate * 4 : 0, // Estimate based on 4 hours
+//             status: 'pending_payment',
+//             created_at: new Date().toISOString()
+//           });
+
+//         if (bookingError) {
+//           console.error('Booking error:', bookingError);
+//           // Don't throw - enquiry was created successfully
+//         }
+
+//         // Success!
+//         setBookingStep('success');
+//         setBookingSuccess(true);
+
+//       } catch (err: any) {
+//         console.error('Booking failed:', err);
+//         setBookingError(err.message || 'Failed to complete booking. Please try again.');
+//       } finally {
+//         setIsSubmitting(false);
+//       }
+//     }
+//   };
+
+//   const resetBooking = () => {
+//     setShowBookingModal(false);
+//     setBookingStep('details');
+//     setGuestName('');
+//     setGuestEmail('');
+//     setGuestPhone('');
+//     setGuestsCount(4);
+//     setBrief('');
+//     setPassword('');
+//     setBookingError('');
+//     setBookingSuccess(false);
+//   };
+
+//   if (loading) {
+//     return (
+//       <div className="min-h-screen bg-[#f8f9fa] flex items-center justify-center">
+//         <div className="animate-pulse text-center">
+//           <div className="w-16 h-16 bg-[#446900]/20 rounded-full mx-auto mb-4"></div>
+//           <p className="text-[#424937]">Loading studio...</p>
+//         </div>
+//       </div>
+//     );
+//   }
+
+//   if (error || !studio) {
+//     return (
+//       <div className="min-h-screen bg-[#f8f9fa] flex items-center justify-center">
+//         <div className="text-center max-w-md mx-auto px-6">
+//           <div className="w-20 h-20 mx-auto mb-6 text-[#737a65]">
+//             <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+//               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+//             </svg>
+//           </div>
+//           <h1 className="text-2xl font-bold mb-4">{error || 'Studio not found'}</h1>
+//           <p className="text-[#424937] mb-8">The studio you're looking for doesn't exist or isn't available yet.</p>
+//           <Link href="/spaces" className="inline-block bg-[#446900] text-white px-6 py-3 rounded-full text-sm font-semibold hover:bg-[#446900]/90 transition-all">
+//             Browse all spaces
+//           </Link>
+//         </div>
+//       </div>
+//     );
+//   }
+
+//   const mainImage = getMainImage();
+//   const smallImage1 = getSmallImage1();
+//   const smallImage2 = getSmallImage2();
+
+//   return (
+//     <div className="bg-[#f8f9fa] text-[#191c1d] font-body-md overflow-x-hidden">
+//       {/* Navigation */}
+//       <nav className="fixed top-0 w-full z-50 bg-white/70 backdrop-blur-xl border-b border-[#c2c9b1]/30 shadow-sm">
+//         <div className="flex justify-between items-center px-6 md:px-16 py-4 w-full max-w-[1440px] mx-auto">
+//           <Link href="/" className="text-2xl font-display-sm tracking-tighter text-[#446900] hover:scale-105 transition-transform duration-200">
+//             ManyRooms
+//           </Link>
+//           <div className="hidden md:flex gap-8 items-center">
+//             <Link href="/" className="text-[#446900] font-bold border-b-2 border-[#446900] font-body-md">Marketplace</Link>
+//             <Link href="/spaces" className="text-[#424937] hover:text-[#446900] transition-colors font-body-md">Studios</Link>
+//             <Link href="/cities" className="text-[#424937] hover:text-[#446900] transition-colors font-body-md">Vibes</Link>
+//             <Link href="/about" className="text-[#424937] hover:text-[#446900] transition-colors font-body-md">Journal</Link>
+//           </div>
+//           <div className="flex items-center gap-4">
+//             <Link 
+//               href="/signup?role=owner"
+//               className="hidden md:block bg-[#beff5f] text-[#111f00] font-label-bold px-6 py-2.5 rounded-full hover:scale-105 transition-transform active:scale-95"
+//             >
+//               List Studio
+//             </Link>
+//           </div>
+//         </div>
+//       </nav>
+
+//       <main className="pt-24 pb-12">
+//         <div className="max-w-[1440px] mx-auto px-6 md:px-16">
+//           {/* Header */}
+//           <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+//             <div className="space-y-4">
+//               <div className="flex flex-wrap gap-3">
+//                 <span className="bg-[#beff5f] text-[#111f00] font-label-bold text-[10px] px-3 py-1 rounded-full uppercase tracking-widest">Featured Studio</span>
+//                 <span className="bg-[#e4d7fd] text-[#665c7c] font-label-bold text-[10px] px-3 py-1 rounded-full uppercase tracking-widest flex items-center gap-1">
+//                   <StarIcon className="w-3 h-3 fill-current" /> 4.98 (124 Reviews)
+//                 </span>
+//               </div>
+//               <h1 className="text-[48px] md:text-[84px] font-extrabold leading-[56px] md:leading-[92px] tracking-tight">{studio.name}</h1>
+//               <div className="flex items-center gap-2 text-[#424937]">
+//                 <MapPinIcon className="w-5 h-5" />
+//                 <span className="text-lg">{formatLocation()}</span>
+//               </div>
+//             </div>
+//             <div className="flex gap-4">
+//               <button className="flex items-center gap-2 px-6 py-3 border border-[#c2c9b1] rounded-full font-label-bold hover:bg-[#edeeef] transition-colors">
+//                 <span className="material-symbols-outlined">share</span> Share
+//               </button>
+//               <button className="flex items-center gap-2 px-6 py-3 border border-[#c2c9b1] rounded-full font-label-bold hover:bg-[#edeeef] transition-colors">
+//                 <span className="material-symbols-outlined">favorite</span> Save
+//               </button>
+//             </div>
+//           </header>
+
+//           {/* Gallery */}
+//           <section className="grid grid-cols-12 gap-4 h-[500px] md:h-[750px] mb-24 overflow-hidden rounded-3xl">
+//             <div className="col-span-12 md:col-span-8 relative overflow-hidden h-full">
+//               {mainImage ? (
+//                 <img src={mainImage} alt={studio.name} className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" />
+//               ) : (
+//                 <div className="w-full h-full flex items-center justify-center bg-gray-100"><PhotoIcon className="w-16 h-16 text-gray-400" /></div>
+//               )}
+//             </div>
+//             <div className="hidden md:grid col-span-4 grid-rows-2 gap-4 h-full">
+//               <div className="relative overflow-hidden">
+//                 {smallImage1 ? (
+//                   <img src={smallImage1} alt={`${studio.name} view 2`} className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" />
+//                 ) : (
+//                   <div className="w-full h-full flex items-center justify-center bg-gray-100"><PhotoIcon className="w-12 h-12 text-gray-400" /></div>
+//                 )}
+//               </div>
+//               <div className="relative overflow-hidden">
+//                 {smallImage2 ? (
+//                   <img src={smallImage2} alt={`${studio.name} view 3`} className="w-full h-full object-cover hover:scale-105 transition-transform duration-700" />
+//                 ) : (
+//                   <div className="w-full h-full flex items-center justify-center bg-gray-100"><PhotoIcon className="w-12 h-12 text-gray-400" /></div>
+//                 )}
+//               </div>
+//             </div>
+//           </section>
+
+//           <div className="grid grid-cols-1 md:grid-cols-12 gap-6 relative">
+//             {/* Main Content */}
+//             <div className="md:col-span-7 lg:col-span-8 space-y-24">
+//               <section>
+//                 <div className="flex items-center gap-4 mb-6">
+//                   <div className="h-px flex-1 bg-[#c2c9b1]/30"></div>
+//                   <span className="font-label-bold uppercase tracking-[0.2em] text-[#424937]">The Vibe</span>
+//                   <div className="h-px flex-1 bg-[#c2c9b1]/30"></div>
+//                 </div>
+//                 <div className="mb-12">
+//                   <h2 className="text-[32px] font-bold mb-6">Industrial Brutalist meets High-Fashion.</h2>
+//                   <p className="text-lg text-[#424937] leading-relaxed max-w-2xl mb-8">
+//                     {studio.description || 'A beautiful creative space ready for your next project.'}
+//                   </p>
+//                   <div className="flex flex-wrap gap-2">
+//                     {studio.amenities && studio.amenities.slice(0, 5).map((item) => (
+//                       <span key={item} className="bg-[#e7e8e9] px-4 py-2 rounded-full font-label-bold text-xs uppercase">{item}</span>
+//                     ))}
+//                   </div>
+//                 </div>
+//               </section>
+
+//               {/* Equipment & Amenities */}
+//               <section>
+//                 <h2 className="text-[32px] font-bold mb-8">Gear & Essentials</h2>
+//                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+//                   {studio.amenities && studio.amenities.map((item) => (
+//                     <div key={item} className="flex items-start gap-4 p-6 bg-[#f3f4f5] rounded-2xl border border-[#c2c9b1]/10 hover:border-[#446900]/30 transition-all">
+//                       <span className="material-symbols-outlined text-[#446900] bg-[#beff5f] p-3 rounded-xl">check_box_outline_blank</span>
+//                       <div><h4 className="font-bold mb-1">{item}</h4><p className="text-sm text-[#424937]">Professional grade.</p></div>
+//                     </div>
+//                   ))}
+//                 </div>
+//               </section>
+
+//               {/* Host */}
+//               <section className="p-8 md:p-12 rounded-3xl bg-[#e4d7fd]/30 border border-[#e4d7fd]">
+//                 <div className="flex flex-col md:flex-row gap-8 items-start">
+//                   <div className="w-24 h-24 rounded-full overflow-hidden shrink-0 ring-4 ring-white shadow-xl bg-[#446900] flex items-center justify-center text-white text-3xl font-bold">
+//                     {ownerName.charAt(0) || 'S'}
+//                   </div>
+//                   <div className="space-y-4">
+//                     <h2 className="text-[32px] font-bold">Hosted by {ownerName || 'Studio Owner'}</h2>
+//                     <p className="text-base text-[#424937]">Creative Director & Curator.</p>
+//                     <button className="bg-[#191c1d] text-[#f8f9fa] px-6 py-2.5 rounded-full font-bold text-sm">Contact Host</button>
+//                   </div>
+//                 </div>
+//               </section>
+//             </div>
+
+//             {/* Booking Sidebar */}
+//             <aside className="md:col-span-5 lg:col-span-4">
+//               <div className="sticky top-28 space-y-6">
+//                 <div className="bg-white/70 backdrop-blur-[20px] border border-white/40 shadow-lg p-8 rounded-[32px]">
+//                   <div className="flex justify-between items-end mb-8">
+//                     <div>
+//                       <span className="text-[#424937] font-label-bold text-xs uppercase tracking-widest">Starting from</span>
+//                       <div className="flex items-baseline gap-1">
+//                         <span className="text-3xl font-extrabold">{formatPrice(studio.hourly_rate)}</span>
+//                         <span className="text-[#424937]">/ hour</span>
+//                       </div>
+//                     </div>
+//                   </div>
+
+//                   <div className="space-y-4 mb-6">
+//                     <div>
+//                       <label className="font-bold text-xs uppercase text-[#424937] ml-2">Event Date</label>
+//                       <input 
+//                         type="date" 
+//                         value={eventDate}
+//                         onChange={(e) => setEventDate(e.target.value)}
+//                         className="w-full bg-[#f3f4f5] border-0 rounded-2xl py-4 px-6 focus:ring-2 focus:ring-[#beff5f] outline-none mt-1"
+//                       />
+//                     </div>
+//                     <div>
+//                       <label className="font-bold text-xs uppercase text-[#424937] ml-2">Number of Guests</label>
+//                       <select 
+//                         value={guestsCount}
+//                         onChange={(e) => setGuestsCount(parseInt(e.target.value))}
+//                         className="w-full bg-[#f3f4f5] border-0 rounded-2xl py-4 px-6 focus:ring-2 focus:ring-[#beff5f] outline-none mt-1"
+//                       >
+//                         {[1,2,3,4,5,6,7,8,9,10,15,20].map(n => (
+//                           <option key={n} value={n}>{n} {n === 1 ? 'Guest' : 'Guests'}</option>
+//                         ))}
+//                       </select>
+//                     </div>
+//                   </div>
+
+//                   <button 
+//                     onClick={() => setShowBookingModal(true)}
+//                     className="w-full bg-[#beff5f] text-[#111f00] font-bold text-lg py-5 rounded-2xl hover:scale-[1.02] transition-all shadow-lg active:scale-95"
+//                   >
+//                     Request to Book
+//                   </button>
+//                   <p className="text-center text-[10px] text-[#424937] mt-4 uppercase">You won't be charged yet</p>
+//                 </div>
+//               </div>
+//             </aside>
+//           </div>
+
+//           {/* Related Studios */}
+//           {relatedStudios.length > 0 && (
+//             <div className="mt-24">
+//               <h3 className="text-[32px] font-bold mb-8">You may also love</h3>
+//               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+//                 {relatedStudios.map((s) => (
+//                   <Link key={s.id} href={`/spaces/${s.id}`} className="group">
+//                     <div className="aspect-[4/5] overflow-hidden rounded-xl mb-4">
+//                       {s.images?.[0] ? (
+//                         <img src={s.images[0]} alt={s.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+//                       ) : (
+//                         <div className="w-full h-full bg-gray-100 flex items-center justify-center"><PhotoIcon className="w-12 h-12 text-gray-400" /></div>
+//                       )}
+//                     </div>
+//                     <div className="flex justify-between">
+//                       <div>
+//                         <p className="text-[10px] uppercase text-[#424937]">{s.city}, {s.state}</p>
+//                         <h4 className="text-xl font-bold">{s.name}</h4>
+//                       </div>
+//                       <div className="text-right">
+//                         <p className="text-[10px] uppercase text-[#424937]">From</p>
+//                         <p className="text-lg font-medium">{formatPrice(s.hourly_rate)}</p>
+//                       </div>
+//                     </div>
+//                   </Link>
+//                 ))}
+//               </div>
+//             </div>
+//           )}
+//         </div>
+//       </main>
+
+//       {/* Booking Modal */}
+//       {showBookingModal && (
+//         <div className="fixed inset-0 z-[80] flex items-center justify-center px-4">
+//           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={resetBooking} />
+//           <div className="relative bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 animate-in fade-in zoom-in duration-300 max-h-[90vh] overflow-y-auto">
+//             <button onClick={resetBooking} className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full">
+//               <XMarkIcon className="w-5 h-5" />
+//             </button>
+
+//             {bookingStep === 'details' && (
+//               <div className="space-y-6">
+//                 <div className="text-center mb-6">
+//                   <div className="w-16 h-16 bg-[#beff5f] rounded-2xl flex items-center justify-center mx-auto mb-4">
+//                     <span className="material-symbols-outlined text-3xl text-[#111f00]">event</span>
+//                   </div>
+//                   <h3 className="text-2xl font-bold mb-2">Book {studio.name}</h3>
+//                   <p className="text-sm text-gray-600">Fill in your details to send an enquiry</p>
+//                 </div>
+
+//                 {bookingError && (
+//                   <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">{bookingError}</div>
+//                 )}
+
+//                 <div className="space-y-4">
+//                   <div>
+//                     <label className="block text-sm font-semibold mb-1">Full Name *</label>
+//                     <input type="text" value={guestName} onChange={(e) => setGuestName(e.target.value)} placeholder="Your name" className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 px-4 focus:ring-2 focus:ring-[#beff5f] outline-none" />
+//                   </div>
+//                   <div>
+//                     <label className="block text-sm font-semibold mb-1">Email Address *</label>
+//                     <input type="email" value={guestEmail} onChange={(e) => setGuestEmail(e.target.value)} placeholder="you@example.com" className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 px-4 focus:ring-2 focus:ring-[#beff5f] outline-none" />
+//                   </div>
+//                   <div>
+//                     <label className="block text-sm font-semibold mb-1">Phone Number</label>
+//                     <input type="tel" value={guestPhone} onChange={(e) => setGuestPhone(e.target.value)} placeholder="+1 234 567 890" className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 px-4 focus:ring-2 focus:ring-[#beff5f] outline-none" />
+//                   </div>
+//                   <div>
+//                     <label className="block text-sm font-semibold mb-1">Brief / Message</label>
+//                     <textarea value={brief} onChange={(e) => setBrief(e.target.value)} placeholder="Tell the host about your project..." rows={3} className="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 focus:ring-2 focus:ring-[#beff5f] outline-none resize-none" />
+//                   </div>
+//                 </div>
+
+//                 <button onClick={handleBookingSubmit} className="w-full bg-[#191c1d] text-white py-4 rounded-2xl font-bold hover:bg-gray-800 transition-all">
+//                   Continue
+//                 </button>
+//               </div>
+//             )}
+
+//             {bookingStep === 'register' && (
+//               <div className="space-y-6">
+//                 <div className="text-center mb-6">
+//                   <div className="w-16 h-16 bg-[#e4d7fd] rounded-2xl flex items-center justify-center mx-auto mb-4">
+//                     <LockClosedIcon className="w-8 h-8 text-[#665c7c]" />
+//                   </div>
+//                   <h3 className="text-2xl font-bold mb-2">Create Password</h3>
+//                   <p className="text-sm text-gray-600">Set a password to create your account</p>
+//                 </div>
+
+//                 {bookingError && (
+//                   <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">{bookingError}</div>
+//                 )}
+
+//                 <div>
+//                   <label className="block text-sm font-semibold mb-1">Password (min. 6 characters)</label>
+//                   <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Create a password" className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 px-4 focus:ring-2 focus:ring-[#beff5f] outline-none" />
+//                 </div>
+
+//                 <button onClick={handleBookingSubmit} disabled={isSubmitting} className="w-full bg-[#beff5f] text-[#111f00] py-4 rounded-2xl font-bold hover:scale-[1.02] transition-all disabled:opacity-50">
+//                   {isSubmitting ? 'Submitting...' : 'Send Enquiry'}
+//                 </button>
+//               </div>
+//             )}
+
+//             {bookingStep === 'success' && (
+//               <div className="text-center space-y-6 py-8">
+//                 <div className="w-20 h-20 bg-[#beff5f] rounded-full flex items-center justify-center mx-auto">
+//                   <CheckCircleIcon className="w-10 h-10 text-[#111f00]" />
+//                 </div>
+//                 <div>
+//                   <h3 className="text-2xl font-bold mb-2">Enquiry Sent! 🎉</h3>
+//                   <p className="text-gray-600">Your enquiry has been sent to <strong>{ownerName || 'the studio owner'}</strong>.</p>
+//                 </div>
+//                 <div className="bg-[#f3f4f5] p-6 rounded-2xl text-left space-y-3">
+//                   <div className="flex items-center gap-3">
+//                     <EnvelopeIcon className="w-5 h-5 text-[#446900]" />
+//                     <p className="text-sm">Check <strong>{guestEmail}</strong> for updates</p>
+//                   </div>
+//                   <div className="flex items-center gap-3">
+//                     <span className="material-symbols-outlined text-[#446900]">schedule</span>
+//                     <p className="text-sm">Awaiting response from studio owner</p>
+//                   </div>
+//                   <div className="flex items-center gap-3">
+//                     <span className="material-symbols-outlined text-[#446900]">notifications</span>
+//                     <p className="text-sm">You'll be notified when the owner responds</p>
+//                   </div>
+//                 </div>
+//                 <div className="flex gap-3">
+//                   <button onClick={resetBooking} className="flex-1 border border-gray-200 py-3 rounded-2xl font-semibold hover:bg-gray-50">Close</button>
+//                   <Link href="/dashboard" className="flex-1 bg-[#191c1d] text-white py-3 rounded-2xl font-semibold hover:bg-gray-800 text-center">View Dashboard</Link>
+//                 </div>
+//               </div>
+//             )}
+//           </div>
+//         </div>
+//       )}
+
+//       <Footer />
+//       <Chatbot />
+//     </div>
+//   );
+// }
+
+
+// 'use client';
+
+// import { useState, useEffect } from 'react';
+// import Link from 'next/link';
+// import { useParams, useRouter } from 'next/navigation';
+// import { MapPinIcon, ArrowRightIcon, PhotoIcon, StarIcon, XMarkIcon, CheckCircleIcon, EnvelopeIcon, UserIcon, LockClosedIcon } from '@heroicons/react/24/outline';
+// import { supabase } from '@/lib/supabase';
+// import Chatbot from '@/components/Chatbot';
+// import Footer from '@/components/Footer';
+
+// interface Studio {
+//   id: string;
+//   name: string;
+//   city: string;
+//   state: string;
+//   country: string;
+//   description: string;
+//   hourly_rate: number;
+//   capacity: number;
+//   amenities: string[];
+//   images: string[];
+//   status: string;
+//   created_at: string;
+//   owner_id: string;
+// }
+
+// export default function StudioDetailPage() {
+//   const params = useParams();
+//   const router = useRouter();
+//   const id = params.id as string;
+//   const [studio, setStudio] = useState<Studio | null>(null);
+//   const [loading, setLoading] = useState(true);
+//   const [error, setError] = useState('');
+//   const [date, setDate] = useState('');
+//   const [startTime, setStartTime] = useState('09:00');
+//   const [endTime, setEndTime] = useState('13:00');
+//   const [relatedStudios, setRelatedStudios] = useState<Studio[]>([]);
+//   const [ownerName, setOwnerName] = useState('');
+//   const [ownerEmail, setOwnerEmail] = useState('');
+
+//   // Booking modal states
+//   const [showBookingModal, setShowBookingModal] = useState(false);
+//   const [bookingStep, setBookingStep] = useState<'details' | 'register' | 'success'>('details');
+//   const [email, setEmail] = useState('');
+//   const [username, setUsername] = useState('');
+//   const [password, setPassword] = useState('');
+//   const [bookingMessage, setBookingMessage] = useState('');
+//   const [isSubmitting, setIsSubmitting] = useState(false);
+//   const [bookingError, setBookingError] = useState('');
+//   const [bookingSuccess, setBookingSuccess] = useState(false);
+
+//   useEffect(() => {
+//     if (id) {
+//       fetchStudio();
+//     }
+//   }, [id]);
+
+//   const fetchStudio = async () => {
+//     setLoading(true);
+//     setError('');
+    
+//     try {
+//       const { data: studioData, error: studioError } = await supabase
+//         .from('studios')
+//         .select('*')
+//         .eq('id', id)
+//         .single();
+
+//       if (studioError) throw studioError;
+      
+//       if (!studioData) {
+//         setError('Studio not found');
+//         setLoading(false);
+//         return;
+//       }
+
+//       if (studioData.status !== 'approved') {
+//         setError('This studio is not yet available for booking');
+//         setLoading(false);
+//         return;
+//       }
+
+//       setStudio(studioData);
+
+//       // Fetch owner details
+//       if (studioData.owner_id) {
+//         const { data: owner } = await supabase
+//           .from('users')
+//           .select('name, email')
+//           .eq('id', studioData.owner_id)
+//           .single();
+//         if (owner) {
+//           setOwnerName(owner.name || 'Studio Owner');
+//           setOwnerEmail(owner.email || '');
+//         }
+//       }
+
+//       const { data: relatedData } = await supabase
+//         .from('studios')
+//         .select('*')
+//         .eq('status', 'approved')
+//         .eq('city', studioData.city)
+//         .neq('id', id)
+//         .limit(3);
+
+//       if (relatedData) {
+//         setRelatedStudios(relatedData);
+//       }
+
+//     } catch (err: any) {
+//       console.error('Error fetching studio:', err);
+//       setError(err.message || 'Failed to load studio');
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   const getMainImage = () => {
+//     if (!studio?.images || studio.images.length === 0) return null;
+//     return studio.images[0];
+//   };
+
+//   const getSmallImage1 = () => {
+//     if (!studio?.images || studio.images.length < 2) return null;
+//     return studio.images[1];
+//   };
+
+//   const getSmallImage2 = () => {
+//     if (!studio?.images || studio.images.length < 3) return null;
+//     return studio.images[2];
+//   };
+
+//   const formatPrice = (price: number) => {
+//     return `$${price}`;
+//   };
+
+//   const formatLocation = () => {
+//     if (!studio) return '';
+//     const parts = [studio.city, studio.state].filter(Boolean);
+//     return parts.join(', ');
+//   };
+
+//   const calculateTotal = () => {
+//     if (!studio) return 0;
+//     const hours = parseInt(endTime) - parseInt(startTime);
+//     return studio.hourly_rate * Math.max(hours, 1) + 45 + 32;
+//   };
+
+//   const handleBookingSubmit = async () => {
+//     setBookingError('');
+    
+//     if (bookingStep === 'details') {
+//       setBookingStep('register');
+//       return;
+//     }
+
+//     if (bookingStep === 'register') {
+//       if (!email || !username || !password) {
+//         setBookingError('Please fill in all fields');
+//         return;
+//       }
+
+//       if (password.length < 6) {
+//         setBookingError('Password must be at least 6 characters');
+//         return;
+//       }
+
+//       setIsSubmitting(true);
+
+//       try {
+//         // Step 1: Create user account
+//         const { data: authData, error: authError } = await supabase.auth.signUp({
+//           email: email,
+//           password: password,
+//           options: {
+//             data: {
+//               name: username,
+//               role: 'renter'
+//             }
+//           }
+//         });
+
+//         if (authError) {
+//           if (authError.message.includes('already registered')) {
+//             // User exists, try signing in
+//             const { error: signInError } = await supabase.auth.signInWithPassword({
+//               email: email,
+//               password: password,
+//             });
+            
+//             if (signInError) {
+//               setBookingError('Email already registered. Please use a different email or sign in.');
+//               setIsSubmitting(false);
+//               return;
+//             }
+//           } else {
+//             throw authError;
+//           }
+//         }
+
+//         // Get current user
+//         const { data: { user } } = await supabase.auth.getUser();
+        
+//         if (!user) {
+//           throw new Error('Failed to authenticate');
+//         }
+
+//         // Step 2: Create or update user profile
+//         const { error: profileError } = await supabase
+//           .from('users')
+//           .upsert({
+//             id: user.id,
+//             email: email,
+//             name: username,
+//             role: 'renter',
+//             created_at: new Date().toISOString()
+//           });
+
+//         if (profileError) {
+//           console.error('Profile error:', profileError);
+//         }
+
+//         // Step 3: Create booking request
+//         const { error: bookingError } = await supabase
+//           .from('bookings')
+//           .insert({
+//             studio_id: studio?.id,
+//             user_id: user.id,
+//             owner_id: studio?.owner_id,
+//             date: date,
+//             start_time: startTime,
+//             end_time: endTime,
+//             message: bookingMessage || 'I would like to book this space for a creative session.',
+//             status: 'pending',
+//             total_amount: calculateTotal(),
+//             created_at: new Date().toISOString()
+//           });
+
+//         if (bookingError) {
+//           console.error('Booking error:', bookingError);
+//           throw bookingError;
+//         }
+
+//         // Step 4: Send notification email to studio owner (would be handled by backend)
+//         // For now, we'll just show success
+//         setBookingStep('success');
+//         setBookingSuccess(true);
+
+//       } catch (err: any) {
+//         console.error('Booking failed:', err);
+//         setBookingError(err.message || 'Failed to complete booking. Please try again.');
+//       } finally {
+//         setIsSubmitting(false);
+//       }
+//     }
+//   };
+
+//   const resetBooking = () => {
+//     setShowBookingModal(false);
+//     setBookingStep('details');
+//     setEmail('');
+//     setUsername('');
+//     setPassword('');
+//     setBookingMessage('');
+//     setBookingError('');
+//     setBookingSuccess(false);
+//   };
+
+//   if (loading) {
+//     return (
+//       <div className="min-h-screen bg-[#f8f9fa] flex items-center justify-center">
+//         <div className="animate-pulse text-center">
+//           <div className="w-16 h-16 bg-[#446900]/20 rounded-full mx-auto mb-4"></div>
+//           <p className="text-[#424937]">Loading studio...</p>
+//         </div>
+//       </div>
+//     );
+//   }
+
+//   if (error || !studio) {
+//     return (
+//       <div className="min-h-screen bg-[#f8f9fa] flex items-center justify-center">
+//         <div className="text-center max-w-md mx-auto px-6">
+//           <div className="w-20 h-20 mx-auto mb-6 text-[#737a65]">
+//             <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+//               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+//             </svg>
+//           </div>
+//           <h1 className="text-2xl font-bold mb-4">{error || 'Studio not found'}</h1>
+//           <p className="text-[#424937] mb-8">The studio you're looking for doesn't exist or isn't available yet.</p>
+//           <Link href="/spaces" className="inline-block bg-[#446900] text-white px-6 py-3 rounded-full text-sm font-semibold hover:bg-[#446900]/90 transition-all">
+//             Browse all spaces
+//           </Link>
+//         </div>
+//       </div>
+//     );
+//   }
+
+//   const mainImage = getMainImage();
+//   const smallImage1 = getSmallImage1();
+//   const smallImage2 = getSmallImage2();
+
+//   return (
+//     <div className="bg-[#f8f9fa] text-[#191c1d] font-body-md overflow-x-hidden">
+//       {/* Navigation */}
+//       <nav className="fixed top-0 w-full z-50 bg-white/70 backdrop-blur-xl border-b border-[#c2c9b1]/30 shadow-sm">
+//         <div className="flex justify-between items-center px-6 md:px-16 py-4 w-full max-w-[1440px] mx-auto">
+//           <Link href="/" className="text-2xl font-display-sm tracking-tighter text-[#446900] hover:scale-105 transition-transform duration-200">
+//             ManyRooms
+//           </Link>
+//           <div className="hidden md:flex gap-8 items-center">
+//             <Link href="/" className="text-[#446900] font-bold border-b-2 border-[#446900] font-body-md">Marketplace</Link>
+//             <Link href="/spaces" className="text-[#424937] hover:text-[#446900] transition-colors font-body-md">Studios</Link>
+//             <Link href="/cities" className="text-[#424937] hover:text-[#446900] transition-colors font-body-md">Vibes</Link>
+//             <Link href="/about" className="text-[#424937] hover:text-[#446900] transition-colors font-body-md">Journal</Link>
+//           </div>
+//           <div className="flex items-center gap-4">
+//             <div className="flex gap-2">
+//               <button className="p-2 text-[#424937] hover:text-[#446900] transition-colors">
+//                 <span className="material-symbols-outlined">favorite</span>
+//               </button>
+//               <button className="p-2 text-[#424937] hover:text-[#446900] transition-colors">
+//                 <span className="material-symbols-outlined">account_circle</span>
+//               </button>
+//             </div>
+//             <Link 
+//               href="/signup?role=owner"
+//               className="hidden md:block bg-[#beff5f] text-[#111f00] font-label-bold px-6 py-2.5 rounded-full hover:scale-105 transition-transform active:scale-95"
+//             >
+//               List Studio
+//             </Link>
+//           </div>
+//         </div>
+//       </nav>
+
+//       <main className="pt-24 pb-12">
+//         <div className="max-w-[1440px] mx-auto px-6 md:px-16">
+//           {/* Dynamic Header & Quick Actions */}
+//           <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+//             <div className="space-y-4">
+//               <div className="flex flex-wrap gap-3">
+//                 <span className="bg-[#beff5f] text-[#111f00] font-label-bold text-[10px] px-3 py-1 rounded-full uppercase tracking-widest">
+//                   Featured Studio
+//                 </span>
+//                 <span className="bg-[#e4d7fd] text-[#665c7c] font-label-bold text-[10px] px-3 py-1 rounded-full uppercase tracking-widest flex items-center gap-1">
+//                   <span className="material-symbols-outlined text-[12px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span> 4.98 (124 Reviews)
+//                 </span>
+//               </div>
+//               <h1 className="text-[48px] md:text-[84px] font-display-sm md:font-display-lg leading-[56px] md:leading-[92px] tracking-[-0.02em] md:tracking-[-0.04em] font-extrabold -ml-1">
+//                 {studio.name}
+//               </h1>
+//               <div className="flex items-center gap-2 text-[#424937]">
+//                 <span className="material-symbols-outlined">location_on</span>
+//                 <span className="text-lg">{formatLocation()} • Creative Quarter</span>
+//               </div>
+//             </div>
+//             <div className="flex gap-4">
+//               <button className="flex items-center gap-2 px-6 py-3 border border-[#c2c9b1] rounded-full font-label-bold hover:bg-[#edeeef] transition-colors">
+//                 <span className="material-symbols-outlined">share</span> Share
+//               </button>
+//               <button className="flex items-center gap-2 px-6 py-3 border border-[#c2c9b1] rounded-full font-label-bold hover:bg-[#edeeef] transition-colors">
+//                 <span className="material-symbols-outlined">favorite</span> Save
+//               </button>
+//             </div>
+//           </header>
+
+//           {/* Immersive Hero Gallery */}
+//           <section className="grid grid-cols-12 gap-4 h-[500px] md:h-[750px] mb-24 overflow-hidden rounded-3xl group">
+//             <div className="col-span-12 md:col-span-8 relative overflow-hidden h-full">
+//               {mainImage ? (
+//                 <img 
+//                   src={mainImage}
+//                   alt={studio.name}
+//                   className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
+//                 />
+//               ) : (
+//                 <div className="w-full h-full flex items-center justify-center bg-gray-100">
+//                   <PhotoIcon className="w-16 h-16 text-gray-400" />
+//                 </div>
+//               )}
+//               <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+//             </div>
+//             <div className="hidden md:grid col-span-4 grid-rows-2 gap-4 h-full">
+//               <div className="relative overflow-hidden">
+//                 {smallImage1 ? (
+//                   <img 
+//                     src={smallImage1}
+//                     alt={`${studio.name} view 2`}
+//                     className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
+//                   />
+//                 ) : (
+//                   <div className="w-full h-full flex items-center justify-center bg-gray-100">
+//                     <PhotoIcon className="w-12 h-12 text-gray-400" />
+//                   </div>
+//                 )}
+//               </div>
+//               <div className="relative overflow-hidden">
+//                 {smallImage2 ? (
+//                   <img 
+//                     src={smallImage2}
+//                     alt={`${studio.name} view 3`}
+//                     className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
+//                   />
+//                 ) : (
+//                   <div className="w-full h-full flex items-center justify-center bg-gray-100">
+//                     <PhotoIcon className="w-12 h-12 text-gray-400" />
+//                   </div>
+//                 )}
+//                 <button className="absolute bottom-6 right-6 bg-white/90 backdrop-blur-md px-6 py-3 rounded-full font-label-bold flex items-center gap-2 shadow-lg hover:scale-105 transition-transform active:scale-95">
+//                   <span className="material-symbols-outlined">grid_view</span> View all {studio.images?.length || 0} photos
+//                 </button>
+//               </div>
+//             </div>
+//           </section>
+
+//           <div className="grid grid-cols-1 md:grid-cols-12 gap-6 relative">
+//             {/* Main Content Left */}
+//             <div className="md:col-span-7 lg:col-span-8 space-y-24">
+//               {/* Studio Story & Vibe */}
+//               <section>
+//                 <div className="flex items-center gap-4 mb-6">
+//                   <div className="h-px flex-1 bg-[#c2c9b1]/30"></div>
+//                   <span className="font-label-bold uppercase tracking-[0.2em] text-[#424937]">The Vibe</span>
+//                   <div className="h-px flex-1 bg-[#c2c9b1]/30"></div>
+//                 </div>
+//                 <div className="mb-12">
+//                   <h2 className="text-[32px] font-headline-lg mb-6">Industrial Brutalist meets High-Fashion.</h2>
+//                   <p className="text-lg text-[#424937] leading-relaxed max-w-2xl mb-8">
+//                     {studio.description || 'A beautiful creative space ready for your next project. Designed for high-end editorial shoots, cinematic productions, and immersive brand activations.'}
+//                   </p>
+//                   <div className="flex flex-wrap gap-2">
+//                     {studio.amenities && studio.amenities.slice(0, 5).map((item) => (
+//                       <span key={item} className="bg-[#e7e8e9] px-4 py-2 rounded-full font-label-bold text-xs uppercase">
+//                         {item}
+//                       </span>
+//                     ))}
+//                     <span className="bg-[#e7e8e9] px-4 py-2 rounded-full font-label-bold text-xs uppercase">Premium Space</span>
+//                   </div>
+//                 </div>
+//               </section>
+
+//               {/* Equipment & Amenities */}
+//               <section>
+//                 <h2 className="text-[32px] font-headline-lg mb-8">Gear & Essentials</h2>
+//                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+//                   {studio.amenities && studio.amenities.map((item) => (
+//                     <div key={item} className="flex items-start gap-4 p-6 bg-[#f3f4f5] rounded-2xl border border-[#c2c9b1]/10 hover:border-[#446900]/30 transition-all group">
+//                       <span className="material-symbols-outlined text-[#446900] bg-[#beff5f] p-3 rounded-xl group-hover:scale-110 transition-transform">
+//                         check_box_outline_blank
+//                       </span>
+//                       <div>
+//                         <h4 className="font-label-bold mb-1">{item}</h4>
+//                         <p className="text-sm text-[#424937]">Professional grade equipment included.</p>
+//                       </div>
+//                     </div>
+//                   ))}
+//                 </div>
+//               </section>
+
+//               {/* Host Profile & Reviews */}
+//               <section className="p-8 md:p-12 rounded-3xl bg-[#e4d7fd]/30 border border-[#e4d7fd]">
+//                 <div className="flex flex-col md:flex-row gap-8 items-start">
+//                   <div className="w-24 h-24 rounded-full overflow-hidden shrink-0 ring-4 ring-white shadow-xl">
+//                     <div className="w-full h-full bg-[#446900] flex items-center justify-center text-white text-3xl font-bold">
+//                       {ownerName.charAt(0) || 'S'}
+//                     </div>
+//                   </div>
+//                   <div className="space-y-4">
+//                     <h2 className="text-[32px] font-headline-lg">Hosted by {ownerName || 'Studio Owner'}</h2>
+//                     <p className="text-base text-[#424937]">Creative Director & Curator. Dedicated to ensuring every creator has the tools and atmosphere needed to excel.</p>
+//                     <div className="flex gap-4">
+//                       <button className="bg-[#191c1d] text-[#f8f9fa] px-6 py-2.5 rounded-full font-label-bold text-sm hover:opacity-90 transition-opacity">
+//                         Contact Host
+//                       </button>
+//                       <div className="flex items-center gap-2 text-[#424937] font-label-bold">
+//                         <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span> Identity Verified
+//                       </div>
+//                     </div>
+//                   </div>
+//                 </div>
+//                 <div className="mt-12 space-y-8">
+//                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+//                     <div className="space-y-4">
+//                       <div className="flex items-center gap-1 text-[#446900]">
+//                         {[...Array(5)].map((_, i) => (
+//                           <StarIcon key={i} className="w-5 h-5 fill-current" />
+//                         ))}
+//                       </div>
+//                       <p className="text-base italic">"The lighting in this space is unreal. We didn't even need our secondary rig for the first half of the shoot."</p>
+//                       <div className="flex items-center gap-3">
+//                         <div className="w-8 h-8 rounded-full bg-[#e1e3e4]"></div>
+//                         <span className="font-label-bold text-xs uppercase">Marcus T., Vogue Italia</span>
+//                       </div>
+//                     </div>
+//                     <div className="space-y-4">
+//                       <div className="flex items-center gap-1 text-[#446900]">
+//                         {[...Array(5)].map((_, i) => (
+//                           <StarIcon key={i} className="w-5 h-5 fill-current" />
+//                         ))}
+//                       </div>
+//                       <p className="text-base italic">"Incredible textures. The brick and concrete mix is perfect for streetwear looks."</p>
+//                       <div className="flex items-center gap-3">
+//                         <div className="w-8 h-8 rounded-full bg-[#e1e3e4]"></div>
+//                         <span className="font-label-bold text-xs uppercase">Sarah L., Creative Agency</span>
+//                       </div>
+//                     </div>
+//                   </div>
+//                 </div>
+//               </section>
+
+//               {/* Location Map */}
+//               <section>
+//                 <div className="flex items-center justify-between mb-8">
+//                   <h2 className="text-[32px] font-headline-lg">Where you'll be</h2>
+//                   <span className="font-label-bold text-[#446900]">{studio.city}, {studio.state}</span>
+//                 </div>
+//                 <div className="w-full h-96 rounded-3xl overflow-hidden shadow-inner grayscale contrast-125 border border-[#c2c9b1] relative group">
+//                   <div className="absolute inset-0 bg-[#446900]/5 pointer-events-none z-10"></div>
+//                   <div className="w-full h-full bg-[#edeeef] flex items-center justify-center">
+//                     <div className="text-center">
+//                       <MapPinIcon className="w-12 h-12 text-[#446900] mx-auto mb-2" />
+//                       <p className="text-[#424937]">{formatLocation()}</p>
+//                     </div>
+//                   </div>
+//                   <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
+//                     <div className="w-12 h-12 bg-[#beff5f] rounded-full flex items-center justify-center shadow-2xl animate-bounce">
+//                       <span className="material-symbols-outlined text-[#111f00] font-bold">location_on</span>
+//                     </div>
+//                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 bg-[#446900]/20 rounded-full animate-ping"></div>
+//                   </div>
+//                 </div>
+//                 <p className="mt-6 text-base text-[#424937]">Located in the heart of the creative hub. Walking distance from major stations.</p>
+//               </section>
+//             </div>
+
+//             {/* Sticky Booking Sidebar */}
+//             <aside className="md:col-span-5 lg:col-span-4">
+//               <div className="sticky top-28 space-y-6">
+//                 <div className="bg-white/70 backdrop-blur-[20px] border border-white/40 shadow-[0_20px_40px_-15px_rgba(99,89,121,0.1)] p-8 rounded-[32px]">
+//                   <div className="flex justify-between items-end mb-8">
+//                     <div>
+//                       <span className="text-[#424937] font-label-bold text-xs uppercase tracking-widest block mb-1">Starting from</span>
+//                       <div className="flex items-baseline gap-1">
+//                         <span className="text-3xl font-extrabold">{formatPrice(studio.hourly_rate)}</span>
+//                         <span className="text-[#424937]">/ hour</span>
+//                       </div>
+//                     </div>
+//                     <div className="bg-[#beff5f] px-3 py-1 rounded-full text-[10px] font-extrabold uppercase">Top Rated</div>
+//                   </div>
+
+//                   <div className="space-y-4 mb-8">
+//                     <div className="grid grid-cols-1 gap-2">
+//                       <label className="font-label-bold text-xs uppercase text-[#424937] ml-2">Date</label>
+//                       <div className="relative">
+//                         <input 
+//                           type="date" 
+//                           value={date}
+//                           onChange={(e) => setDate(e.target.value)}
+//                           className="w-full bg-[#f3f4f5] border-0 rounded-2xl py-4 px-6 focus:ring-2 focus:ring-[#beff5f] transition-all outline-none"
+//                         />
+//                         <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-[#424937] pointer-events-none">calendar_today</span>
+//                       </div>
+//                     </div>
+//                     <div className="grid grid-cols-2 gap-4">
+//                       <div className="space-y-2">
+//                         <label className="font-label-bold text-xs uppercase text-[#424937] ml-2">Start</label>
+//                         <select 
+//                           value={startTime}
+//                           onChange={(e) => setStartTime(e.target.value)}
+//                           className="w-full bg-[#f3f4f5] border-0 rounded-2xl py-4 px-4 focus:ring-2 focus:ring-[#beff5f] appearance-none outline-none"
+//                         >
+//                           <option value="09:00">09:00 AM</option>
+//                           <option value="10:00">10:00 AM</option>
+//                           <option value="11:00">11:00 AM</option>
+//                           <option value="12:00">12:00 PM</option>
+//                           <option value="13:00">01:00 PM</option>
+//                           <option value="14:00">02:00 PM</option>
+//                         </select>
+//                       </div>
+//                       <div className="space-y-2">
+//                         <label className="font-label-bold text-xs uppercase text-[#424937] ml-2">End</label>
+//                         <select 
+//                           value={endTime}
+//                           onChange={(e) => setEndTime(e.target.value)}
+//                           className="w-full bg-[#f3f4f5] border-0 rounded-2xl py-4 px-4 focus:ring-2 focus:ring-[#beff5f] appearance-none outline-none"
+//                         >
+//                           <option value="13:00">01:00 PM</option>
+//                           <option value="14:00">02:00 PM</option>
+//                           <option value="15:00">03:00 PM</option>
+//                           <option value="16:00">04:00 PM</option>
+//                           <option value="17:00">05:00 PM</option>
+//                           <option value="18:00">06:00 PM</option>
+//                         </select>
+//                       </div>
+//                     </div>
+//                   </div>
+
+//                   <div className="space-y-3 mb-8 border-t border-[#c2c9b1]/20 pt-6">
+//                     <div className="flex justify-between text-sm">
+//                       <span className="text-[#424937]">${studio.hourly_rate} x {Math.max(parseInt(endTime) - parseInt(startTime), 1)} hours</span>
+//                       <span>${studio.hourly_rate * Math.max(parseInt(endTime) - parseInt(startTime), 1)}</span>
+//                     </div>
+//                     <div className="flex justify-between text-sm">
+//                       <span className="text-[#424937]">Cleaning Fee</span>
+//                       <span>$45</span>
+//                     </div>
+//                     <div className="flex justify-between text-sm">
+//                       <span className="text-[#424937]">ManyRooms Service Fee</span>
+//                       <span>$32</span>
+//                     </div>
+//                     <div className="flex justify-between font-bold text-lg pt-2">
+//                       <span>Total</span>
+//                       <span className="text-[#446900]">${calculateTotal()}</span>
+//                     </div>
+//                   </div>
+
+//                   <button 
+//                     onClick={() => {
+//                       if (!date) {
+//                         alert('Please select a date first');
+//                         return;
+//                       }
+//                       setShowBookingModal(true);
+//                     }}
+//                     className="w-full bg-[#beff5f] text-[#111f00] font-display-sm text-lg py-5 rounded-2xl hover:scale-[1.02] transition-all shadow-[0_10px_30px_-5px_rgba(190,255,95,0.4)] active:scale-95"
+//                   >
+//                     Request to Book
+//                   </button>
+//                   <p className="text-center text-[10px] text-[#424937] mt-4 uppercase font-label-bold tracking-tighter">You won't be charged yet</p>
+//                 </div>
+
+//                 <div className="bg-[#edeeef] p-6 rounded-[24px] flex items-center gap-4">
+//                   <span className="material-symbols-outlined text-[#446900] text-3xl">verified_user</span>
+//                   <div className="text-xs">
+//                     <p className="font-bold mb-1">ManyRooms Protection</p>
+//                     <p className="text-[#424937]">Every booking includes damage protection and host liability insurance.</p>
+//                   </div>
+//                 </div>
+//               </div>
+//             </aside>
+//           </div>
+
+//           {/* You may also love section */}
+//           {relatedStudios.length > 0 && (
+//             <div className="mt-24">
+//               <div className="flex items-center justify-between mb-8">
+//                 <h3 className="text-[32px] font-headline-lg">You may also love</h3>
+//                 <Link href="/spaces" className="text-xs uppercase tracking-widest border-b border-[#191c1d]/20 pb-1 hover:opacity-60 transition-opacity flex items-center gap-1">
+//                   VIEW ALL <ArrowRightIcon className="w-3 h-3" />
+//                 </Link>
+//               </div>
+//               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+//                 {relatedStudios.map((s) => (
+//                   <Link key={s.id} href={`/spaces/${s.id}`} className="group">
+//                     <div className="aspect-[4/5] overflow-hidden rounded-xl mb-4">
+//                       {s.images && s.images[0] ? (
+//                         <img
+//                           src={s.images[0]}
+//                           alt={s.name}
+//                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+//                         />
+//                       ) : (
+//                         <div className="w-full h-full flex items-center justify-center bg-gray-100">
+//                           <PhotoIcon className="w-12 h-12 text-gray-400" />
+//                         </div>
+//                       )}
+//                     </div>
+//                     <div className="flex justify-between items-start">
+//                       <div>
+//                         <p className="text-[10px] uppercase tracking-widest text-[#424937]">{s.city}, {s.state}</p>
+//                         <h4 className="text-xl font-bold mt-1 group-hover:opacity-70 transition-opacity">{s.name}</h4>
+//                       </div>
+//                       <div className="text-right">
+//                         <p className="text-[10px] uppercase tracking-widest text-[#424937]">From</p>
+//                         <p className="text-lg font-medium">{formatPrice(s.hourly_rate)}</p>
+//                         <p className="text-[10px] text-[#424937]">/ hour</p>
+//                       </div>
+//                     </div>
+//                   </Link>
+//                 ))}
+//               </div>
+//             </div>
+//           )}
+
+//           {/* FAQ Section */}
+//           <div className="mt-24 pt-12 border-t border-[#c2c9b1]/10">
+//             <h3 className="text-[32px] font-headline-lg mb-8">Frequently Asked</h3>
+//             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+//               {[
+//                 { q: "What's included in the hire fee?", a: "All standard equipment listed in the amenities section. Additional production support can be arranged separately." },
+//                 { q: "Can I view the space before booking?", a: "Yes, viewing requests can be arranged with the host. Please mention this in your enquiry." },
+//                 { q: "What's your cancellation policy?", a: "Cancellations made 48+ hours before booking are fully refundable." },
+//                 { q: "Do you offer production support?", a: "Yes, experienced crew and equipment hire can be arranged upon request." }
+//               ].map((faq) => (
+//                 <div key={faq.q}>
+//                   <p className="font-bold mb-2">{faq.q}</p>
+//                   <p className="text-sm text-[#424937]">{faq.a}</p>
+//                 </div>
+//               ))}
+//             </div>
+//           </div>
+//         </div>
+//       </main>
+
+//       {/* Booking Modal */}
+//       {showBookingModal && (
+//         <div className="fixed inset-0 z-[80] flex items-center justify-center px-4">
+//           <div 
+//             className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+//             onClick={resetBooking}
+//           />
+//           <div className="relative bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 animate-in fade-in zoom-in duration-300 max-h-[90vh] overflow-y-auto">
+//             <button 
+//               onClick={resetBooking}
+//               className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full transition-all z-10"
+//             >
+//               <XMarkIcon className="w-5 h-5 text-gray-600" />
+//             </button>
+
+//             {bookingStep === 'details' && (
+//               <div className="space-y-6">
+//                 <div className="text-center mb-6">
+//                   <div className="w-16 h-16 bg-[#beff5f] rounded-2xl flex items-center justify-center mx-auto mb-4">
+//                     <span className="material-symbols-outlined text-3xl text-[#111f00]">event</span>
+//                   </div>
+//                   <h3 className="text-2xl font-bold text-gray-900 mb-2">Book {studio.name}</h3>
+//                   <p className="text-sm text-gray-600">
+//                     {date} • {startTime}:00 - {endTime}:00 • ${calculateTotal()} total
+//                   </p>
+//                 </div>
+
+//                 <div className="space-y-4">
+//                   <div>
+//                     <label className="block text-sm font-semibold text-gray-700 mb-1">Message to Host (Optional)</label>
+//                     <textarea
+//                       value={bookingMessage}
+//                       onChange={(e) => setBookingMessage(e.target.value)}
+//                       placeholder="Tell the host about your project..."
+//                       rows={4}
+//                       className="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 focus:ring-2 focus:ring-[#beff5f] focus:border-transparent outline-none resize-none"
+//                     />
+//                   </div>
+//                 </div>
+
+//                 <button
+//                   onClick={handleBookingSubmit}
+//                   className="w-full bg-[#191c1d] text-white py-4 rounded-2xl font-bold hover:bg-gray-800 transition-all"
+//                 >
+//                   Continue to Register
+//                 </button>
+//                 <p className="text-xs text-center text-gray-500">You'll create an account in the next step</p>
+//               </div>
+//             )}
+
+//             {bookingStep === 'register' && (
+//               <div className="space-y-6">
+//                 <div className="text-center mb-6">
+//                   <div className="w-16 h-16 bg-[#e4d7fd] rounded-2xl flex items-center justify-center mx-auto mb-4">
+//                     <UserIcon className="w-8 h-8 text-[#665c7c]" />
+//                   </div>
+//                   <h3 className="text-2xl font-bold text-gray-900 mb-2">Create Your Account</h3>
+//                   <p className="text-sm text-gray-600">Register to complete your booking request</p>
+//                 </div>
+
+//                 {bookingError && (
+//                   <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
+//                     {bookingError}
+//                   </div>
+//                 )}
+
+//                 <div className="space-y-4">
+//                   <div>
+//                     <label className="block text-sm font-semibold text-gray-700 mb-1">Email Address</label>
+//                     <div className="relative">
+//                       <EnvelopeIcon className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+//                       <input
+//                         type="email"
+//                         value={email}
+//                         onChange={(e) => setEmail(e.target.value)}
+//                         placeholder="you@example.com"
+//                         className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 pl-12 pr-4 focus:ring-2 focus:ring-[#beff5f] focus:border-transparent outline-none"
+//                       />
+//                     </div>
+//                   </div>
+
+//                   <div>
+//                     <label className="block text-sm font-semibold text-gray-700 mb-1">Username</label>
+//                     <div className="relative">
+//                       <UserIcon className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+//                       <input
+//                         type="text"
+//                         value={username}
+//                         onChange={(e) => setUsername(e.target.value)}
+//                         placeholder="Choose a username"
+//                         className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 pl-12 pr-4 focus:ring-2 focus:ring-[#beff5f] focus:border-transparent outline-none"
+//                       />
+//                     </div>
+//                   </div>
+
+//                   <div>
+//                     <label className="block text-sm font-semibold text-gray-700 mb-1">Password</label>
+//                     <div className="relative">
+//                       <LockClosedIcon className="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+//                       <input
+//                         type="password"
+//                         value={password}
+//                         onChange={(e) => setPassword(e.target.value)}
+//                         placeholder="Min. 6 characters"
+//                         className="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 pl-12 pr-4 focus:ring-2 focus:ring-[#beff5f] focus:border-transparent outline-none"
+//                       />
+//                     </div>
+//                   </div>
+//                 </div>
+
+//                 <button
+//                   onClick={handleBookingSubmit}
+//                   disabled={isSubmitting}
+//                   className="w-full bg-[#beff5f] text-[#111f00] py-4 rounded-2xl font-bold hover:scale-[1.02] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+//                 >
+//                   {isSubmitting ? (
+//                     <span className="flex items-center justify-center gap-2">
+//                       <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+//                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+//                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+//                       </svg>
+//                       Creating Account...
+//                     </span>
+//                   ) : (
+//                     'Complete Booking'
+//                   )}
+//                 </button>
+//                 <p className="text-xs text-center text-gray-500">Your details are secure and encrypted</p>
+//               </div>
+//             )}
+
+//             {bookingStep === 'success' && (
+//               <div className="text-center space-y-6 py-8">
+//                 <div className="w-20 h-20 bg-[#beff5f] rounded-full flex items-center justify-center mx-auto">
+//                   <CheckCircleIcon className="w-10 h-10 text-[#111f00]" />
+//                 </div>
+//                 <div>
+//                   <h3 className="text-2xl font-bold text-gray-900 mb-2">Request Sent! 🎉</h3>
+//                   <p className="text-gray-600">
+//                     Your booking request has been sent to <strong>{ownerName || 'the studio owner'}</strong>.
+//                   </p>
+//                 </div>
+//                 <div className="bg-[#f3f4f5] p-6 rounded-2xl text-left space-y-3">
+//                   <div className="flex items-center gap-3">
+//                     <EnvelopeIcon className="w-5 h-5 text-[#446900] flex-shrink-0" />
+//                     <p className="text-sm text-gray-700">Check your email (<strong>{email}</strong>) for updates</p>
+//                   </div>
+//                   <div className="flex items-center gap-3">
+//                     <span className="material-symbols-outlined text-[#446900]">schedule</span>
+//                     <p className="text-sm text-gray-700">Awaiting response from studio owner</p>
+//                   </div>
+//                   <div className="flex items-center gap-3">
+//                     <span className="material-symbols-outlined text-[#446900]">notifications</span>
+//                     <p className="text-sm text-gray-700">You'll be notified when the owner responds</p>
+//                   </div>
+//                 </div>
+//                 <div className="flex gap-3">
+//                   <button
+//                     onClick={resetBooking}
+//                     className="flex-1 border border-gray-200 py-3 rounded-2xl font-semibold hover:bg-gray-50 transition-all"
+//                   >
+//                     Close
+//                   </button>
+//                   <Link
+//                     href="/dashboard"
+//                     className="flex-1 bg-[#191c1d] text-white py-3 rounded-2xl font-semibold hover:bg-gray-800 transition-all text-center"
+//                   >
+//                     View Dashboard
+//                   </Link>
+//                 </div>
+//               </div>
+//             )}
+//           </div>
+//         </div>
+//       )}
+
+//       {/* Footer */}
+//       <Footer />
+    
+//       {/* Chatbot */}
+//       <Chatbot />
+//     </div>
+//   );
+// }
+
+
+
+// 'use client';
+
+// import { useState, useEffect } from 'react';
+// import Link from 'next/link';
+// import Image from 'next/image';
+// import { useParams } from 'next/navigation';
+// import { MapPinIcon, UsersIcon, ArrowRightIcon, PhotoIcon, HeartIcon, ShareIcon, StarIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
+// import { supabase } from '@/lib/supabase';
+// import Chatbot from '@/components/Chatbot';
+// import Footer from '@/components/Footer';
+
+// interface Studio {
+//   id: string;
+//   name: string;
+//   city: string;
+//   state: string;
+//   country: string;
+//   description: string;
+//   hourly_rate: number;
+//   capacity: number;
+//   amenities: string[];
+//   images: string[];
+//   status: string;
+//   created_at: string;
+//   owner_id: string;
+// }
+
+// export default function StudioDetailPage() {
+//   const params = useParams();
+//   const id = params.id as string;
+//   const [studio, setStudio] = useState<Studio | null>(null);
+//   const [loading, setLoading] = useState(true);
+//   const [error, setError] = useState('');
+//   const [date, setDate] = useState('');
+//   const [guests, setGuests] = useState(4);
+//   const [brief, setBrief] = useState('');
+//   const [relatedStudios, setRelatedStudios] = useState<Studio[]>([]);
+//   const [ownerName, setOwnerName] = useState('');
+
+//   useEffect(() => {
+//     if (id) {
+//       fetchStudio();
+//     }
+//   }, [id]);
+
+//   const fetchStudio = async () => {
+//     setLoading(true);
+//     setError('');
+    
+//     try {
+//       const { data: studioData, error: studioError } = await supabase
+//         .from('studios')
+//         .select('*')
+//         .eq('id', id)
+//         .single();
+
+//       if (studioError) throw studioError;
+      
+//       if (!studioData) {
+//         setError('Studio not found');
+//         setLoading(false);
+//         return;
+//       }
+
+//       if (studioData.status !== 'approved') {
+//         setError('This studio is not yet available for booking');
+//         setLoading(false);
+//         return;
+//       }
+
+//       setStudio(studioData);
+
+//       // Fetch owner name
+//       if (studioData.owner_id) {
+//         const { data: owner } = await supabase
+//           .from('users')
+//           .select('name')
+//           .eq('id', studioData.owner_id)
+//           .single();
+//         if (owner) setOwnerName(owner.name || 'Studio Owner');
+//       }
+
+//       const { data: relatedData, error: relatedError } = await supabase
+//         .from('studios')
+//         .select('*')
+//         .eq('status', 'approved')
+//         .eq('city', studioData.city)
+//         .neq('id', id)
+//         .limit(3);
+
+//       if (!relatedError && relatedData) {
+//         setRelatedStudios(relatedData);
+//       }
+
+//     } catch (err: any) {
+//       console.error('Error fetching studio:', err);
+//       setError(err.message || 'Failed to load studio');
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   const getMainImage = () => {
+//     if (!studio?.images || studio.images.length === 0) return null;
+//     return studio.images[0];
+//   };
+
+//   const getSmallImage1 = () => {
+//     if (!studio?.images || studio.images.length < 2) return null;
+//     return studio.images[1];
+//   };
+
+//   const getSmallImage2 = () => {
+//     if (!studio?.images || studio.images.length < 3) return null;
+//     return studio.images[2];
+//   };
+
+//   const formatPrice = (price: number) => {
+//     return `$${price}`;
+//   };
+
+//   const formatLocation = () => {
+//     if (!studio) return '';
+//     const parts = [studio.city, studio.state].filter(Boolean);
+//     return parts.join(', ');
+//   };
+
+//   if (loading) {
+//     return (
+//       <div className="min-h-screen bg-[#f8f9fa] flex items-center justify-center">
+//         <div className="animate-pulse text-center">
+//           <div className="w-16 h-16 bg-[#446900]/20 rounded-full mx-auto mb-4"></div>
+//           <p className="text-[#424937]">Loading studio...</p>
+//         </div>
+//       </div>
+//     );
+//   }
+
+//   if (error || !studio) {
+//     return (
+//       <div className="min-h-screen bg-[#f8f9fa] flex items-center justify-center">
+//         <div className="text-center max-w-md mx-auto px-6">
+//           <div className="w-20 h-20 mx-auto mb-6 text-[#737a65]">
+//             <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+//               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+//             </svg>
+//           </div>
+//           <h1 className="text-2xl font-bold mb-4">{error || 'Studio not found'}</h1>
+//           <p className="text-[#424937] mb-8">The studio you're looking for doesn't exist or isn't available yet.</p>
+//           <Link href="/spaces" className="inline-block bg-[#446900] text-white px-6 py-3 rounded-full text-sm font-semibold hover:bg-[#446900]/90 transition-all">
+//             Browse all spaces
+//           </Link>
+//         </div>
+//       </div>
+//     );
+//   }
+
+//   const mainImage = getMainImage();
+//   const smallImage1 = getSmallImage1();
+//   const smallImage2 = getSmallImage2();
+
+//   return (
+//     <div className="bg-[#f8f9fa] text-[#191c1d] font-body-md overflow-x-hidden">
+//       {/* Navigation */}
+//       <nav className="fixed top-0 w-full z-50 bg-white/70 backdrop-blur-xl border-b border-[#c2c9b1]/30 shadow-sm">
+//         <div className="flex justify-between items-center px-6 md:px-16 py-4 w-full max-w-[1440px] mx-auto">
+//           <Link href="/" className="text-2xl font-display-sm tracking-tighter text-[#446900] hover:scale-105 transition-transform duration-200">
+//             ManyRooms
+//           </Link>
+//           <div className="hidden md:flex gap-8 items-center">
+//             <Link href="/" className="text-[#446900] font-bold border-b-2 border-[#446900] font-body-md">Marketplace</Link>
+//             <Link href="/spaces" className="text-[#424937] hover:text-[#446900] transition-colors font-body-md">Studios</Link>
+//             <Link href="/cities" className="text-[#424937] hover:text-[#446900] transition-colors font-body-md">Vibes</Link>
+//             <Link href="/about" className="text-[#424937] hover:text-[#446900] transition-colors font-body-md">Journal</Link>
+//           </div>
+//           <div className="flex items-center gap-4">
+//             <div className="flex gap-2">
+//               <button className="p-2 text-[#424937] hover:text-[#446900] transition-colors">
+//                 <span className="material-symbols-outlined">favorite</span>
+//               </button>
+//               <button className="p-2 text-[#424937] hover:text-[#446900] transition-colors">
+//                 <span className="material-symbols-outlined">account_circle</span>
+//               </button>
+//             </div>
+//             <Link 
+//               href="/signup?role=owner"
+//               className="hidden md:block bg-[#beff5f] text-[#111f00] font-label-bold px-6 py-2.5 rounded-full hover:scale-105 transition-transform active:scale-95"
+//             >
+//               List Studio
+//             </Link>
+//           </div>
+//         </div>
+//       </nav>
+
+//       <main className="pt-24 pb-12">
+//         <div className="max-w-[1440px] mx-auto px-6 md:px-16">
+//           {/* Dynamic Header & Quick Actions */}
+//           <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+//             <div className="space-y-4">
+//               <div className="flex flex-wrap gap-3">
+//                 <span className="bg-[#beff5f] text-[#111f00] font-label-bold text-[10px] px-3 py-1 rounded-full uppercase tracking-widest">
+//                   Featured Studio
+//                 </span>
+//                 <span className="bg-[#e4d7fd] text-[#665c7c] font-label-bold text-[10px] px-3 py-1 rounded-full uppercase tracking-widest flex items-center gap-1">
+//                   <span className="material-symbols-outlined text-[12px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span> 4.98 (124 Reviews)
+//                 </span>
+//               </div>
+//               <h1 className="text-[48px] md:text-[84px] font-display-sm md:font-display-lg leading-[56px] md:leading-[92px] tracking-[-0.02em] md:tracking-[-0.04em] font-extrabold -ml-1">
+//                 {studio.name}
+//               </h1>
+//               <div className="flex items-center gap-2 text-[#424937]">
+//                 <span className="material-symbols-outlined">location_on</span>
+//                 <span className="text-lg">{formatLocation()} • Creative Quarter</span>
+//               </div>
+//             </div>
+//             <div className="flex gap-4">
+//               <button className="flex items-center gap-2 px-6 py-3 border border-[#c2c9b1] rounded-full font-label-bold hover:bg-[#edeeef] transition-colors">
+//                 <span className="material-symbols-outlined">share</span> Share
+//               </button>
+//               <button className="flex items-center gap-2 px-6 py-3 border border-[#c2c9b1] rounded-full font-label-bold hover:bg-[#edeeef] transition-colors">
+//                 <span className="material-symbols-outlined">favorite</span> Save
+//               </button>
+//             </div>
+//           </header>
+
+//           {/* Immersive Hero Gallery */}
+//           <section className="grid grid-cols-12 gap-4 h-[500px] md:h-[750px] mb-24 overflow-hidden rounded-3xl group">
+//             <div className="col-span-12 md:col-span-8 relative overflow-hidden h-full">
+//               {mainImage ? (
+//                 <img 
+//                   src={mainImage}
+//                   alt={studio.name}
+//                   className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
+//                 />
+//               ) : (
+//                 <div className="w-full h-full flex items-center justify-center bg-gray-100">
+//                   <PhotoIcon className="w-16 h-16 text-gray-400" />
+//                 </div>
+//               )}
+//               <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+//             </div>
+//             <div className="hidden md:grid col-span-4 grid-rows-2 gap-4 h-full">
+//               <div className="relative overflow-hidden">
+//                 {smallImage1 ? (
+//                   <img 
+//                     src={smallImage1}
+//                     alt={`${studio.name} view 2`}
+//                     className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
+//                   />
+//                 ) : (
+//                   <div className="w-full h-full flex items-center justify-center bg-gray-100">
+//                     <PhotoIcon className="w-12 h-12 text-gray-400" />
+//                   </div>
+//                 )}
+//               </div>
+//               <div className="relative overflow-hidden">
+//                 {smallImage2 ? (
+//                   <img 
+//                     src={smallImage2}
+//                     alt={`${studio.name} view 3`}
+//                     className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
+//                   />
+//                 ) : (
+//                   <div className="w-full h-full flex items-center justify-center bg-gray-100">
+//                     <PhotoIcon className="w-12 h-12 text-gray-400" />
+//                   </div>
+//                 )}
+//                 <button className="absolute bottom-6 right-6 bg-white/90 backdrop-blur-md px-6 py-3 rounded-full font-label-bold flex items-center gap-2 shadow-lg hover:scale-105 transition-transform active:scale-95">
+//                   <span className="material-symbols-outlined">grid_view</span> View all {studio.images?.length || 0} photos
+//                 </button>
+//               </div>
+//             </div>
+//           </section>
+
+//           <div className="grid grid-cols-1 md:grid-cols-12 gap-6 relative">
+//             {/* Main Content Left */}
+//             <div className="md:col-span-7 lg:col-span-8 space-y-24">
+//               {/* Studio Story & Vibe */}
+//               <section>
+//                 <div className="flex items-center gap-4 mb-6">
+//                   <div className="h-px flex-1 bg-[#c2c9b1]/30"></div>
+//                   <span className="font-label-bold uppercase tracking-[0.2em] text-[#424937]">The Vibe</span>
+//                   <div className="h-px flex-1 bg-[#c2c9b1]/30"></div>
+//                 </div>
+//                 <div className="mb-12">
+//                   <h2 className="text-[32px] font-headline-lg mb-6">Industrial Brutalist meets High-Fashion.</h2>
+//                   <p className="text-lg text-[#424937] leading-relaxed max-w-2xl mb-8">
+//                     {studio.description || 'A beautiful creative space ready for your next project. Designed for high-end editorial shoots, cinematic productions, and immersive brand activations.'}
+//                   </p>
+//                   <div className="flex flex-wrap gap-2">
+//                     {studio.amenities && studio.amenities.slice(0, 5).map((item) => (
+//                       <span key={item} className="bg-[#e7e8e9] px-4 py-2 rounded-full font-label-bold text-xs uppercase">
+//                         {item}
+//                       </span>
+//                     ))}
+//                     <span className="bg-[#e7e8e9] px-4 py-2 rounded-full font-label-bold text-xs uppercase">Premium Space</span>
+//                   </div>
+//                 </div>
+//               </section>
+
+//               {/* Equipment & Amenities */}
+//               <section>
+//                 <h2 className="text-[32px] font-headline-lg mb-8">Gear & Essentials</h2>
+//                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+//                   {studio.amenities && studio.amenities.map((item) => (
+//                     <div key={item} className="flex items-start gap-4 p-6 bg-[#f3f4f5] rounded-2xl border border-[#c2c9b1]/10 hover:border-[#446900]/30 transition-all group">
+//                       <span className="material-symbols-outlined text-[#446900] bg-[#beff5f] p-3 rounded-xl group-hover:scale-110 transition-transform">
+//                         check_box_outline_blank
+//                       </span>
+//                       <div>
+//                         <h4 className="font-label-bold mb-1">{item}</h4>
+//                         <p className="text-sm text-[#424937]">Professional grade equipment included.</p>
+//                       </div>
+//                     </div>
+//                   ))}
+//                 </div>
+//               </section>
+
+//               {/* Host Profile & Reviews */}
+//               <section className="p-8 md:p-12 rounded-3xl bg-[#e4d7fd]/30 border border-[#e4d7fd]">
+//                 <div className="flex flex-col md:flex-row gap-8 items-start">
+//                   <div className="w-24 h-24 rounded-full overflow-hidden shrink-0 ring-4 ring-white shadow-xl">
+//                     <div className="w-full h-full bg-[#446900] flex items-center justify-center text-white text-3xl font-bold">
+//                       {ownerName.charAt(0) || 'S'}
+//                     </div>
+//                   </div>
+//                   <div className="space-y-4">
+//                     <h2 className="text-[32px] font-headline-lg">Hosted by {ownerName || 'Studio Owner'}</h2>
+//                     <p className="text-base text-[#424937]">Creative Director & Curator. Dedicated to ensuring every creator has the tools and atmosphere needed to excel.</p>
+//                     <div className="flex gap-4">
+//                       <button className="bg-[#191c1d] text-[#f8f9fa] px-6 py-2.5 rounded-full font-label-bold text-sm hover:opacity-90 transition-opacity">
+//                         Contact Host
+//                       </button>
+//                       <div className="flex items-center gap-2 text-[#424937] font-label-bold">
+//                         <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span> Identity Verified
+//                       </div>
+//                     </div>
+//                   </div>
+//                 </div>
+//                 <div className="mt-12 space-y-8">
+//                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+//                     <div className="space-y-4">
+//                       <div className="flex items-center gap-1 text-[#446900]">
+//                         <StarIcon className="w-5 h-5 fill-current" />
+//                         <StarIcon className="w-5 h-5 fill-current" />
+//                         <StarIcon className="w-5 h-5 fill-current" />
+//                         <StarIcon className="w-5 h-5 fill-current" />
+//                         <StarIcon className="w-5 h-5 fill-current" />
+//                       </div>
+//                       <p className="text-base italic">"The lighting in this space is unreal. We didn't even need our secondary rig for the first half of the shoot."</p>
+//                       <div className="flex items-center gap-3">
+//                         <div className="w-8 h-8 rounded-full bg-[#e1e3e4]"></div>
+//                         <span className="font-label-bold text-xs uppercase">Marcus T., Vogue Italia</span>
+//                       </div>
+//                     </div>
+//                     <div className="space-y-4">
+//                       <div className="flex items-center gap-1 text-[#446900]">
+//                         <StarIcon className="w-5 h-5 fill-current" />
+//                         <StarIcon className="w-5 h-5 fill-current" />
+//                         <StarIcon className="w-5 h-5 fill-current" />
+//                         <StarIcon className="w-5 h-5 fill-current" />
+//                         <StarIcon className="w-5 h-5 fill-current" />
+//                       </div>
+//                       <p className="text-base italic">"Incredible textures. The brick and concrete mix is perfect for streetwear looks. Efficient load-in and great coffee nearby!"</p>
+//                       <div className="flex items-center gap-3">
+//                         <div className="w-8 h-8 rounded-full bg-[#e1e3e4]"></div>
+//                         <span className="font-label-bold text-xs uppercase">Sarah L., Creative Agency</span>
+//                       </div>
+//                     </div>
+//                   </div>
+//                 </div>
+//               </section>
+
+//               {/* Location Map */}
+//               <section>
+//                 <div className="flex items-center justify-between mb-8">
+//                   <h2 className="text-[32px] font-headline-lg">Where you'll be</h2>
+//                   <span className="font-label-bold text-[#446900]">{studio.city}, {studio.state}</span>
+//                 </div>
+//                 <div className="w-full h-96 rounded-3xl overflow-hidden shadow-inner grayscale contrast-125 border border-[#c2c9b1] relative group">
+//                   <div className="absolute inset-0 bg-[#446900]/5 pointer-events-none z-10"></div>
+//                   <div className="w-full h-full bg-[#edeeef] flex items-center justify-center">
+//                     <div className="text-center">
+//                       <MapPinIcon className="w-12 h-12 text-[#446900] mx-auto mb-2" />
+//                       <p className="text-[#424937]">{formatLocation()}</p>
+//                     </div>
+//                   </div>
+//                   <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
+//                     <div className="w-12 h-12 bg-[#beff5f] rounded-full flex items-center justify-center shadow-2xl animate-bounce">
+//                       <span className="material-symbols-outlined text-[#111f00] font-bold">location_on</span>
+//                     </div>
+//                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 bg-[#446900]/20 rounded-full animate-ping"></div>
+//                   </div>
+//                 </div>
+//                 <p className="mt-6 text-base text-[#424937]">Located in the heart of the creative hub. Walking distance from major stations. Surrounded by world-class coffee shops and supply stores.</p>
+//               </section>
+//             </div>
+
+//             {/* Sticky Booking Sidebar */}
+//             <aside className="md:col-span-5 lg:col-span-4">
+//               <div className="sticky top-28 space-y-6">
+//                 <div className="bg-white/70 backdrop-blur-[20px] border border-white/40 shadow-[0_20px_40px_-15px_rgba(99,89,121,0.1)] p-8 rounded-[32px]">
+//                   <div className="flex justify-between items-end mb-8">
+//                     <div>
+//                       <span className="text-[#424937] font-label-bold text-xs uppercase tracking-widest block mb-1">Starting from</span>
+//                       <div className="flex items-baseline gap-1">
+//                         <span className="text-3xl font-extrabold">{formatPrice(studio.hourly_rate)}</span>
+//                         <span className="text-[#424937]">/ hour</span>
+//                       </div>
+//                     </div>
+//                     <div className="bg-[#beff5f] px-3 py-1 rounded-full text-[10px] font-extrabold uppercase">Top Rated</div>
+//                   </div>
+
+//                   <div className="space-y-4 mb-8">
+//                     <div className="grid grid-cols-1 gap-2">
+//                       <label className="font-label-bold text-xs uppercase text-[#424937] ml-2">Date</label>
+//                       <div className="relative">
+//                         <input 
+//                           type="date" 
+//                           value={date}
+//                           onChange={(e) => setDate(e.target.value)}
+//                           className="w-full bg-[#f3f4f5] border-0 rounded-2xl py-4 px-6 focus:ring-2 focus:ring-[#beff5f] transition-all outline-none"
+//                         />
+//                         <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-[#424937] pointer-events-none">calendar_today</span>
+//                       </div>
+//                     </div>
+//                     <div className="grid grid-cols-2 gap-4">
+//                       <div className="space-y-2">
+//                         <label className="font-label-bold text-xs uppercase text-[#424937] ml-2">Start</label>
+//                         <select className="w-full bg-[#f3f4f5] border-0 rounded-2xl py-4 px-4 focus:ring-2 focus:ring-[#beff5f] appearance-none outline-none">
+//                           <option>09:00 AM</option>
+//                           <option>10:00 AM</option>
+//                           <option>11:00 AM</option>
+//                         </select>
+//                       </div>
+//                       <div className="space-y-2">
+//                         <label className="font-label-bold text-xs uppercase text-[#424937] ml-2">End</label>
+//                         <select className="w-full bg-[#f3f4f5] border-0 rounded-2xl py-4 px-4 focus:ring-2 focus:ring-[#beff5f] appearance-none outline-none">
+//                           <option>01:00 PM</option>
+//                           <option>02:00 PM</option>
+//                           <option>03:00 PM</option>
+//                         </select>
+//                       </div>
+//                     </div>
+//                   </div>
+
+//                   <div className="space-y-3 mb-8 border-t border-[#c2c9b1]/20 pt-6">
+//                     <div className="flex justify-between text-sm">
+//                       <span className="text-[#424937]">${studio.hourly_rate} x 4 hours</span>
+//                       <span>${studio.hourly_rate * 4}</span>
+//                     </div>
+//                     <div className="flex justify-between text-sm">
+//                       <span className="text-[#424937]">Cleaning Fee</span>
+//                       <span>$45</span>
+//                     </div>
+//                     <div className="flex justify-between text-sm">
+//                       <span className="text-[#424937]">ManyRooms Service Fee</span>
+//                       <span>$32</span>
+//                     </div>
+//                     <div className="flex justify-between font-bold text-lg pt-2">
+//                       <span>Total</span>
+//                       <span className="text-[#446900]">${studio.hourly_rate * 4 + 77}</span>
+//                     </div>
+//                   </div>
+
+//                   <button className="w-full bg-[#beff5f] text-[#111f00] font-display-sm text-lg py-5 rounded-2xl hover:scale-[1.02] transition-all shadow-[0_10px_30px_-5px_rgba(190,255,95,0.4)] active:scale-95">
+//                     Request to Book
+//                   </button>
+//                   <p className="text-center text-[10px] text-[#424937] mt-4 uppercase font-label-bold tracking-tighter">You won't be charged yet</p>
+//                 </div>
+
+//                 <div className="bg-[#edeeef] p-6 rounded-[24px] flex items-center gap-4">
+//                   <span className="material-symbols-outlined text-[#446900] text-3xl">verified_user</span>
+//                   <div className="text-xs">
+//                     <p className="font-bold mb-1">ManyRooms Protection</p>
+//                     <p className="text-[#424937]">Every booking includes damage protection and host liability insurance.</p>
+//                   </div>
+//                 </div>
+//               </div>
+//             </aside>
+//           </div>
+
+//           {/* You may also love section */}
+//           {relatedStudios.length > 0 && (
+//             <div className="mt-24">
+//               <div className="flex items-center justify-between mb-8">
+//                 <h3 className="text-[32px] font-headline-lg">You may also love</h3>
+//                 <Link href="/spaces" className="text-xs uppercase tracking-widest border-b border-[#191c1d]/20 pb-1 hover:opacity-60 transition-opacity flex items-center gap-1">
+//                   VIEW ALL <ArrowRightIcon className="w-3 h-3" />
+//                 </Link>
+//               </div>
+//               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+//                 {relatedStudios.map((s) => (
+//                   <Link key={s.id} href={`/spaces/${s.id}`} className="group">
+//                     <div className="aspect-[4/5] overflow-hidden rounded-xl mb-4">
+//                       {s.images && s.images[0] ? (
+//                         <img
+//                           src={s.images[0]}
+//                           alt={s.name}
+//                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+//                         />
+//                       ) : (
+//                         <div className="w-full h-full flex items-center justify-center bg-gray-100">
+//                           <PhotoIcon className="w-12 h-12 text-gray-400" />
+//                         </div>
+//                       )}
+//                     </div>
+//                     <div className="flex justify-between items-start">
+//                       <div>
+//                         <p className="text-[10px] uppercase tracking-widest text-[#424937]">{s.city}, {s.state}</p>
+//                         <h4 className="text-xl font-bold mt-1 group-hover:opacity-70 transition-opacity">{s.name}</h4>
+//                       </div>
+//                       <div className="text-right">
+//                         <p className="text-[10px] uppercase tracking-widest text-[#424937]">From</p>
+//                         <p className="text-lg font-medium">{formatPrice(s.hourly_rate)}</p>
+//                         <p className="text-[10px] text-[#424937]">/ hour</p>
+//                       </div>
+//                     </div>
+//                   </Link>
+//                 ))}
+//               </div>
+//             </div>
+//           )}
+
+//           {/* FAQ Section */}
+//           <div className="mt-24 pt-12 border-t border-[#c2c9b1]/10">
+//             <h3 className="text-[32px] font-headline-lg mb-8">Frequently Asked</h3>
+//             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+//               {[
+//                 { q: "What's included in the hire fee?", a: "All standard equipment listed in the amenities section. Additional production support can be arranged separately." },
+//                 { q: "Can I view the space before booking?", a: "Yes, viewing requests can be arranged with the host. Please mention this in your enquiry." },
+//                 { q: "What's your cancellation policy?", a: "Cancellations made 48+ hours before booking are fully refundable." },
+//                 { q: "Do you offer production support?", a: "Yes, experienced crew and equipment hire can be arranged upon request." }
+//               ].map((faq) => (
+//                 <div key={faq.q}>
+//                   <p className="font-bold mb-2">{faq.q}</p>
+//                   <p className="text-sm text-[#424937]">{faq.a}</p>
+//                 </div>
+//               ))}
+//             </div>
+//           </div>
+//         </div>
+//       </main>
+
+//       {/* Footer */}
+//       <Footer />
+    
+//       {/* Chatbot */}
+//       <Chatbot />
+//     </div>
+//   );
+// }
