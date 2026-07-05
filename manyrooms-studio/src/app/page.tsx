@@ -44,7 +44,7 @@ export default function HomePage() {
   
   const heroRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLDivElement>(null);
-  const animationFrameRef = useRef<number>();
+  const animationFrameRef = useRef<number | null>(null);
   const [textColor, setTextColor] = useState('#191c1d');
   const [isMobile, setIsMobile] = useState(false);
 
@@ -169,7 +169,7 @@ export default function HomePage() {
     animationFrameRef.current = requestAnimationFrame(animateCards);
     
     return () => {
-      if (animationFrameRef.current) {
+      if (animationFrameRef.current !== null) {
         cancelAnimationFrame(animationFrameRef.current);
       }
     };
