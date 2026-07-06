@@ -8,10 +8,6 @@ import { supabase } from '@/lib/supabase';
 import {
   PhoneIcon,
   VideoCameraIcon,
-  InformationCircleIcon,
-  PaperClipIcon,
-  PhotoIcon,
-  FaceSmileIcon,
   PaperAirplaneIcon,
   CalendarIcon,
   ClockIcon,
@@ -55,21 +51,32 @@ export default function ClientMessagesPage() {
   const [enquiries, setEnquiries] = useState<Enquiry[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
+  const [sending, setSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
+  // Fetch enquiries on mount
   useEffect(() => {
     if (user) {
       fetchEnquiries();
     }
   }, [user]);
 
+  // Subscribe to real-time messages when active enquiry changes
   useEffect(() => {
     if (!activeEnquiryId) return;
 
+    // Fetch existing messages
     fetchMessages(activeEnquiryId);
 
+    // Clean up previous channel
+    if (channelRef.current) {
+      supabase.removeChannel(channelRef.current);
+    }
+
+    // Subscribe to new messages
     const channel = supabase
-      .channel(`messages:${activeEnquiryId}`)
+      .channel(`messages-${activeEnquiryId}`)
       .on(
         'postgres_changes',
         {
@@ -79,34 +86,53 @@ export default function ClientMessagesPage() {
           filter: `enquiry_id=eq.${activeEnquiryId}`,
         },
         (payload) => {
+          console.log('New message received:', payload.new);
           const newMessage = payload.new as Message;
-          setMessages((prev) => [...prev, newMessage]);
+          setMessages((prev) => {
+            // Avoid duplicates
+            if (prev.find(m => m.id === newMessage.id)) return prev;
+            return [...prev, newMessage];
+          });
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log('Subscription status:', status);
+      });
+
+    channelRef.current = channel;
 
     return () => {
-      supabase.removeChannel(channel);
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current);
+        channelRef.current = null;
+      }
     };
   }, [activeEnquiryId]);
 
+  // Scroll to bottom on new messages
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
   const fetchEnquiries = async () => {
     try {
+      console.log('Fetching enquiries for:', user?.email);
+      
       const { data, error } = await supabase
         .from('enquiries')
         .select('*, studios(name, images, city, state, owner_id)')
         .eq('guest_email', user?.email)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching enquiries:', error);
+        throw error;
+      }
+
+      console.log('Enquiries found:', data?.length || 0);
 
       const enrichedEnquiries = await Promise.all(
         (data || []).map(async (enq: any) => {
-          // Get owner name
           let ownerName = 'Studio Owner';
           if (enq.studios?.owner_id) {
             const { data: ownerData } = await supabase
@@ -143,7 +169,7 @@ export default function ClientMessagesPage() {
             guests_count: enq.guests_count,
             brief: enq.brief,
             status: enq.status,
-            last_message: lastMsg?.[0]?.message || enq.brief,
+            last_message: lastMsg?.[0]?.message || enq.brief || 'No messages yet',
             last_message_time: lastMsg?.[0]?.created_at || enq.created_at,
             unread_count: unreadCount || 0,
           };
@@ -155,37 +181,65 @@ export default function ClientMessagesPage() {
         setActiveEnquiryId(enrichedEnquiries[0].id);
       }
     } catch (err) {
-      console.error('Error fetching enquiries:', err);
+      console.error('Error in fetchEnquiries:', err);
     } finally {
       setLoading(false);
     }
   };
 
   const fetchMessages = async (enquiryId: string) => {
-    const { data } = await supabase
+    console.log('Fetching messages for enquiry:', enquiryId);
+    
+    const { data, error } = await supabase
       .from('messages')
       .select('*')
       .eq('enquiry_id', enquiryId)
       .order('created_at', { ascending: true });
     
-    if (data) setMessages(data);
+    if (error) {
+      console.error('Error fetching messages:', error);
+    } else {
+      console.log('Messages found:', data?.length || 0);
+      setMessages(data || []);
+    }
   };
 
   const handleSendMessage = async () => {
     if (!messageInput.trim() || !activeEnquiryId || !user) return;
 
-    const { error } = await supabase
-      .from('messages')
-      .insert({
-        enquiry_id: activeEnquiryId,
-        sender_id: user.id,
-        sender_type: 'client',
-        message: messageInput.trim(),
-        read: false,
-        created_at: new Date().toISOString(),
-      });
+    setSending(true);
+    
+    const newMessage = {
+      enquiry_id: activeEnquiryId,
+      sender_id: user.id,
+      sender_type: 'client' as const,
+      message: messageInput.trim(),
+      image_url: null,
+      read: false,
+      created_at: new Date().toISOString(),
+    };
 
-    if (!error) setMessageInput('');
+    console.log('Sending message:', newMessage);
+
+    const { data, error } = await supabase
+      .from('messages')
+      .insert(newMessage)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error sending message:', error);
+      alert('Failed to send message: ' + error.message);
+    } else {
+      console.log('Message sent successfully:', data);
+      setMessageInput('');
+      // Optimistically add message to the list
+      if (data) {
+        setMessages((prev) => [...prev, data]);
+      }
+    }
+    
+    setSending(false);
   };
 
   const getInitials = (name: string) => {
@@ -193,6 +247,7 @@ export default function ClientMessagesPage() {
   };
 
   const formatTime = (dateStr: string) => {
+    if (!dateStr) return '';
     const date = new Date(dateStr);
     const now = new Date();
     const diff = now.getTime() - date.getTime();
@@ -235,7 +290,7 @@ export default function ClientMessagesPage() {
           <div className="p-4">
             <div className="bg-[#edeeef] rounded-xl flex items-center px-4 py-2">
               <span className="material-symbols-outlined text-[#737a65]">search</span>
-              <input className="bg-transparent border-none focus:ring-0 text-sm w-full ml-2 outline-none" placeholder="Search..." type="text" />
+              <input className="bg-transparent border-none focus:ring-0 text-sm w-full ml-2 outline-none text-[#191c1d] placeholder:text-[#737a65]" placeholder="Search..." type="text" />
             </div>
           </div>
           <div className="flex-1 overflow-y-auto">
@@ -243,22 +298,23 @@ export default function ClientMessagesPage() {
               <div className="p-8 text-center">
                 <span className="material-symbols-outlined text-4xl text-[#c2c9b1] mb-3">chat_bubble</span>
                 <p className="text-[#424937] font-bold text-sm">No conversations yet</p>
+                <p className="text-xs text-[#737a65] mt-1">Book a studio to start a conversation</p>
               </div>
             ) : (
               enquiries.map((enq) => (
                 <div
                   key={enq.id}
                   onClick={() => setActiveEnquiryId(enq.id)}
-                  className={`p-4 cursor-pointer border-b border-[#c2c9b1]/10 ${
+                  className={`p-4 cursor-pointer border-b border-[#c2c9b1]/10 transition-colors ${
                     activeEnquiryId === enq.id ? 'bg-[#e4d7fd]/30 border-l-4 border-[#beff5f]' : 'hover:bg-[#e7e8e9]'
                   }`}
                 >
                   <div className="flex items-start gap-3">
-                    <div className="w-12 h-12 rounded-xl overflow-hidden shrink-0">
+                    <div className="w-12 h-12 rounded-xl overflow-hidden shrink-0 bg-[#edeeef]">
                       {enq.studio_image ? (
                         <img className="w-full h-full object-cover" src={enq.studio_image} alt={enq.studio_name} />
                       ) : (
-                        <div className="w-full h-full bg-[#edeeef] flex items-center justify-center">
+                        <div className="w-full h-full flex items-center justify-center">
                           <span className="material-symbols-outlined text-[#c2c9b1]">photo</span>
                         </div>
                       )}
@@ -292,11 +348,12 @@ export default function ClientMessagesPage() {
               <div className="text-center">
                 <span className="material-symbols-outlined text-5xl text-[#c2c9b1] mb-4">forum</span>
                 <p className="text-[#424937] font-bold">Select a conversation</p>
+                <p className="text-sm text-[#737a65] mt-1">Choose an enquiry to view messages</p>
               </div>
             </div>
           ) : (
             <>
-              <div className="h-16 px-4 md:px-6 flex items-center justify-between border-b border-[#c2c9b1]/20 shrink-0">
+              <div className="h-16 px-4 md:px-6 flex items-center justify-between border-b border-[#c2c9b1]/20 shrink-0 bg-white/70 backdrop-blur-xl">
                 <div>
                   <h2 className="font-bold text-lg text-[#191c1d]">{activeEnquiry.studio_name}</h2>
                   <p className="text-[11px] text-[#424937]">Host: {activeEnquiry.owner_name}</p>
@@ -308,7 +365,7 @@ export default function ClientMessagesPage() {
                   <div className="flex items-center justify-center h-full">
                     <div className="text-center">
                       <p className="text-[#424937] font-bold">No messages yet</p>
-                      <p className="text-sm text-[#737a65] mt-1">Send a message to the host</p>
+                      <p className="text-sm text-[#737a65] mt-1">Send a message to the host to start the conversation</p>
                     </div>
                   </div>
                 ) : (
@@ -338,7 +395,7 @@ export default function ClientMessagesPage() {
               <div className="p-4 bg-white border-t border-[#c2c9b1]/20 shrink-0">
                 <div className="flex items-center gap-3 bg-[#edeeef] rounded-2xl px-4 py-2 focus-within:ring-2 focus-within:ring-[#beff5f] transition-all">
                   <input
-                    className="flex-1 bg-transparent border-none focus:ring-0 text-sm py-2 outline-none"
+                    className="flex-1 bg-transparent border-none focus:ring-0 text-sm py-2 outline-none text-[#191c1d] placeholder:text-[#737a65]"
                     placeholder="Type a message..."
                     value={messageInput}
                     onChange={(e) => setMessageInput(e.target.value)}
@@ -351,7 +408,7 @@ export default function ClientMessagesPage() {
                   />
                   <button
                     onClick={handleSendMessage}
-                    disabled={!messageInput.trim()}
+                    disabled={!messageInput.trim() || sending}
                     className="bg-[#beff5f] text-[#111f00] p-2 rounded-xl hover:scale-105 active:scale-95 transition-all disabled:opacity-50"
                   >
                     <PaperAirplaneIcon className="w-4 h-4 rotate-90" />
@@ -365,6 +422,375 @@ export default function ClientMessagesPage() {
     </div>
   );
 }
+
+
+
+// // app/dashboard/messages/page.tsx
+// 'use client';
+
+// import { useState, useEffect, useRef } from 'react';
+// import { useAuth } from '@/context/AuthContext';
+// import { supabase } from '@/lib/supabase';
+// import {
+//   PhoneIcon,
+//   VideoCameraIcon,
+//   InformationCircleIcon,
+//   PaperClipIcon,
+//   PhotoIcon,
+//   FaceSmileIcon,
+//   PaperAirplaneIcon,
+//   CalendarIcon,
+//   ClockIcon,
+//   CurrencyDollarIcon,
+//   DocumentTextIcon,
+//   ShieldCheckIcon,
+// } from '@heroicons/react/24/outline';
+
+// interface Enquiry {
+//   id: string;
+//   studio_id: string;
+//   studio_name: string;
+//   studio_image: string;
+//   studio_city: string;
+//   studio_state: string;
+//   owner_name: string;
+//   event_date: string;
+//   guests_count: number;
+//   brief: string;
+//   status: string;
+//   last_message?: string;
+//   last_message_time?: string;
+//   unread_count?: number;
+// }
+
+// interface Message {
+//   id: string;
+//   enquiry_id: string;
+//   sender_id: string;
+//   sender_type: 'client' | 'owner';
+//   message: string;
+//   image_url: string | null;
+//   read: boolean;
+//   created_at: string;
+// }
+
+// export default function ClientMessagesPage() {
+//   const { user } = useAuth();
+//   const [activeEnquiryId, setActiveEnquiryId] = useState<string | null>(null);
+//   const [messageInput, setMessageInput] = useState('');
+//   const [enquiries, setEnquiries] = useState<Enquiry[]>([]);
+//   const [messages, setMessages] = useState<Message[]>([]);
+//   const [loading, setLoading] = useState(true);
+//   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+//   useEffect(() => {
+//     if (user) {
+//       fetchEnquiries();
+//     }
+//   }, [user]);
+
+//   useEffect(() => {
+//     if (!activeEnquiryId) return;
+
+//     fetchMessages(activeEnquiryId);
+
+//     const channel = supabase
+//       .channel(`messages:${activeEnquiryId}`)
+//       .on(
+//         'postgres_changes',
+//         {
+//           event: 'INSERT',
+//           schema: 'public',
+//           table: 'messages',
+//           filter: `enquiry_id=eq.${activeEnquiryId}`,
+//         },
+//         (payload) => {
+//           const newMessage = payload.new as Message;
+//           setMessages((prev) => [...prev, newMessage]);
+//         }
+//       )
+//       .subscribe();
+
+//     return () => {
+//       supabase.removeChannel(channel);
+//     };
+//   }, [activeEnquiryId]);
+
+//   useEffect(() => {
+//     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+//   }, [messages]);
+
+//   const fetchEnquiries = async () => {
+//     try {
+//       const { data, error } = await supabase
+//         .from('enquiries')
+//         .select('*, studios(name, images, city, state, owner_id)')
+//         .eq('guest_email', user?.email)
+//         .order('created_at', { ascending: false });
+
+//       if (error) throw error;
+
+//       const enrichedEnquiries = await Promise.all(
+//         (data || []).map(async (enq: any) => {
+//           // Get owner name
+//           let ownerName = 'Studio Owner';
+//           if (enq.studios?.owner_id) {
+//             const { data: ownerData } = await supabase
+//               .from('users')
+//               .select('name')
+//               .eq('id', enq.studios.owner_id)
+//               .single();
+//             if (ownerData) ownerName = ownerData.name;
+//           }
+
+//           const { data: lastMsg } = await supabase
+//             .from('messages')
+//             .select('message, created_at')
+//             .eq('enquiry_id', enq.id)
+//             .order('created_at', { ascending: false })
+//             .limit(1);
+
+//           const { count: unreadCount } = await supabase
+//             .from('messages')
+//             .select('*', { count: 'exact', head: true })
+//             .eq('enquiry_id', enq.id)
+//             .eq('sender_type', 'owner')
+//             .eq('read', false);
+
+//           return {
+//             id: enq.id,
+//             studio_id: enq.studio_id,
+//             studio_name: enq.studios?.name || 'Unknown Studio',
+//             studio_image: enq.studios?.images?.[0] || '',
+//             studio_city: enq.studios?.city || '',
+//             studio_state: enq.studios?.state || '',
+//             owner_name: ownerName,
+//             event_date: enq.event_date,
+//             guests_count: enq.guests_count,
+//             brief: enq.brief,
+//             status: enq.status,
+//             last_message: lastMsg?.[0]?.message || enq.brief,
+//             last_message_time: lastMsg?.[0]?.created_at || enq.created_at,
+//             unread_count: unreadCount || 0,
+//           };
+//         })
+//       );
+
+//       setEnquiries(enrichedEnquiries);
+//       if (enrichedEnquiries.length > 0 && !activeEnquiryId) {
+//         setActiveEnquiryId(enrichedEnquiries[0].id);
+//       }
+//     } catch (err) {
+//       console.error('Error fetching enquiries:', err);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   const fetchMessages = async (enquiryId: string) => {
+//     const { data } = await supabase
+//       .from('messages')
+//       .select('*')
+//       .eq('enquiry_id', enquiryId)
+//       .order('created_at', { ascending: true });
+    
+//     if (data) setMessages(data);
+//   };
+
+//   const handleSendMessage = async () => {
+//     if (!messageInput.trim() || !activeEnquiryId || !user) return;
+
+//     const { error } = await supabase
+//       .from('messages')
+//       .insert({
+//         enquiry_id: activeEnquiryId,
+//         sender_id: user.id,
+//         sender_type: 'client',
+//         message: messageInput.trim(),
+//         read: false,
+//         created_at: new Date().toISOString(),
+//       });
+
+//     if (!error) setMessageInput('');
+//   };
+
+//   const getInitials = (name: string) => {
+//     return name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '??';
+//   };
+
+//   const formatTime = (dateStr: string) => {
+//     const date = new Date(dateStr);
+//     const now = new Date();
+//     const diff = now.getTime() - date.getTime();
+//     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    
+//     if (days === 0) return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+//     if (days === 1) return 'Yesterday';
+//     if (days < 7) return `${days}d ago`;
+//     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+//   };
+
+//   const activeEnquiry = enquiries.find(e => e.id === activeEnquiryId);
+//   const unreadTotal = enquiries.reduce((sum, e) => sum + (e.unread_count || 0), 0);
+
+//   if (loading) {
+//     return (
+//       <div className="h-[calc(100vh-64px)] flex items-center justify-center bg-[#f8f9fa]">
+//         <div className="animate-pulse text-center">
+//           <div className="w-12 h-12 bg-[#446900]/20 rounded-full mx-auto mb-3"></div>
+//           <p className="text-[#446900] font-bold text-sm">Loading messages...</p>
+//         </div>
+//       </div>
+//     );
+//   }
+
+//   return (
+//     <div className="h-[calc(100vh-64px)] flex flex-col bg-[#f8f9fa]">
+//       <header className="h-16 bg-white/70 backdrop-blur-xl border-b border-[#c2c9b1]/30 flex items-center justify-between px-4 md:px-6 shrink-0">
+//         <div className="flex items-center gap-3">
+//           <h2 className="text-xl md:text-2xl font-extrabold text-[#191c1d]">Messages</h2>
+//           {unreadTotal > 0 && (
+//             <span className="px-2 py-0.5 bg-[#beff5f] text-[#111f00] text-xs font-bold rounded-full">{unreadTotal} New</span>
+//           )}
+//         </div>
+//       </header>
+
+//       <div className="flex-1 flex overflow-hidden">
+//         {/* Conversations Sidebar */}
+//         <aside className="w-full md:w-80 lg:w-96 border-r border-[#c2c9b1]/20 bg-white flex flex-col shrink-0">
+//           <div className="p-4">
+//             <div className="bg-[#edeeef] rounded-xl flex items-center px-4 py-2">
+//               <span className="material-symbols-outlined text-[#737a65]">search</span>
+//               <input className="bg-transparent border-none focus:ring-0 text-sm w-full ml-2 outline-none" placeholder="Search..." type="text" />
+//             </div>
+//           </div>
+//           <div className="flex-1 overflow-y-auto">
+//             {enquiries.length === 0 ? (
+//               <div className="p-8 text-center">
+//                 <span className="material-symbols-outlined text-4xl text-[#c2c9b1] mb-3">chat_bubble</span>
+//                 <p className="text-[#424937] font-bold text-sm">No conversations yet</p>
+//               </div>
+//             ) : (
+//               enquiries.map((enq) => (
+//                 <div
+//                   key={enq.id}
+//                   onClick={() => setActiveEnquiryId(enq.id)}
+//                   className={`p-4 cursor-pointer border-b border-[#c2c9b1]/10 ${
+//                     activeEnquiryId === enq.id ? 'bg-[#e4d7fd]/30 border-l-4 border-[#beff5f]' : 'hover:bg-[#e7e8e9]'
+//                   }`}
+//                 >
+//                   <div className="flex items-start gap-3">
+//                     <div className="w-12 h-12 rounded-xl overflow-hidden shrink-0">
+//                       {enq.studio_image ? (
+//                         <img className="w-full h-full object-cover" src={enq.studio_image} alt={enq.studio_name} />
+//                       ) : (
+//                         <div className="w-full h-full bg-[#edeeef] flex items-center justify-center">
+//                           <span className="material-symbols-outlined text-[#c2c9b1]">photo</span>
+//                         </div>
+//                       )}
+//                     </div>
+//                     <div className="flex-1 min-w-0">
+//                       <div className="flex justify-between items-center mb-1">
+//                         <h3 className="font-bold text-sm truncate text-[#191c1d]">{enq.studio_name}</h3>
+//                         <span className="text-[10px] text-[#737a65] whitespace-nowrap ml-2">
+//                           {formatTime(enq.last_message_time || enq.event_date)}
+//                         </span>
+//                       </div>
+//                       <p className="text-sm text-[#424937] line-clamp-1">{enq.last_message}</p>
+//                       <span className="text-[11px] text-[#737a65]">Host: {enq.owner_name}</span>
+//                       {(enq.unread_count || 0) > 0 && (
+//                         <span className="inline-block mt-1 px-2 py-0.5 bg-[#beff5f] text-[#111f00] text-[10px] font-bold rounded-full">
+//                           {enq.unread_count} new
+//                         </span>
+//                       )}
+//                     </div>
+//                   </div>
+//                 </div>
+//               ))
+//             )}
+//           </div>
+//         </aside>
+
+//         {/* Chat Area */}
+//         <section className="flex-1 flex flex-col bg-white min-w-0">
+//           {!activeEnquiry ? (
+//             <div className="flex-1 flex items-center justify-center">
+//               <div className="text-center">
+//                 <span className="material-symbols-outlined text-5xl text-[#c2c9b1] mb-4">forum</span>
+//                 <p className="text-[#424937] font-bold">Select a conversation</p>
+//               </div>
+//             </div>
+//           ) : (
+//             <>
+//               <div className="h-16 px-4 md:px-6 flex items-center justify-between border-b border-[#c2c9b1]/20 shrink-0">
+//                 <div>
+//                   <h2 className="font-bold text-lg text-[#191c1d]">{activeEnquiry.studio_name}</h2>
+//                   <p className="text-[11px] text-[#424937]">Host: {activeEnquiry.owner_name}</p>
+//                 </div>
+//               </div>
+
+//               <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4">
+//                 {messages.length === 0 ? (
+//                   <div className="flex items-center justify-center h-full">
+//                     <div className="text-center">
+//                       <p className="text-[#424937] font-bold">No messages yet</p>
+//                       <p className="text-sm text-[#737a65] mt-1">Send a message to the host</p>
+//                     </div>
+//                   </div>
+//                 ) : (
+//                   messages.map((msg) => (
+//                     <div key={msg.id} className={`flex gap-3 max-w-[80%] ${msg.sender_type === 'client' ? 'ml-auto flex-row-reverse' : ''}`}>
+//                       <div className={`w-8 h-8 shrink-0 rounded-full flex items-center justify-center text-xs font-bold ${
+//                         msg.sender_type === 'client' ? 'bg-[#446900] text-white' : 'bg-[#e1e3e4] text-[#424937]'
+//                       }`}>
+//                         {msg.sender_type === 'client' ? 'ME' : getInitials(activeEnquiry.owner_name)}
+//                       </div>
+//                       <div className={`flex flex-col ${msg.sender_type === 'client' ? 'items-end' : ''}`}>
+//                         <div className={`p-3 rounded-2xl shadow-sm text-sm leading-relaxed ${
+//                           msg.sender_type === 'client'
+//                             ? 'bg-[#beff5f] text-[#111f00] rounded-br-sm'
+//                             : 'bg-[#eaddff] text-[#1f1732] rounded-bl-sm'
+//                         }`}>
+//                           {msg.message}
+//                         </div>
+//                         <span className="text-[10px] text-[#737a65] mt-1 px-1">{formatTime(msg.created_at)}</span>
+//                       </div>
+//                     </div>
+//                   ))
+//                 )}
+//                 <div ref={messagesEndRef} />
+//               </div>
+
+//               <div className="p-4 bg-white border-t border-[#c2c9b1]/20 shrink-0">
+//                 <div className="flex items-center gap-3 bg-[#edeeef] rounded-2xl px-4 py-2 focus-within:ring-2 focus-within:ring-[#beff5f] transition-all">
+//                   <input
+//                     className="flex-1 bg-transparent border-none focus:ring-0 text-sm py-2 outline-none"
+//                     placeholder="Type a message..."
+//                     value={messageInput}
+//                     onChange={(e) => setMessageInput(e.target.value)}
+//                     onKeyDown={(e) => {
+//                       if (e.key === 'Enter' && !e.shiftKey) {
+//                         e.preventDefault();
+//                         handleSendMessage();
+//                       }
+//                     }}
+//                   />
+//                   <button
+//                     onClick={handleSendMessage}
+//                     disabled={!messageInput.trim()}
+//                     className="bg-[#beff5f] text-[#111f00] p-2 rounded-xl hover:scale-105 active:scale-95 transition-all disabled:opacity-50"
+//                   >
+//                     <PaperAirplaneIcon className="w-4 h-4 rotate-90" />
+//                   </button>
+//                 </div>
+//               </div>
+//             </>
+//           )}
+//         </section>
+//       </div>
+//     </div>
+//   );
+// }
 
 
 

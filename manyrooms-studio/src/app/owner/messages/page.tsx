@@ -6,20 +6,11 @@ import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/lib/supabase';
 import {
-  MagnifyingGlassIcon,
   PhoneIcon,
-  VideoCameraIcon,
   EllipsisVerticalIcon,
-  FaceSmileIcon,
   PaperAirplaneIcon,
-  PlusCircleIcon,
   MapPinIcon,
-  StarIcon,
 } from '@heroicons/react/24/outline';
-
-const MaterialIcon = ({ icon, className = '' }: { icon: string; className?: string }) => (
-  <span className={`material-symbols-outlined ${className}`}>{icon}</span>
-);
 
 interface Enquiry {
   id: string;
@@ -59,26 +50,27 @@ export default function OwnerMessagesPage() {
   const [enquiries, setEnquiries] = useState<Enquiry[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(true);
+  const [sending, setSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const channelRef = useRef<any>(null);
+  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
-  // Fetch enquiries for owner's studios
   useEffect(() => {
     if (user) {
       fetchEnquiries();
     }
   }, [user]);
 
-  // Subscribe to real-time messages
   useEffect(() => {
     if (!activeEnquiryId) return;
 
-    // Fetch existing messages
     fetchMessages(activeEnquiryId);
 
-    // Subscribe to new messages
+    if (channelRef.current) {
+      supabase.removeChannel(channelRef.current);
+    }
+
     const channel = supabase
-      .channel(`messages:${activeEnquiryId}`)
+      .channel(`owner-messages-${activeEnquiryId}`)
       .on(
         'postgres_changes',
         {
@@ -88,36 +80,42 @@ export default function OwnerMessagesPage() {
           filter: `enquiry_id=eq.${activeEnquiryId}`,
         },
         (payload) => {
+          console.log('Owner received message:', payload.new);
           const newMessage = payload.new as Message;
-          setMessages((prev) => [...prev, newMessage]);
+          setMessages((prev) => {
+            if (prev.find(m => m.id === newMessage.id)) return prev;
+            return [...prev, newMessage];
+          });
           
-          // Mark as read if from client
           if (newMessage.sender_type === 'client') {
             supabase
               .from('messages')
               .update({ read: true })
               .eq('id', newMessage.id)
-              .then(() => {});
+              .then(() => console.log('Marked as read'));
           }
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        console.log('Owner subscription status:', status);
+      });
 
     channelRef.current = channel;
 
     return () => {
-      supabase.removeChannel(channel);
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current);
+        channelRef.current = null;
+      }
     };
   }, [activeEnquiryId]);
 
-  // Scroll to bottom on new messages
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
   const fetchEnquiries = async () => {
     try {
-      // Get all enquiries for studios owned by this user
       const { data: studiosData } = await supabase
         .from('studios')
         .select('id')
@@ -139,12 +137,11 @@ export default function OwnerMessagesPage() {
 
       if (error) throw error;
 
-      // Get last message for each enquiry
       const enrichedEnquiries = await Promise.all(
         (enquiriesData || []).map(async (enq: any) => {
           const { data: lastMsg } = await supabase
             .from('messages')
-            .select('message, created_at, read')
+            .select('message, created_at')
             .eq('enquiry_id', enq.id)
             .order('created_at', { ascending: false })
             .limit(1);
@@ -179,7 +176,6 @@ export default function OwnerMessagesPage() {
 
       setEnquiries(enrichedEnquiries);
       
-      // Auto-select first enquiry
       if (enrichedEnquiries.length > 0 && !activeEnquiryId) {
         setActiveEnquiryId(enrichedEnquiries[0].id);
       }
@@ -191,17 +187,18 @@ export default function OwnerMessagesPage() {
   };
 
   const fetchMessages = async (enquiryId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from('messages')
-        .select('*')
-        .eq('enquiry_id', enquiryId)
-        .order('created_at', { ascending: true });
+    const { data, error } = await supabase
+      .from('messages')
+      .select('*')
+      .eq('enquiry_id', enquiryId)
+      .order('created_at', { ascending: true });
 
-      if (error) throw error;
+    if (error) {
+      console.error('Error fetching messages:', error);
+    } else {
+      console.log('Owner messages found:', data?.length || 0);
       setMessages(data || []);
 
-      // Mark unread messages as read
       const unreadIds = (data || [])
         .filter(m => m.sender_type === 'client' && !m.read)
         .map(m => m.id);
@@ -212,13 +209,13 @@ export default function OwnerMessagesPage() {
           .update({ read: true })
           .in('id', unreadIds);
       }
-    } catch (err) {
-      console.error('Error fetching messages:', err);
     }
   };
 
   const handleSendMessage = async () => {
     if (!messageInput.trim() || !activeEnquiryId || !user) return;
+
+    setSending(true);
 
     const newMessage = {
       enquiry_id: activeEnquiryId,
@@ -230,16 +227,26 @@ export default function OwnerMessagesPage() {
       created_at: new Date().toISOString(),
     };
 
-    try {
-      const { error } = await supabase
-        .from('messages')
-        .insert(newMessage);
+    console.log('Owner sending message:', newMessage);
 
-      if (error) throw error;
+    const { data, error } = await supabase
+      .from('messages')
+      .insert(newMessage)
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error sending message:', error);
+      alert('Failed to send message: ' + error.message);
+    } else {
+      console.log('Owner message sent:', data);
       setMessageInput('');
-    } catch (err) {
-      console.error('Error sending message:', err);
+      if (data) {
+        setMessages((prev) => [...prev, data]);
+      }
     }
+    
+    setSending(false);
   };
 
   const getInitials = (name: string) => {
@@ -247,20 +254,16 @@ export default function OwnerMessagesPage() {
   };
 
   const formatTime = (dateStr: string) => {
+    if (!dateStr) return '';
     const date = new Date(dateStr);
     const now = new Date();
     const diff = now.getTime() - date.getTime();
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
     
-    if (days === 0) {
-      return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
-    } else if (days === 1) {
-      return 'Yesterday';
-    } else if (days < 7) {
-      return `${days}d ago`;
-    } else {
-      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    }
+    if (days === 0) return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+    if (days === 1) return 'Yesterday';
+    if (days < 7) return `${days}d ago`;
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   };
 
   const activeEnquiry = enquiries.find(e => e.id === activeEnquiryId);
@@ -283,20 +286,12 @@ export default function OwnerMessagesPage() {
 
   return (
     <div className="h-[calc(100vh-64px)] flex flex-col bg-[#f8f9fa]">
-      {/* Header */}
-      <header className="h-16 bg-white/70 backdrop-blur-xl border-b border-[#c2c9b1]/30 flex items-center justify-between px-4 md:px-6 sticky top-0 z-20 shrink-0">
+      <header className="h-16 bg-white/70 backdrop-blur-xl border-b border-[#c2c9b1]/30 flex items-center justify-between px-4 md:px-6 shrink-0">
         <div className="flex items-center gap-4">
           <h1 className="text-xl md:text-2xl font-extrabold text-[#446900] tracking-tight">Inbox</h1>
           {unreadTotal > 0 && (
-            <span className="px-2 py-0.5 bg-[#beff5f] text-[#111f00] text-xs font-bold rounded-full">
-              {unreadTotal} New
-            </span>
+            <span className="px-2 py-0.5 bg-[#beff5f] text-[#111f00] text-xs font-bold rounded-full">{unreadTotal} New</span>
           )}
-        </div>
-        <div className="flex items-center gap-3">
-          <button className="p-2 hover:bg-[#edeeef] rounded-full transition-colors">
-            <span className="material-symbols-outlined text-[#424937]">notifications</span>
-          </button>
         </div>
       </header>
 
@@ -348,12 +343,8 @@ export default function OwnerMessagesPage() {
                       {formatTime(enq.last_message_time || enq.event_date)}
                     </span>
                   </div>
-                  <p className="text-xs font-bold text-[#424937] mb-1">
-                    {enq.studio_name}
-                  </p>
-                  <p className="text-sm text-[#424937] line-clamp-1">
-                    {enq.last_message || 'No messages'}
-                  </p>
+                  <p className="text-xs font-bold text-[#424937] mb-1">{enq.studio_name}</p>
+                  <p className="text-sm text-[#424937] line-clamp-1">{enq.last_message || 'No messages'}</p>
                   {(enq.unread_count || 0) > 0 && (
                     <span className="inline-block mt-1 px-2 py-0.5 bg-[#beff5f] text-[#111f00] text-[10px] font-bold rounded-full">
                       {enq.unread_count}
@@ -372,12 +363,10 @@ export default function OwnerMessagesPage() {
               <div className="text-center">
                 <span className="material-symbols-outlined text-5xl text-[#c2c9b1] mb-4">forum</span>
                 <p className="text-[#424937] font-bold">Select a conversation</p>
-                <p className="text-sm text-[#737a65] mt-1">Choose an enquiry to view messages</p>
               </div>
             </div>
           ) : (
             <>
-              {/* Chat Header */}
               <div className="h-16 border-b border-[#c2c9b1]/20 px-4 md:px-6 flex items-center justify-between bg-white/70 backdrop-blur-xl shrink-0">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-[#635979] text-white flex items-center justify-center font-bold text-sm">
@@ -388,17 +377,8 @@ export default function OwnerMessagesPage() {
                     <p className="text-[10px] text-[#424937]">{activeEnquiry.guest_email}</p>
                   </div>
                 </div>
-                <div className="flex gap-2">
-                  <button className="p-2 hover:bg-[#edeeef] rounded-full transition-colors">
-                    <PhoneIcon className="w-5 h-5 text-[#424937]" />
-                  </button>
-                  <button className="p-2 hover:bg-[#edeeef] rounded-full transition-colors">
-                    <EllipsisVerticalIcon className="w-5 h-5 text-[#424937]" />
-                  </button>
-                </div>
               </div>
 
-              {/* Messages */}
               <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4">
                 {messages.length === 0 ? (
                   <div className="flex items-center justify-center h-full">
@@ -409,10 +389,7 @@ export default function OwnerMessagesPage() {
                   </div>
                 ) : (
                   messages.map((msg) => (
-                    <div
-                      key={msg.id}
-                      className={`flex gap-3 max-w-[80%] ${msg.sender_type === 'owner' ? 'ml-auto flex-row-reverse' : ''}`}
-                    >
+                    <div key={msg.id} className={`flex gap-3 max-w-[80%] ${msg.sender_type === 'owner' ? 'ml-auto flex-row-reverse' : ''}`}>
                       <div className={`w-8 h-8 shrink-0 rounded-full flex items-center justify-center text-xs font-bold ${
                         msg.sender_type === 'owner' ? 'bg-[#446900] text-white' : 'bg-[#e1e3e4] text-[#424937]'
                       }`}>
@@ -426,9 +403,7 @@ export default function OwnerMessagesPage() {
                         }`}>
                           {msg.message}
                         </div>
-                        <span className="text-[10px] text-[#737a65] mt-1 px-1">
-                          {formatTime(msg.created_at)}
-                        </span>
+                        <span className="text-[10px] text-[#737a65] mt-1 px-1">{formatTime(msg.created_at)}</span>
                       </div>
                     </div>
                   ))
@@ -436,13 +411,11 @@ export default function OwnerMessagesPage() {
                 <div ref={messagesEndRef} />
               </div>
 
-              {/* Message Input */}
-              <div className="p-4 bg-white/50 backdrop-blur-md border-t border-[#c2c9b1]/20 shrink-0">
+              <div className="p-4 bg-white border-t border-[#c2c9b1]/20 shrink-0">
                 <div className="flex items-center gap-3 bg-[#edeeef] rounded-2xl px-4 py-2 focus-within:ring-2 focus-within:ring-[#beff5f] transition-all">
                   <input
-                    className="flex-1 bg-transparent border-none focus:ring-0 text-sm py-2 outline-none"
+                    className="flex-1 bg-transparent border-none focus:ring-0 text-sm py-2 outline-none text-[#191c1d] placeholder:text-[#737a65]"
                     placeholder="Type your message..."
-                    type="text"
                     value={messageInput}
                     onChange={(e) => setMessageInput(e.target.value)}
                     onKeyDown={(e) => {
@@ -454,8 +427,8 @@ export default function OwnerMessagesPage() {
                   />
                   <button
                     onClick={handleSendMessage}
-                    disabled={!messageInput.trim()}
-                    className="bg-[#beff5f] text-[#111f00] p-2 rounded-xl hover:scale-105 active:scale-95 transition-all flex items-center justify-center disabled:opacity-50"
+                    disabled={!messageInput.trim() || sending}
+                    className="bg-[#beff5f] text-[#111f00] p-2 rounded-xl hover:scale-105 active:scale-95 transition-all disabled:opacity-50"
                   >
                     <PaperAirplaneIcon className="w-4 h-4 rotate-90" />
                   </button>
@@ -474,8 +447,8 @@ export default function OwnerMessagesPage() {
               <div className="rounded-2xl overflow-hidden bg-[#f8f9fa] mb-6 shadow-sm border border-[#c2c9b1]/20">
                 {activeEnquiry.studio_image && (
                   <div className="h-40 bg-cover bg-center relative" style={{ backgroundImage: `url('${activeEnquiry.studio_image}')` }}>
-                    <div className="absolute top-3 right-3 bg-[#446900] text-white font-bold text-[10px] px-2 py-1 rounded-full">
-                      {activeEnquiry.status.toUpperCase()}
+                    <div className="absolute top-3 right-3 bg-[#446900] text-white font-bold text-[10px] px-2 py-1 rounded-full uppercase">
+                      {activeEnquiry.status}
                     </div>
                   </div>
                 )}
@@ -494,19 +467,9 @@ export default function OwnerMessagesPage() {
                       <span className="text-[#737a65]">Guests</span>
                       <span className="font-bold text-[#191c1d]">{activeEnquiry.guests_count} Persons</span>
                     </div>
-                    <div className="flex justify-between items-center text-sm">
-                      <span className="text-[#737a65]">Status</span>
-                      <span className={`font-bold text-xs px-2 py-0.5 rounded-full ${
-                        activeEnquiry.status === 'pending' ? 'bg-amber-100 text-amber-700' :
-                        activeEnquiry.status === 'approved' ? 'bg-green-100 text-green-700' :
-                        'bg-gray-100 text-gray-600'
-                      }`}>
-                        {activeEnquiry.status}
-                      </span>
-                    </div>
                   </div>
                   {activeEnquiry.brief && (
-                    <div className="bg-[#f3f4f5] p-3 rounded-xl mb-4">
+                    <div className="bg-[#f3f4f5] p-3 rounded-xl">
                       <p className="text-xs font-bold text-[#737a65] mb-1">Client Message</p>
                       <p className="text-sm text-[#191c1d]">{activeEnquiry.brief}</p>
                     </div>
@@ -517,10 +480,10 @@ export default function OwnerMessagesPage() {
               <div className="bg-[#f3f4f5] p-4 rounded-2xl">
                 <h4 className="text-xs font-bold uppercase text-[#737a65] mb-3 tracking-widest">Client Info</h4>
                 <div className="space-y-2 text-sm">
-                  <p><span className="text-[#737a65]">Name:</span> <span className="font-bold">{activeEnquiry.guest_name}</span></p>
-                  <p><span className="text-[#737a65]">Email:</span> <span className="font-bold">{activeEnquiry.guest_email}</span></p>
+                  <p><span className="text-[#737a65]">Name:</span> <span className="font-bold text-[#191c1d]">{activeEnquiry.guest_name}</span></p>
+                  <p><span className="text-[#737a65]">Email:</span> <span className="font-bold text-[#191c1d]">{activeEnquiry.guest_email}</span></p>
                   {activeEnquiry.guest_phone && (
-                    <p><span className="text-[#737a65]">Phone:</span> <span className="font-bold">{activeEnquiry.guest_phone}</span></p>
+                    <p><span className="text-[#737a65]">Phone:</span> <span className="font-bold text-[#191c1d]">{activeEnquiry.guest_phone}</span></p>
                   )}
                 </div>
               </div>
@@ -531,6 +494,541 @@ export default function OwnerMessagesPage() {
     </div>
   );
 }
+
+
+
+// // app/owner/messages/page.tsx
+// 'use client';
+
+// import { useState, useEffect, useRef } from 'react';
+// import { useAuth } from '@/context/AuthContext';
+// import { supabase } from '@/lib/supabase';
+// import {
+//   MagnifyingGlassIcon,
+//   PhoneIcon,
+//   VideoCameraIcon,
+//   EllipsisVerticalIcon,
+//   FaceSmileIcon,
+//   PaperAirplaneIcon,
+//   PlusCircleIcon,
+//   MapPinIcon,
+//   StarIcon,
+// } from '@heroicons/react/24/outline';
+
+// const MaterialIcon = ({ icon, className = '' }: { icon: string; className?: string }) => (
+//   <span className={`material-symbols-outlined ${className}`}>{icon}</span>
+// );
+
+// interface Enquiry {
+//   id: string;
+//   guest_name: string;
+//   guest_email: string;
+//   guest_phone: string;
+//   event_date: string;
+//   guests_count: number;
+//   brief: string;
+//   status: string;
+//   studio_id: string;
+//   studio_name: string;
+//   studio_image: string;
+//   studio_city: string;
+//   studio_state: string;
+//   last_message?: string;
+//   last_message_time?: string;
+//   unread_count?: number;
+// }
+
+// interface Message {
+//   id: string;
+//   enquiry_id: string;
+//   sender_id: string;
+//   sender_type: 'client' | 'owner';
+//   message: string;
+//   image_url: string | null;
+//   read: boolean;
+//   created_at: string;
+// }
+
+// export default function OwnerMessagesPage() {
+//   const { user } = useAuth();
+//   const [activeFilter, setActiveFilter] = useState<'all' | 'pending' | 'confirmed'>('all');
+//   const [activeEnquiryId, setActiveEnquiryId] = useState<string | null>(null);
+//   const [messageInput, setMessageInput] = useState('');
+//   const [enquiries, setEnquiries] = useState<Enquiry[]>([]);
+//   const [messages, setMessages] = useState<Message[]>([]);
+//   const [loading, setLoading] = useState(true);
+//   const messagesEndRef = useRef<HTMLDivElement>(null);
+//   const channelRef = useRef<any>(null);
+
+//   // Fetch enquiries for owner's studios
+//   useEffect(() => {
+//     if (user) {
+//       fetchEnquiries();
+//     }
+//   }, [user]);
+
+//   // Subscribe to real-time messages
+//   useEffect(() => {
+//     if (!activeEnquiryId) return;
+
+//     // Fetch existing messages
+//     fetchMessages(activeEnquiryId);
+
+//     // Subscribe to new messages
+//     const channel = supabase
+//       .channel(`messages:${activeEnquiryId}`)
+//       .on(
+//         'postgres_changes',
+//         {
+//           event: 'INSERT',
+//           schema: 'public',
+//           table: 'messages',
+//           filter: `enquiry_id=eq.${activeEnquiryId}`,
+//         },
+//         (payload) => {
+//           const newMessage = payload.new as Message;
+//           setMessages((prev) => [...prev, newMessage]);
+          
+//           // Mark as read if from client
+//           if (newMessage.sender_type === 'client') {
+//             supabase
+//               .from('messages')
+//               .update({ read: true })
+//               .eq('id', newMessage.id)
+//               .then(() => {});
+//           }
+//         }
+//       )
+//       .subscribe();
+
+//     channelRef.current = channel;
+
+//     return () => {
+//       supabase.removeChannel(channel);
+//     };
+//   }, [activeEnquiryId]);
+
+//   // Scroll to bottom on new messages
+//   useEffect(() => {
+//     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+//   }, [messages]);
+
+//   const fetchEnquiries = async () => {
+//     try {
+//       // Get all enquiries for studios owned by this user
+//       const { data: studiosData } = await supabase
+//         .from('studios')
+//         .select('id')
+//         .eq('owner_id', user?.id);
+
+//       if (!studiosData || studiosData.length === 0) {
+//         setEnquiries([]);
+//         setLoading(false);
+//         return;
+//       }
+
+//       const studioIds = studiosData.map(s => s.id);
+
+//       const { data: enquiriesData, error } = await supabase
+//         .from('enquiries')
+//         .select('*, studios(name, images, city, state)')
+//         .in('studio_id', studioIds)
+//         .order('created_at', { ascending: false });
+
+//       if (error) throw error;
+
+//       // Get last message for each enquiry
+//       const enrichedEnquiries = await Promise.all(
+//         (enquiriesData || []).map(async (enq: any) => {
+//           const { data: lastMsg } = await supabase
+//             .from('messages')
+//             .select('message, created_at, read')
+//             .eq('enquiry_id', enq.id)
+//             .order('created_at', { ascending: false })
+//             .limit(1);
+
+//           const { count: unreadCount } = await supabase
+//             .from('messages')
+//             .select('*', { count: 'exact', head: true })
+//             .eq('enquiry_id', enq.id)
+//             .eq('sender_type', 'client')
+//             .eq('read', false);
+
+//           return {
+//             id: enq.id,
+//             guest_name: enq.guest_name,
+//             guest_email: enq.guest_email,
+//             guest_phone: enq.guest_phone,
+//             event_date: enq.event_date,
+//             guests_count: enq.guests_count,
+//             brief: enq.brief,
+//             status: enq.status,
+//             studio_id: enq.studio_id,
+//             studio_name: enq.studios?.name || 'Unknown Studio',
+//             studio_image: enq.studios?.images?.[0] || '',
+//             studio_city: enq.studios?.city || '',
+//             studio_state: enq.studios?.state || '',
+//             last_message: lastMsg?.[0]?.message || enq.brief || 'No messages yet',
+//             last_message_time: lastMsg?.[0]?.created_at || enq.created_at,
+//             unread_count: unreadCount || 0,
+//           };
+//         })
+//       );
+
+//       setEnquiries(enrichedEnquiries);
+      
+//       // Auto-select first enquiry
+//       if (enrichedEnquiries.length > 0 && !activeEnquiryId) {
+//         setActiveEnquiryId(enrichedEnquiries[0].id);
+//       }
+//     } catch (err) {
+//       console.error('Error fetching enquiries:', err);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   const fetchMessages = async (enquiryId: string) => {
+//     try {
+//       const { data, error } = await supabase
+//         .from('messages')
+//         .select('*')
+//         .eq('enquiry_id', enquiryId)
+//         .order('created_at', { ascending: true });
+
+//       if (error) throw error;
+//       setMessages(data || []);
+
+//       // Mark unread messages as read
+//       const unreadIds = (data || [])
+//         .filter(m => m.sender_type === 'client' && !m.read)
+//         .map(m => m.id);
+
+//       if (unreadIds.length > 0) {
+//         await supabase
+//           .from('messages')
+//           .update({ read: true })
+//           .in('id', unreadIds);
+//       }
+//     } catch (err) {
+//       console.error('Error fetching messages:', err);
+//     }
+//   };
+
+//   const handleSendMessage = async () => {
+//     if (!messageInput.trim() || !activeEnquiryId || !user) return;
+
+//     const newMessage = {
+//       enquiry_id: activeEnquiryId,
+//       sender_id: user.id,
+//       sender_type: 'owner' as const,
+//       message: messageInput.trim(),
+//       image_url: null,
+//       read: false,
+//       created_at: new Date().toISOString(),
+//     };
+
+//     try {
+//       const { error } = await supabase
+//         .from('messages')
+//         .insert(newMessage);
+
+//       if (error) throw error;
+//       setMessageInput('');
+//     } catch (err) {
+//       console.error('Error sending message:', err);
+//     }
+//   };
+
+//   const getInitials = (name: string) => {
+//     return name?.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2) || '??';
+//   };
+
+//   const formatTime = (dateStr: string) => {
+//     const date = new Date(dateStr);
+//     const now = new Date();
+//     const diff = now.getTime() - date.getTime();
+//     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    
+//     if (days === 0) {
+//       return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+//     } else if (days === 1) {
+//       return 'Yesterday';
+//     } else if (days < 7) {
+//       return `${days}d ago`;
+//     } else {
+//       return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+//     }
+//   };
+
+//   const activeEnquiry = enquiries.find(e => e.id === activeEnquiryId);
+//   const unreadTotal = enquiries.reduce((sum, e) => sum + (e.unread_count || 0), 0);
+
+//   const filteredEnquiries = activeFilter === 'all' 
+//     ? enquiries 
+//     : enquiries.filter(e => e.status === activeFilter);
+
+//   if (loading) {
+//     return (
+//       <div className="h-[calc(100vh-64px)] flex items-center justify-center bg-[#f8f9fa]">
+//         <div className="animate-pulse text-center">
+//           <div className="w-12 h-12 bg-[#446900]/20 rounded-full mx-auto mb-3"></div>
+//           <p className="text-[#446900] font-bold text-sm">Loading messages...</p>
+//         </div>
+//       </div>
+//     );
+//   }
+
+//   return (
+//     <div className="h-[calc(100vh-64px)] flex flex-col bg-[#f8f9fa]">
+//       {/* Header */}
+//       <header className="h-16 bg-white/70 backdrop-blur-xl border-b border-[#c2c9b1]/30 flex items-center justify-between px-4 md:px-6 sticky top-0 z-20 shrink-0">
+//         <div className="flex items-center gap-4">
+//           <h1 className="text-xl md:text-2xl font-extrabold text-[#446900] tracking-tight">Inbox</h1>
+//           {unreadTotal > 0 && (
+//             <span className="px-2 py-0.5 bg-[#beff5f] text-[#111f00] text-xs font-bold rounded-full">
+//               {unreadTotal} New
+//             </span>
+//           )}
+//         </div>
+//         <div className="flex items-center gap-3">
+//           <button className="p-2 hover:bg-[#edeeef] rounded-full transition-colors">
+//             <span className="material-symbols-outlined text-[#424937]">notifications</span>
+//           </button>
+//         </div>
+//       </header>
+
+//       <div className="flex-1 flex overflow-hidden">
+//         {/* LEFT: Conversation List */}
+//         <div className="w-full md:w-80 lg:w-96 border-r border-[#c2c9b1]/20 flex flex-col bg-white shrink-0">
+//           <div className="p-4 border-b border-[#c2c9b1]/20 flex gap-2">
+//             {(['all', 'pending', 'confirmed'] as const).map((filter) => (
+//               <button
+//                 key={filter}
+//                 onClick={() => setActiveFilter(filter)}
+//                 className={`px-3 py-1 rounded-full text-xs font-bold transition-all ${
+//                   activeFilter === filter
+//                     ? 'bg-[#e7e8e9] text-[#191c1d]'
+//                     : 'hover:bg-[#f3f4f5] text-[#424937]'
+//                 }`}
+//               >
+//                 {filter === 'all' ? 'All' : filter === 'pending' ? 'Pending' : 'Confirmed'}
+//               </button>
+//             ))}
+//           </div>
+
+//           <div className="flex-1 overflow-y-auto">
+//             {filteredEnquiries.length === 0 ? (
+//               <div className="p-8 text-center">
+//                 <span className="material-symbols-outlined text-4xl text-[#c2c9b1] mb-3">chat_bubble</span>
+//                 <p className="text-[#424937] font-bold text-sm">No enquiries yet</p>
+//                 <p className="text-xs text-[#737a65] mt-1">When clients book your studios, they'll appear here.</p>
+//               </div>
+//             ) : (
+//               filteredEnquiries.map((enq) => (
+//                 <div
+//                   key={enq.id}
+//                   onClick={() => setActiveEnquiryId(enq.id)}
+//                   className={`p-4 cursor-pointer transition-colors border-b border-[#c2c9b1]/10 ${
+//                     activeEnquiryId === enq.id
+//                       ? 'bg-[#beff5f]/10 border-l-4 border-[#446900]'
+//                       : 'hover:bg-[#f3f4f5]'
+//                   }`}
+//                 >
+//                   <div className="flex justify-between items-start mb-1">
+//                     <div className="flex items-center gap-2">
+//                       <span className="font-bold text-sm text-[#191c1d]">{enq.guest_name}</span>
+//                       {(enq.unread_count || 0) > 0 && (
+//                         <span className="w-2 h-2 rounded-full bg-[#446900]"></span>
+//                       )}
+//                     </div>
+//                     <span className="text-[10px] text-[#737a65] uppercase font-bold">
+//                       {formatTime(enq.last_message_time || enq.event_date)}
+//                     </span>
+//                   </div>
+//                   <p className="text-xs font-bold text-[#424937] mb-1">
+//                     {enq.studio_name}
+//                   </p>
+//                   <p className="text-sm text-[#424937] line-clamp-1">
+//                     {enq.last_message || 'No messages'}
+//                   </p>
+//                   {(enq.unread_count || 0) > 0 && (
+//                     <span className="inline-block mt-1 px-2 py-0.5 bg-[#beff5f] text-[#111f00] text-[10px] font-bold rounded-full">
+//                       {enq.unread_count}
+//                     </span>
+//                   )}
+//                 </div>
+//               ))
+//             )}
+//           </div>
+//         </div>
+
+//         {/* CENTER: Chat Area */}
+//         <div className="flex-1 flex flex-col bg-white relative overflow-hidden min-w-0">
+//           {!activeEnquiry ? (
+//             <div className="flex-1 flex items-center justify-center">
+//               <div className="text-center">
+//                 <span className="material-symbols-outlined text-5xl text-[#c2c9b1] mb-4">forum</span>
+//                 <p className="text-[#424937] font-bold">Select a conversation</p>
+//                 <p className="text-sm text-[#737a65] mt-1">Choose an enquiry to view messages</p>
+//               </div>
+//             </div>
+//           ) : (
+//             <>
+//               {/* Chat Header */}
+//               <div className="h-16 border-b border-[#c2c9b1]/20 px-4 md:px-6 flex items-center justify-between bg-white/70 backdrop-blur-xl shrink-0">
+//                 <div className="flex items-center gap-3">
+//                   <div className="w-10 h-10 rounded-full bg-[#635979] text-white flex items-center justify-center font-bold text-sm">
+//                     {getInitials(activeEnquiry.guest_name)}
+//                   </div>
+//                   <div>
+//                     <h2 className="font-bold text-sm text-[#191c1d]">{activeEnquiry.guest_name}</h2>
+//                     <p className="text-[10px] text-[#424937]">{activeEnquiry.guest_email}</p>
+//                   </div>
+//                 </div>
+//                 <div className="flex gap-2">
+//                   <button className="p-2 hover:bg-[#edeeef] rounded-full transition-colors">
+//                     <PhoneIcon className="w-5 h-5 text-[#424937]" />
+//                   </button>
+//                   <button className="p-2 hover:bg-[#edeeef] rounded-full transition-colors">
+//                     <EllipsisVerticalIcon className="w-5 h-5 text-[#424937]" />
+//                   </button>
+//                 </div>
+//               </div>
+
+//               {/* Messages */}
+//               <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4">
+//                 {messages.length === 0 ? (
+//                   <div className="flex items-center justify-center h-full">
+//                     <div className="text-center">
+//                       <p className="text-[#424937] font-bold">No messages yet</p>
+//                       <p className="text-sm text-[#737a65] mt-1">Send the first message to start the conversation</p>
+//                     </div>
+//                   </div>
+//                 ) : (
+//                   messages.map((msg) => (
+//                     <div
+//                       key={msg.id}
+//                       className={`flex gap-3 max-w-[80%] ${msg.sender_type === 'owner' ? 'ml-auto flex-row-reverse' : ''}`}
+//                     >
+//                       <div className={`w-8 h-8 shrink-0 rounded-full flex items-center justify-center text-xs font-bold ${
+//                         msg.sender_type === 'owner' ? 'bg-[#446900] text-white' : 'bg-[#e1e3e4] text-[#424937]'
+//                       }`}>
+//                         {msg.sender_type === 'owner' ? 'ME' : getInitials(activeEnquiry.guest_name)}
+//                       </div>
+//                       <div className={`flex flex-col ${msg.sender_type === 'owner' ? 'items-end' : ''}`}>
+//                         <div className={`p-3 rounded-2xl shadow-sm text-sm leading-relaxed ${
+//                           msg.sender_type === 'owner'
+//                             ? 'bg-[#eaddff] text-[#1f1732] rounded-br-sm'
+//                             : 'bg-[#f3f4f5] text-[#191c1d] rounded-bl-sm'
+//                         }`}>
+//                           {msg.message}
+//                         </div>
+//                         <span className="text-[10px] text-[#737a65] mt-1 px-1">
+//                           {formatTime(msg.created_at)}
+//                         </span>
+//                       </div>
+//                     </div>
+//                   ))
+//                 )}
+//                 <div ref={messagesEndRef} />
+//               </div>
+
+//               {/* Message Input */}
+//               <div className="p-4 bg-white/50 backdrop-blur-md border-t border-[#c2c9b1]/20 shrink-0">
+//                 <div className="flex items-center gap-3 bg-[#edeeef] rounded-2xl px-4 py-2 focus-within:ring-2 focus-within:ring-[#beff5f] transition-all">
+//                   <input
+//                     className="flex-1 bg-transparent border-none focus:ring-0 text-sm py-2 outline-none"
+//                     placeholder="Type your message..."
+//                     type="text"
+//                     value={messageInput}
+//                     onChange={(e) => setMessageInput(e.target.value)}
+//                     onKeyDown={(e) => {
+//                       if (e.key === 'Enter' && !e.shiftKey) {
+//                         e.preventDefault();
+//                         handleSendMessage();
+//                       }
+//                     }}
+//                   />
+//                   <button
+//                     onClick={handleSendMessage}
+//                     disabled={!messageInput.trim()}
+//                     className="bg-[#beff5f] text-[#111f00] p-2 rounded-xl hover:scale-105 active:scale-95 transition-all flex items-center justify-center disabled:opacity-50"
+//                   >
+//                     <PaperAirplaneIcon className="w-4 h-4 rotate-90" />
+//                   </button>
+//                 </div>
+//               </div>
+//             </>
+//           )}
+//         </div>
+
+//         {/* RIGHT: Inquiry Context */}
+//         {activeEnquiry && (
+//           <div className="hidden xl:flex w-80 border-l border-[#c2c9b1]/20 flex-col bg-white overflow-y-auto shrink-0">
+//             <div className="p-6">
+//               <h3 className="text-xs font-bold uppercase tracking-widest text-[#737a65] mb-6">Inquiry Details</h3>
+              
+//               <div className="rounded-2xl overflow-hidden bg-[#f8f9fa] mb-6 shadow-sm border border-[#c2c9b1]/20">
+//                 {activeEnquiry.studio_image && (
+//                   <div className="h-40 bg-cover bg-center relative" style={{ backgroundImage: `url('${activeEnquiry.studio_image}')` }}>
+//                     <div className="absolute top-3 right-3 bg-[#446900] text-white font-bold text-[10px] px-2 py-1 rounded-full">
+//                       {activeEnquiry.status.toUpperCase()}
+//                     </div>
+//                   </div>
+//                 )}
+//                 <div className="p-4">
+//                   <h4 className="font-bold text-sm text-[#191c1d] mb-1">{activeEnquiry.studio_name}</h4>
+//                   <p className="text-xs text-[#424937] mb-4 flex items-center gap-1">
+//                     <MapPinIcon className="w-3 h-3" />
+//                     {activeEnquiry.studio_city}, {activeEnquiry.studio_state}
+//                   </p>
+//                   <div className="space-y-3 mb-5">
+//                     <div className="flex justify-between items-center text-sm">
+//                       <span className="text-[#737a65]">Event Date</span>
+//                       <span className="font-bold text-[#191c1d]">{activeEnquiry.event_date}</span>
+//                     </div>
+//                     <div className="flex justify-between items-center text-sm">
+//                       <span className="text-[#737a65]">Guests</span>
+//                       <span className="font-bold text-[#191c1d]">{activeEnquiry.guests_count} Persons</span>
+//                     </div>
+//                     <div className="flex justify-between items-center text-sm">
+//                       <span className="text-[#737a65]">Status</span>
+//                       <span className={`font-bold text-xs px-2 py-0.5 rounded-full ${
+//                         activeEnquiry.status === 'pending' ? 'bg-amber-100 text-amber-700' :
+//                         activeEnquiry.status === 'approved' ? 'bg-green-100 text-green-700' :
+//                         'bg-gray-100 text-gray-600'
+//                       }`}>
+//                         {activeEnquiry.status}
+//                       </span>
+//                     </div>
+//                   </div>
+//                   {activeEnquiry.brief && (
+//                     <div className="bg-[#f3f4f5] p-3 rounded-xl mb-4">
+//                       <p className="text-xs font-bold text-[#737a65] mb-1">Client Message</p>
+//                       <p className="text-sm text-[#191c1d]">{activeEnquiry.brief}</p>
+//                     </div>
+//                   )}
+//                 </div>
+//               </div>
+
+//               <div className="bg-[#f3f4f5] p-4 rounded-2xl">
+//                 <h4 className="text-xs font-bold uppercase text-[#737a65] mb-3 tracking-widest">Client Info</h4>
+//                 <div className="space-y-2 text-sm">
+//                   <p><span className="text-[#737a65]">Name:</span> <span className="font-bold">{activeEnquiry.guest_name}</span></p>
+//                   <p><span className="text-[#737a65]">Email:</span> <span className="font-bold">{activeEnquiry.guest_email}</span></p>
+//                   {activeEnquiry.guest_phone && (
+//                     <p><span className="text-[#737a65]">Phone:</span> <span className="font-bold">{activeEnquiry.guest_phone}</span></p>
+//                   )}
+//                 </div>
+//               </div>
+//             </div>
+//           </div>
+//         )}
+//       </div>
+//     </div>
+//   );
+// }
 
 
 // // app/owner/messages/page.tsx
