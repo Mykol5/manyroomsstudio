@@ -1,7 +1,8 @@
+
 // app/page.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import {
@@ -28,11 +29,70 @@ interface Studio {
   description: string;
 }
 
+interface ChatMessage {
+  text: string;
+  type: 'user' | 'owner';
+}
+
 export default function HomePage() {
   const [featuredSpaces, setFeaturedSpaces] = useState<Studio[]>([]);
   const [loading, setLoading] = useState(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
+  const [phoneMessages, setPhoneMessages] = useState<ChatMessage[]>([]);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
+
+  const chatSequence: ChatMessage[] = [
+    { text: "Hi! Is Studio A available for a 4-hour shoot this Friday?", type: "user" },
+    { text: "Hey! Yes, we have a slot from 2 PM - 6 PM. Would you like to book?", type: "owner" },
+    { text: "Perfect, sending the request now! 🚀", type: "user" },
+  ];
+
+  // Animate phone chat messages
+  useEffect(() => {
+    let isMounted = true;
+    let timeoutIds: NodeJS.Timeout[] = [];
+
+    const animateMessages = async () => {
+      setPhoneMessages([]);
+      
+      for (const msg of chatSequence) {
+        if (!isMounted) return;
+        await new Promise<void>(resolve => {
+          const id = setTimeout(() => {
+            setPhoneMessages(prev => [...prev, msg]);
+            resolve();
+          }, 1500);
+          timeoutIds.push(id);
+        });
+      }
+      
+      // Wait and restart
+      if (isMounted) {
+        const id = setTimeout(() => {
+          animateMessages();
+        }, 3500);
+        timeoutIds.push(id);
+      }
+    };
+
+    animateMessages();
+
+    return () => {
+      isMounted = false;
+      timeoutIds.forEach(clearTimeout);
+    };
+  }, []);
+
+  // Scroll to bottom of phone chat
+  useEffect(() => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTo({
+        top: chatContainerRef.current.scrollHeight,
+        behavior: 'smooth',
+      });
+    }
+  }, [phoneMessages]);
 
   useEffect(() => {
     fetchApprovedStudios();
@@ -95,18 +155,9 @@ export default function HomePage() {
           <div className="flex items-center gap-3 md:gap-4">
             <div className="hidden md:flex relative items-center">
               <MagnifyingGlassIcon className="absolute left-3 w-4 h-4 text-[#737a65]" />
-              <input 
-                className="pl-10 pr-4 py-2 bg-[#f3f4f5] border-none rounded-full w-48 lg:w-64 focus:ring-2 focus:ring-[#beff5f] text-sm outline-none text-[#191c1d]" 
-                placeholder="Search by vibe..." 
-                type="text" 
-              />
+              <input className="pl-10 pr-4 py-2 bg-[#f3f4f5] border-none rounded-full w-48 lg:w-64 focus:ring-2 focus:ring-[#beff5f] text-sm outline-none text-[#191c1d]" placeholder="Search by vibe..." type="text" />
             </div>
-            <Link 
-              href="/signup?role=owner" 
-              className="hidden md:block px-6 py-2 bg-[#beff5f] text-[#111f00] font-bold text-sm rounded-full hover:scale-105 transition-transform"
-            >
-              List Studio
-            </Link>
+            <Link href="/signup?role=owner" className="hidden md:block px-6 py-2 bg-[#beff5f] text-[#111f00] font-bold text-sm rounded-full hover:scale-105 transition-transform">List Studio</Link>
             <div className="hidden md:flex items-center gap-3">
               <span className="material-symbols-outlined text-[#424937] cursor-pointer hover:scale-105 transition-transform">favorite</span>
               <span className="material-symbols-outlined text-[#424937] cursor-pointer hover:scale-105 transition-transform">account_circle</span>
@@ -145,127 +196,156 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Hero Section with Background Image */}
+      {/* Hero Section with Dark Background + Animated Phone */}
       <header className="relative min-h-screen flex items-center pt-24 overflow-hidden">
-        {/* Hero Background Image - Person in Studio */}
+        {/* Solid dark background image */}
         <div className="absolute inset-0 z-0">
           <img 
-            src="https://images.unsplash.com/photo-1604014237800-1c9102c219da?auto=format&fit=crop&q=80&w=2000"
-            alt="Creative professional in studio"
-            className="w-full h-full object-cover object-center"
+            src="https://lh3.googleusercontent.com/aida/AP1WRLtEc8Jdj7-pew_Z-y9BIERr8FgqdMMZ1XE92TFeJawsBAEipOOAC05OebLve_NSjKvsMZXMahvRlApQhJg9Hd_th3KAPSylYQlt9g7hKGav64ZvezV9UUIOvKC_Xp_k0Dj3W022I8pbiW1NxOgWGGCgfH6QZTWVGr67anw2zZQ-wDn8-Lu-n8QLjbPn8Ev2FoWHg_4VGMoAgdVIQN_eLNgSqjEQe-g-Q-kJb1CvTmXpi0rL1gerY04D_1vz"
+            alt="High-end professional studio"
+            className="w-full h-full object-cover"
           />
-          {/* Gradient Overlays */}
-          <div className="absolute inset-0 bg-gradient-to-r from-[#f8f9fa] via-[#f8f9fa]/85 to-[#f8f9fa]/40"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/50 to-transparent"></div>
           <div className="absolute inset-0 bg-gradient-to-t from-[#f8f9fa] via-transparent to-transparent"></div>
         </div>
 
         <div className="relative z-10 w-full max-w-[1440px] mx-auto px-4 md:px-16 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
           
+          {/* Left Content */}
           <div className="lg:col-span-7 flex flex-col items-start gap-6">
             <div className={`transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-              <span className="inline-block px-4 py-1 rounded-full bg-[#e4d7fd]/90 backdrop-blur-sm text-[#665c7c] font-bold text-sm uppercase tracking-wider mb-4">
+              <span className="inline-block px-4 py-1 rounded-full bg-[#beff5f] text-[#111f00] font-bold text-sm uppercase tracking-wider mb-4">
                 The Creative Evolution
               </span>
-              <h1 className="text-[56px] leading-[62px] md:text-[84px] md:leading-[92px] font-extrabold text-[#191c1d] tracking-tighter">
-                Space <span className="text-[#446900] italic">smarter</span>,<br/>not harder.
+              <h1 className="text-[56px] leading-[62px] md:text-[84px] md:leading-[92px] font-extrabold text-white tracking-tighter drop-shadow-lg">
+                Space <span className="text-[#beff5f] italic">smarter</span>,<br/>not harder.
               </h1>
             </div>
-            <p className={`text-lg text-[#424937] max-w-xl transition-all duration-700 delay-100 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+            <p className={`text-lg text-white/80 max-w-xl transition-all duration-700 delay-100 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
               Monetize your creative square footage with powerful automations for booking, lighting, and access. Join 1M+ creators worldwide.
             </p>
             
+            {/* Search by Vibe */}
             <div className={`w-full max-w-2xl transition-all duration-700 delay-200 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-              <div className="bg-white/90 backdrop-blur-xl border border-white/60 p-2 rounded-[32px] flex items-center shadow-2xl">
+              <div className="bg-white/10 backdrop-blur-md border border-white/20 p-2 rounded-[32px] flex items-center shadow-xl">
                 <div className="flex-grow flex items-center px-4">
-                  <span className="material-symbols-outlined text-[#446900] mr-3" style={{ fontVariationSettings: "'FILL' 1" }}>
+                  <span className="material-symbols-outlined text-[#beff5f] mr-3" style={{ fontVariationSettings: "'FILL' 1" }}>
                     temp_preferences_custom
                   </span>
                   <input 
-                    className="w-full bg-transparent border-none focus:ring-0 text-lg outline-none text-[#191c1d] placeholder:text-[#737a65]" 
+                    className="w-full bg-transparent border-none focus:ring-0 text-lg outline-none text-white placeholder:text-white/60" 
                     placeholder="Describe the aesthetic (e.g. '70s synth-wave desert loft')" 
                     type="text" 
                   />
                 </div>
                 <Link 
                   href="/spaces"
-                  className="bg-[#beff5f] text-[#111f00] px-8 py-4 rounded-[24px] font-bold flex items-center gap-2 hover:shadow-[0_0_20px_rgba(190,255,95,0.6)] transition-all whitespace-nowrap"
+                  className="bg-[#beff5f] text-[#111f00] px-8 py-4 rounded-[24px] font-bold flex items-center gap-2 hover:brightness-110 transition-all whitespace-nowrap"
                 >
                   <span className="material-symbols-outlined">auto_awesome</span>
                   Search by Vibe
                 </Link>
               </div>
               <div className="flex gap-4 mt-4 px-4 overflow-x-auto whitespace-nowrap">
-                <span className="text-[#424937] text-sm font-bold">Trending:</span>
-                <Link href="/spaces?vibe=concrete" className="text-[#446900] hover:underline text-sm">#ConcreteMinimalism</Link>
-                <Link href="/spaces?vibe=music" className="text-[#446900] hover:underline text-sm">#SoftGlowMusic</Link>
-                <Link href="/spaces?vibe=podcast" className="text-[#446900] hover:underline text-sm">#PodcastNook</Link>
+                <span className="text-white/60 text-sm font-bold">Trending:</span>
+                <Link href="/spaces?vibe=concrete" className="text-[#beff5f] hover:underline text-sm">#ConcreteMinimalism</Link>
+                <Link href="/spaces?vibe=music" className="text-[#beff5f] hover:underline text-sm">#SoftGlowMusic</Link>
+                <Link href="/spaces?vibe=podcast" className="text-[#beff5f] hover:underline text-sm">#PodcastNook</Link>
               </div>
             </div>
           </div>
 
-          {/* Right side - subtle glass effect area for depth */}
-          <div className="lg:col-span-5 relative hidden lg:flex justify-center items-center h-[600px]">
-            <div className="absolute top-10 right-0 bg-white/85 backdrop-blur-xl border border-white/50 p-6 rounded-2xl shadow-2xl max-w-[280px] border-l-8 border-[#beff5f]" style={{ animation: 'float 6s ease-in-out infinite' }}>
-              <div className="flex items-center gap-3 mb-2">
-                <div className="w-10 h-10 rounded-full bg-[#e4d7fd] flex items-center justify-center">
-                  <span className="material-symbols-outlined text-[#665c7c]">camera_enhance</span>
-                </div>
-                <span className="font-bold text-sm text-[#191c1d]">Studio Bot</span>
+          {/* Right: Animated Phone Mockup */}
+          <div className="lg:col-span-5 relative hidden lg:flex justify-center items-center h-[650px]">
+            <div className="w-72 h-[580px] bg-slate-900 rounded-[3rem] border-[12px] border-slate-800 shadow-[0_40px_100px_-20px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col relative">
+              {/* Status Bar */}
+              <div className="h-10 bg-slate-800 flex justify-center items-end pb-1">
+                <div className="w-20 h-4 bg-slate-900 rounded-full"></div>
               </div>
-              <p className="text-sm italic text-[#191c1d]">"Hey! Do you sell production hours?"</p>
-            </div>
-            
-            <div className="absolute bottom-20 left-0 bg-white/85 backdrop-blur-xl border border-white/50 p-6 rounded-2xl shadow-2xl max-w-[280px] border-r-8 border-[#ffe6de]" style={{ animation: 'float 6s ease-in-out infinite 1s' }}>
-              <div className="flex items-center gap-3 mb-2 flex-row-reverse">
-                <div className="w-10 h-10 rounded-full bg-[#beff5f] flex items-center justify-center">
-                  <span className="material-symbols-outlined text-[#111f00]">done_all</span>
+              {/* Content */}
+              <div className="flex-grow bg-slate-50 p-4 flex flex-col overflow-hidden">
+                {/* Chat Header */}
+                <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-200">
+                  <div className="w-10 h-10 rounded-full bg-[#beff5f] flex items-center justify-center text-[#111f00]">
+                    <span className="material-symbols-outlined">person</span>
+                  </div>
+                  <div>
+                    <div className="font-bold text-slate-900 text-sm">Studio Manager</div>
+                    <div className="text-[10px] text-green-500 font-bold flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span> Online
+                    </div>
+                  </div>
                 </div>
-                <span className="font-bold text-sm text-[#191c1d]">ManyRooms</span>
+                {/* Messages */}
+                <div ref={chatContainerRef} className="flex flex-col gap-4 overflow-y-auto flex-grow chat-container" style={{ scrollbarWidth: 'none' }}>
+                  {phoneMessages.map((msg, idx) => (
+                    <div key={idx} className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'} animate-message`}>
+                      <div className={`max-w-[85%] rounded-2xl px-4 py-2 text-xs font-medium shadow-sm ${
+                        msg.type === 'user' 
+                          ? 'bg-[#e4d7fd] text-[#1f1732] rounded-tr-none' 
+                          : 'bg-[#beff5f] text-[#111f00] rounded-tl-none'
+                      }`}>
+                        {msg.text}
+                      </div>
+                    </div>
+                  ))}
+                  {phoneMessages.length === 0 && (
+                    <div className="flex items-center justify-center h-full text-slate-400 text-xs">
+                      Loading messages...
+                    </div>
+                  )}
+                </div>
               </div>
-              <p className="text-sm font-bold text-[#446900]">"Hey! Yes, we do! Want me to send you the link to book? 🚀"</p>
+              {/* Input Area */}
+              <div className="h-16 bg-white p-3 border-t border-slate-200 flex items-center gap-2">
+                <div className="flex-grow h-8 bg-slate-100 rounded-full px-4 text-[10px] flex items-center text-slate-400">Message...</div>
+                <div className="w-8 h-8 rounded-full bg-[#beff5f] flex items-center justify-center text-[#111f00]">
+                  <span className="material-symbols-outlined text-sm">send</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </header>
 
-      {/* Social Proof */}
-      <section className="py-12 bg-white border-y border-[#c2c9b1]/30">
+      {/* Social Proof - Marquee */}
+      <section className="py-12 bg-white border-y border-[#c2c9b1]/30 overflow-hidden">
         <div className="max-w-[1440px] mx-auto px-4 md:px-16 flex flex-col md:flex-row items-center gap-12">
-          <div className="flex flex-col gap-2 shrink-0">
+          <div className="flex flex-col gap-2 shrink-0 bg-white z-10 pr-8">
             <h3 className="text-5xl font-extrabold leading-tight text-[#446900]">1M+</h3>
             <p className="font-bold text-sm text-[#424937] uppercase">Creators Trust Us</p>
           </div>
-          <div className="flex flex-wrap justify-center md:justify-start gap-8 md:gap-12 opacity-50 hover:opacity-100 transition-all duration-500 flex-grow">
-            {['Meta', 'TikTok', 'Instagram', 'Facebook', 'WhatsApp'].map((brand) => (
-              <span key={brand} className="text-xl md:text-2xl font-extrabold text-[#191c1d]">{brand}</span>
-            ))}
+          <div className="relative flex-grow overflow-hidden">
+            <div className="flex gap-16 animate-marquee whitespace-nowrap items-center py-4">
+              {['Meta', 'TikTok', 'Instagram', 'Facebook', 'WhatsApp', 'Meta', 'TikTok', 'Instagram', 'Facebook', 'WhatsApp'].map((brand, i) => (
+                <span key={i} className="text-xl font-extrabold text-[#191c1d] opacity-50 hover:opacity-100 transition-all">{brand}</span>
+              ))}
+            </div>
           </div>
         </div>
       </section>
 
       {/* Everywhere Section */}
-      <section className="py-24 bg-[#f8f9fa] relative overflow-hidden">
+      <section className="py-24 bg-[#f8f9fa] relative overflow-hidden reveal">
         <div className="max-w-[1440px] mx-auto px-4 md:px-16">
           <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-8">
-            <div className="max-w-2xl">
+            <div className="max-w-2xl reveal-item">
               <h2 className="text-4xl md:text-5xl font-extrabold mb-4 text-[#191c1d]">
                 Everywhere your <span className="text-[#a43c12]">vision</span> lives.
               </h2>
               <p className="text-lg text-[#424937]">The most sophisticated network of creative square footage on the planet. Specialized for every niche.</p>
             </div>
             <Link href="/spaces" className="group flex items-center gap-2 text-[#446900] font-bold text-sm uppercase">
-              Explore all categories 
-              <span className="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
+              Explore all categories <span className="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
             </Link>
           </div>
-          
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
               { image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBDSHg0tkd_xlXbd8XLxjvdWaUgh-Wgi_B2ogcGWvBQHu5itBc6wfvLL7Uks_ztfZQAqK7lWfTx4O_i13JCWPmO7gTmeYzxQaPrG_tsy3pbEsLcTdP08ztwgndHP1-Jt9pOad3BL9ib-gPyEx0GUvwlrJA2niuV8FD2JBh6h_ZsS8F0VriH2HZEpRKhFr-IScJrOEIwiePqm4kvFD-P41nwFMfMsU0MPd9kycWXkGl_DsOrZfIzoQzj7KEuW1hAx2iGIw-gZyhNPqb', badge: 'Audio Production', badgeColor: 'bg-[#635979] text-white', title: 'Music & Podcast Studios', desc: 'Acoustically perfect environments for your next hit.' },
               { image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuB74YlBwI2kAzcpnrBVppH7dn6wM8Dpt5QmxAEKu3ImGGFSmPvz6AFW8tpeSIuKjkVDfRNSBFlNTxyizEu5zu2dstawrNFjmsy9aWG2giHSpNp1bHh_sCvEe5wjmkhOdFYNouCLbm00PkvPtRPTZWCftj0Qxhkuxy7jcfAt-TXbLa6CQgrvS2k7EUCcOSdozHLPPI_JNZQU11IxT7PtjMXuob_u02TdqLxb-Y2FgGONZYZcn5a5vXzDcb3hO1WGokfGXEgRAX-JP-cy', badge: 'Visual Arts', badgeColor: 'bg-[#beff5f] text-[#111f00]', title: 'Photography & Film', desc: 'Natural light lofts and professional cyc walls.' },
               { image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBRVPUuNYkbGYO_2TrCnEpkpXhaEJChhEI1eKHDnEIWVrkbPKAsranLkrOZncliRk2uhvXtaFPKcbz4MDlHZgYT5SqCiqkSOQlMb8D0s5WK-43lw61XoC26Wo5ZXj5cObwwVxdLO7jO_S2PtrSDCCWz86klSzEz1ZMJjL30RdAsth_8VUnAUTAcHYJ97bykBsJXrEtN7fy9JWeS_BGScrktCVk56-UDJeEfuZPAjY8aMOKHsQBQ2n4Q7S6CWgXnIbM2U5dXgpxB1_VI', badge: 'Co-Creation', badgeColor: 'bg-[#ffe6de] text-[#b4471d]', title: 'Pop-up & Design Hubs', desc: 'Dynamic spaces for teams to build the future.' },
             ].map((card, i) => (
-              <div key={i} className="group relative rounded-[32px] overflow-hidden h-[500px] shadow-xl hover:-translate-y-2 transition-transform duration-500">
+              <div key={i} className="group relative rounded-[32px] overflow-hidden h-[500px] shadow-xl hover:-translate-y-2 transition-transform duration-500 reveal-item">
                 <img className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" src={card.image} alt={card.title} />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
                 <div className="absolute bottom-0 left-0 p-8 w-full">
@@ -280,14 +360,12 @@ export default function HomePage() {
       </section>
 
       {/* The Crew Collective */}
-      <section className="py-24 bg-white relative overflow-hidden">
+      <section className="py-24 bg-white relative overflow-hidden reveal">
         <div className="max-w-[1440px] mx-auto px-4 md:px-16">
           <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-8">
-            <div className="max-w-2xl">
+            <div className="max-w-2xl reveal-item">
               <span className="inline-block px-4 py-1 rounded-full bg-[#beff5f] text-[#111f00] font-bold text-sm uppercase tracking-wider mb-4">The Crew Collective</span>
-              <h2 className="text-4xl md:text-5xl font-extrabold mb-4 text-[#191c1d]">
-                Hire the <span className="text-[#446900]">pros</span> who make it happen.
-              </h2>
+              <h2 className="text-4xl md:text-5xl font-extrabold mb-4 text-[#191c1d]">Hire the <span className="text-[#446900]">pros</span> who make it happen.</h2>
               <p className="text-lg text-[#424937]">Don't just book a space—build your dream team. Access our vetted network of creative professionals ready to elevate your production.</p>
             </div>
             <Link href="/services" className="group flex items-center gap-2 text-[#446900] font-bold text-sm uppercase">
@@ -296,12 +374,12 @@ export default function HomePage() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              { title: 'Photographers', desc: 'Editorial, Commercial & Portrait', image: 'https://images.unsplash.com/photo-1542038784456-1ea8e935640e?auto=format&fit=crop&q=80&w=800' },
-              { title: 'Videographers', desc: 'DPs, Editors & Drone Pilots', image: 'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?auto=format&fit=crop&q=80&w=800' },
-              { title: 'HMU Artists', desc: 'Beauty, SFX & High-Fashion', image: 'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&q=80&w=800' },
-              { title: 'Studio Support', desc: 'Cleaners, PAs & Set Builders', image: 'https://images.unsplash.com/photo-1581578731548-c64695cc6958?auto=format&fit=crop&q=80&w=800' },
+              { title: 'Photographers', desc: 'Editorial, Commercial & Portrait', image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDF34mH1t1b_daE_tPfalnXue-edqeUxW6ZdSQHyUia5HkQLuaxRVZTGw6key5E1aNH6llJm60epDwbwPGlLp0MpM5nxMsC4MvJln_jXC-fXkFzEGnEOFWPi5oicJCtWfnNQapDjjoZEvJiSPCTWyT89dJz510YTnT4eHAbF6czlaxio6i25fmcGSTySWAkkDu8rwx_u-vSBh2ntypJoGOoOs18krdxinNWFSX3WPUrFxMdf_sInX75YdcAgoWIgv1WGBKAHS03H-wQ' },
+              { title: 'Videographers', desc: 'DPs, Editors & Drone Pilots', image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCAeGmZn-h3NqKJmOFCV08OAQIQZnzBDjE-B2TGHIbXWF21fuXnPz4eXVYCp18cyGj9YGiH0bTDbk5WvW9GnfPRb8pPsBMJd6t-piAg7cUQTKQgvyJPAve6seIBQ3WJjUj3jsSL_0vwg8iZqoI7ueq2AWfqSgGq4y00xRIzRJ29-rq1aBt1no4gQyHNGylyR-223_HLjbATDhUEVIJEH9VPMjnvHPZcIC1PxyPubgROVyQx7GOuMIPSIVQ4m48iHWHP25ub-vc9T3fo' },
+              { title: 'HMU Artists', desc: 'Beauty, SFX & High-Fashion', image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBstEwTZGxzOlMuMKJ3DIM7MTew8MzXavTguvPG6Q6OtUL2HFiIaNEQsmnJ4Boo8lFZzIbrdn0WsxMIiC45hCpwSAZOeK5bgouxKE12-YJH_YsoTLSK7fqlHKxI4a5hzH4GfOdg523fswnoXigircuZcUwOea3UoxtbmQzoJbmHENjid4Ea-vV-hc93EQAL9mu4VkZybGbrNyPBddDggCMsUoqsNxZZImAFyy9SfygG0o2SzHtnT4NvjOkId_PAEplmViI_aaPFePSU' },
+              { title: 'Studio Support', desc: 'Cleaners, PAs & Set Builders', image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuC8pzzl2d32DJ1X_9dyOqcq2S584fvfzY_KEO2hkhnioVHc4TqPjWKg4m-N_-f-QXUdomuCQP1UwRQ1lvMZHkWFUJNUSlGlFmBcQkRgRuxTgyq0NOI_nLEbrzpdDsfFsEDbG46qLSobd70yjlCWF0ps2LwdwuAb49EcEejXsxYh14rwoAFK30LW6MGQfhQhh_FXlJlQA9dQfgPIDaZRd1ZisonE2y370NS24Pwz_6gdKcAhvTlFRzhlHXiLCR2BhGsqTMrA5tevUi6m' },
             ].map((service, i) => (
-              <div key={i} className="group relative rounded-[32px] overflow-hidden h-[400px] shadow-lg hover:-translate-y-2 transition-transform duration-500 cursor-pointer">
+              <div key={i} className="group relative rounded-[32px] overflow-hidden h-[400px] shadow-lg hover:-translate-y-2 transition-transform duration-500 cursor-pointer reveal-item">
                 <img className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" src={service.image} alt={service.title} />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
                 <div className="absolute bottom-0 left-0 p-6 w-full">
@@ -314,11 +392,11 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Before/After Comparison */}
-      <section className="py-24 bg-[#f3f4f5]">
+      {/* Before/After */}
+      <section className="py-24 bg-[#f3f4f5] reveal">
         <div className="max-w-[1440px] mx-auto px-4 md:px-16">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-[#e1e3e4] rounded-[40px] p-8 md:p-12 flex flex-col items-center text-center">
+            <div className="bg-[#e1e3e4] rounded-[40px] p-8 md:p-12 flex flex-col items-center text-center reveal-item">
               <span className="text-sm font-bold text-[#424937] uppercase mb-8">Before ManyRooms</span>
               <h2 className="text-4xl md:text-5xl font-extrabold mb-12 text-[#191c1d]">All work<br/>and no play.</h2>
               <ul className="w-full space-y-6 text-left">
@@ -330,7 +408,7 @@ export default function HomePage() {
                 ))}
               </ul>
             </div>
-            <div className="bg-[#446900] text-white rounded-[40px] p-8 md:p-12 flex flex-col items-center text-center relative overflow-hidden">
+            <div className="bg-[#446900] text-white rounded-[40px] p-8 md:p-12 flex flex-col items-center text-center relative overflow-hidden reveal-item">
               <div className="absolute top-0 right-0 p-8">
                 <span className="material-symbols-outlined text-[#beff5f] text-6xl animate-pulse" style={{ fontVariationSettings: "'FILL' 1" }}>monetization_on</span>
               </div>
@@ -352,10 +430,10 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Steps Section */}
-      <section className="py-24 bg-white">
+      {/* Steps */}
+      <section className="py-24 bg-white reveal">
         <div className="max-w-[1440px] mx-auto px-4 md:px-16 text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-extrabold mb-4 text-[#191c1d]">
+          <h2 className="text-4xl md:text-5xl font-extrabold mb-4 text-[#191c1d] reveal-item">
             Get up and running in <span className="italic text-[#446900]">3 simple steps</span>.
           </h2>
         </div>
@@ -365,7 +443,7 @@ export default function HomePage() {
             { icon: 'smart_toy', title: 'Automate bookings', desc: 'Let our Studio AI handle inquiries, vetting, and scheduling while you focus on creating.', bg: 'bg-[#beff5f]' },
             { icon: 'account_balance_wallet', title: 'Collect revenue', desc: 'Instant payouts directly to your account. No more chasing invoices or "exposure" deals.', bg: 'bg-[#ffe6de]' },
           ].map((step, i) => (
-            <div key={i} className="flex flex-col items-center gap-6 text-center">
+            <div key={i} className="flex flex-col items-center gap-6 text-center reveal-item">
               <div className={`w-24 h-24 rounded-full ${step.bg} flex items-center justify-center mb-2`}>
                 <span className="material-symbols-outlined text-4xl text-[#446900]" style={{ fontVariationSettings: "'FILL' 1" }}>{step.icon}</span>
               </div>
@@ -376,10 +454,10 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Featured Studios Gallery */}
-      <section className="py-24 bg-[#f3f4f5] overflow-hidden">
+      {/* Featured Studios */}
+      <section className="py-24 bg-[#f3f4f5] overflow-hidden reveal">
         <div className="max-w-[1440px] mx-auto px-4 md:px-16 flex justify-between items-end mb-12">
-          <h2 className="text-3xl font-bold text-[#191c1d]">
+          <h2 className="text-3xl font-bold text-[#191c1d] reveal-item">
             Featured Studios <span className="text-[#446900] bg-[#beff5f]/30 px-3 py-1 rounded-lg text-sm">New This Week</span>
           </h2>
           <div className="flex gap-2">
@@ -403,7 +481,7 @@ export default function HomePage() {
             featuredSpaces.map((space) => {
               const coverImage = getFirstImage(space.images);
               return (
-                <Link key={space.id} href={`/spaces/${space.id}`} className="min-w-[380px] bg-white rounded-3xl overflow-hidden shadow-md group flex-shrink-0">
+                <Link key={space.id} href={`/spaces/${space.id}`} className="min-w-[380px] bg-white rounded-3xl overflow-hidden shadow-md group flex-shrink-0 reveal-item">
                   <div className="h-64 relative overflow-hidden">
                     {coverImage ? (
                       <img className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src={coverImage} alt={space.name} />
@@ -442,14 +520,481 @@ export default function HomePage() {
       <Chatbot />
 
       <style jsx>{`
-        @keyframes float {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-20px); }
+        @keyframes messageIn {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-message {
+          animation: messageIn 0.4s ease-out forwards;
+        }
+        .chat-container::-webkit-scrollbar { display: none; }
+        
+        @keyframes marquee {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+        .animate-marquee {
+          animation: marquee 30s linear infinite;
         }
       `}</style>
     </div>
   );
 }
+
+
+
+// // app/page.tsx
+// 'use client';
+
+// import { useState, useEffect } from 'react';
+// import Link from 'next/link';
+// import { supabase } from '@/lib/supabase';
+// import {
+//   MagnifyingGlassIcon,
+//   Bars3Icon,
+//   XMarkIcon,
+//   StarIcon,
+//   MapPinIcon,
+//   ChevronLeftIcon,
+//   ChevronRightIcon,
+// } from '@heroicons/react/24/outline';
+// import Chatbot from '@/components/Chatbot';
+// import Footer from '@/components/Footer';
+// import './home.css';
+
+// interface Studio {
+//   id: string;
+//   name: string;
+//   city: string;
+//   state: string;
+//   hourly_rate: number;
+//   images: string[];
+//   status: string;
+//   description: string;
+// }
+
+// export default function HomePage() {
+//   const [featuredSpaces, setFeaturedSpaces] = useState<Studio[]>([]);
+//   const [loading, setLoading] = useState(true);
+//   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+//   const [isVisible, setIsVisible] = useState(false);
+
+//   useEffect(() => {
+//     fetchApprovedStudios();
+//     setTimeout(() => setIsVisible(true), 100);
+//   }, []);
+
+//   useEffect(() => {
+//     if (isMobileMenuOpen) {
+//       document.body.style.overflow = 'hidden';
+//     } else {
+//       document.body.style.overflow = 'unset';
+//     }
+//     return () => { document.body.style.overflow = 'unset'; };
+//   }, [isMobileMenuOpen]);
+
+//   const fetchApprovedStudios = async () => {
+//     setLoading(true);
+//     try {
+//       const { data, error } = await supabase
+//         .from('studios')
+//         .select('*')
+//         .eq('status', 'approved')
+//         .limit(6);
+//       if (error) throw error;
+//       setFeaturedSpaces(data || []);
+//     } catch (error) {
+//       console.error('Error fetching studios:', error);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   const getFirstImage = (images: string[]) => {
+//     if (!images || images.length === 0) return null;
+//     return images[0];
+//   };
+
+//   return (
+//     <div className="home-page bg-[#f8f9fa] text-[#191c1d] overflow-x-hidden">
+      
+//       {/* Navigation */}
+//       <nav className="fixed top-0 w-full z-50 bg-white/70 backdrop-blur-xl border-b border-[#c2c9b1]/30 shadow-sm">
+//         <div className="flex justify-between items-center px-4 md:px-16 py-3 md:py-4 w-full max-w-[1440px] mx-auto">
+//           <div className="flex items-center gap-4 md:gap-8">
+//             <Link href="/" className="group flex-shrink-0">
+//               <img 
+//                 alt="ManyRooms Logo" 
+//                 className="h-8 md:h-10 w-auto object-contain" 
+//                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuCj4l-7dKP6wsFLJVaha-0y6angmGBQIrc_25ZvzO4pYfo99ccX_Ez1Cr3eaBLwN7TpKfnyO2bQjSn2zi9-LvZwbIx095MYCOY5NMW4gv_1xZDjSqd1yOSaZpl9UPmKSQzsq3wUOQRyBffYS8_CHESXwD6FVa7gSAvRkqKad5Z2VLh7D8rkyBc0urG8eBfXgU2XyL9Ohy0_XdDvhHwLburvvSENjkI-jy9_qsIBmEaKAXA32QCjHabBj5ySLxFjbMrCKn3Im8WkmVQ0"
+//               />
+//             </Link>
+//             <div className="hidden lg:flex gap-6 items-center">
+//               <Link href="/" className="text-[#446900] font-bold border-b-2 border-[#446900] py-1">Marketplace</Link>
+//               <Link href="/spaces" className="text-[#424937] hover:text-[#446900] transition-colors py-1">Studios</Link>
+//               <Link href="/cities" className="text-[#424937] hover:text-[#446900] transition-colors py-1">Vibes</Link>
+//               <Link href="/about" className="text-[#424937] hover:text-[#446900] transition-colors py-1">Journal</Link>
+//               <Link href="/services" className="text-[#424937] hover:text-[#446900] transition-colors py-1">Services</Link>
+//             </div>
+//           </div>
+//           <div className="flex items-center gap-3 md:gap-4">
+//             <div className="hidden md:flex relative items-center">
+//               <MagnifyingGlassIcon className="absolute left-3 w-4 h-4 text-[#737a65]" />
+//               <input 
+//                 className="pl-10 pr-4 py-2 bg-[#f3f4f5] border-none rounded-full w-48 lg:w-64 focus:ring-2 focus:ring-[#beff5f] text-sm outline-none text-[#191c1d]" 
+//                 placeholder="Search by vibe..." 
+//                 type="text" 
+//               />
+//             </div>
+//             <Link 
+//               href="/signup?role=owner" 
+//               className="hidden md:block px-6 py-2 bg-[#beff5f] text-[#111f00] font-bold text-sm rounded-full hover:scale-105 transition-transform"
+//             >
+//               List Studio
+//             </Link>
+//             <div className="hidden md:flex items-center gap-3">
+//               <span className="material-symbols-outlined text-[#424937] cursor-pointer hover:scale-105 transition-transform">favorite</span>
+//               <span className="material-symbols-outlined text-[#424937] cursor-pointer hover:scale-105 transition-transform">account_circle</span>
+//             </div>
+//             <button onClick={() => setIsMobileMenuOpen(true)} className="md:hidden p-2 hover:bg-gray-100 rounded-full">
+//               <Bars3Icon className="w-5 h-5 text-[#191c1d]" />
+//             </button>
+//           </div>
+//         </div>
+//       </nav>
+
+//       {/* Mobile Menu */}
+//       <div className={`fixed inset-0 z-[60] md:hidden transition-all duration-300 ${isMobileMenuOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}>
+//         <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsMobileMenuOpen(false)} />
+//         <div className={`absolute top-0 right-0 h-full w-[300px] bg-white shadow-2xl transition-transform duration-300 ${isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
+//           <div className="p-6">
+//             <div className="flex justify-between items-center mb-10">
+//               <span className="text-2xl font-bold text-[#446900]">ManyRooms</span>
+//               <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 hover:bg-gray-100 rounded-full">
+//                 <XMarkIcon className="w-6 h-6 text-[#191c1d]" />
+//               </button>
+//             </div>
+//             <nav className="flex flex-col gap-6">
+//               <Link href="/" className="text-base font-semibold text-[#191c1d] hover:text-[#446900]" onClick={() => setIsMobileMenuOpen(false)}>Marketplace</Link>
+//               <Link href="/spaces" className="text-base font-semibold text-[#191c1d] hover:text-[#446900]" onClick={() => setIsMobileMenuOpen(false)}>Studios</Link>
+//               <Link href="/cities" className="text-base font-semibold text-[#191c1d] hover:text-[#446900]" onClick={() => setIsMobileMenuOpen(false)}>Vibes</Link>
+//               <Link href="/about" className="text-base font-semibold text-[#191c1d] hover:text-[#446900]" onClick={() => setIsMobileMenuOpen(false)}>Journal</Link>
+//               <Link href="/services" className="text-base font-semibold text-[#191c1d] hover:text-[#446900]" onClick={() => setIsMobileMenuOpen(false)}>Services</Link>
+//               <div className="border-t border-gray-200 pt-6 mt-2">
+//                 <Link href="/signup?role=owner" className="block text-base font-semibold text-[#191c1d] hover:text-[#446900] mb-4" onClick={() => setIsMobileMenuOpen(false)}>List Studio</Link>
+//                 <Link href="/login" className="block text-base font-semibold text-[#191c1d] hover:text-[#446900] mb-4" onClick={() => setIsMobileMenuOpen(false)}>Log in</Link>
+//                 <Link href="/signup" className="block text-base font-semibold text-[#191c1d] hover:text-[#446900] mb-4" onClick={() => setIsMobileMenuOpen(false)}>Sign up</Link>
+//               </div>
+//             </nav>
+//           </div>
+//         </div>
+//       </div>
+
+//       {/* Hero Section with Background Image */}
+//       <header className="relative min-h-screen flex items-center pt-24 overflow-hidden">
+//         {/* Hero Background Image - Person in Studio */}
+//         <div className="absolute inset-0 z-0">
+//           <img 
+//             src="https://images.unsplash.com/photo-1604014237800-1c9102c219da?auto=format&fit=crop&q=80&w=2000"
+//             alt="Creative professional in studio"
+//             className="w-full h-full object-cover object-center"
+//           />
+//           {/* Gradient Overlays */}
+//           <div className="absolute inset-0 bg-gradient-to-r from-[#f8f9fa] via-[#f8f9fa]/85 to-[#f8f9fa]/40"></div>
+//           <div className="absolute inset-0 bg-gradient-to-t from-[#f8f9fa] via-transparent to-transparent"></div>
+//         </div>
+
+//         <div className="relative z-10 w-full max-w-[1440px] mx-auto px-4 md:px-16 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+          
+//           <div className="lg:col-span-7 flex flex-col items-start gap-6">
+//             <div className={`transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+//               <span className="inline-block px-4 py-1 rounded-full bg-[#e4d7fd]/90 backdrop-blur-sm text-[#665c7c] font-bold text-sm uppercase tracking-wider mb-4">
+//                 The Creative Evolution
+//               </span>
+//               <h1 className="text-[56px] leading-[62px] md:text-[84px] md:leading-[92px] font-extrabold text-[#191c1d] tracking-tighter">
+//                 Space <span className="text-[#446900] italic">smarter</span>,<br/>not harder.
+//               </h1>
+//             </div>
+//             <p className={`text-lg text-[#424937] max-w-xl transition-all duration-700 delay-100 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+//               Monetize your creative square footage with powerful automations for booking, lighting, and access. Join 1M+ creators worldwide.
+//             </p>
+            
+//             <div className={`w-full max-w-2xl transition-all duration-700 delay-200 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+//               <div className="bg-white/90 backdrop-blur-xl border border-white/60 p-2 rounded-[32px] flex items-center shadow-2xl">
+//                 <div className="flex-grow flex items-center px-4">
+//                   <span className="material-symbols-outlined text-[#446900] mr-3" style={{ fontVariationSettings: "'FILL' 1" }}>
+//                     temp_preferences_custom
+//                   </span>
+//                   <input 
+//                     className="w-full bg-transparent border-none focus:ring-0 text-lg outline-none text-[#191c1d] placeholder:text-[#737a65]" 
+//                     placeholder="Describe the aesthetic (e.g. '70s synth-wave desert loft')" 
+//                     type="text" 
+//                   />
+//                 </div>
+//                 <Link 
+//                   href="/spaces"
+//                   className="bg-[#beff5f] text-[#111f00] px-8 py-4 rounded-[24px] font-bold flex items-center gap-2 hover:shadow-[0_0_20px_rgba(190,255,95,0.6)] transition-all whitespace-nowrap"
+//                 >
+//                   <span className="material-symbols-outlined">auto_awesome</span>
+//                   Search by Vibe
+//                 </Link>
+//               </div>
+//               <div className="flex gap-4 mt-4 px-4 overflow-x-auto whitespace-nowrap">
+//                 <span className="text-[#424937] text-sm font-bold">Trending:</span>
+//                 <Link href="/spaces?vibe=concrete" className="text-[#446900] hover:underline text-sm">#ConcreteMinimalism</Link>
+//                 <Link href="/spaces?vibe=music" className="text-[#446900] hover:underline text-sm">#SoftGlowMusic</Link>
+//                 <Link href="/spaces?vibe=podcast" className="text-[#446900] hover:underline text-sm">#PodcastNook</Link>
+//               </div>
+//             </div>
+//           </div>
+
+//           {/* Right side - subtle glass effect area for depth */}
+//           <div className="lg:col-span-5 relative hidden lg:flex justify-center items-center h-[600px]">
+//             <div className="absolute top-10 right-0 bg-white/85 backdrop-blur-xl border border-white/50 p-6 rounded-2xl shadow-2xl max-w-[280px] border-l-8 border-[#beff5f]" style={{ animation: 'float 6s ease-in-out infinite' }}>
+//               <div className="flex items-center gap-3 mb-2">
+//                 <div className="w-10 h-10 rounded-full bg-[#e4d7fd] flex items-center justify-center">
+//                   <span className="material-symbols-outlined text-[#665c7c]">camera_enhance</span>
+//                 </div>
+//                 <span className="font-bold text-sm text-[#191c1d]">Studio Bot</span>
+//               </div>
+//               <p className="text-sm italic text-[#191c1d]">"Hey! Do you sell production hours?"</p>
+//             </div>
+            
+//             <div className="absolute bottom-20 left-0 bg-white/85 backdrop-blur-xl border border-white/50 p-6 rounded-2xl shadow-2xl max-w-[280px] border-r-8 border-[#ffe6de]" style={{ animation: 'float 6s ease-in-out infinite 1s' }}>
+//               <div className="flex items-center gap-3 mb-2 flex-row-reverse">
+//                 <div className="w-10 h-10 rounded-full bg-[#beff5f] flex items-center justify-center">
+//                   <span className="material-symbols-outlined text-[#111f00]">done_all</span>
+//                 </div>
+//                 <span className="font-bold text-sm text-[#191c1d]">ManyRooms</span>
+//               </div>
+//               <p className="text-sm font-bold text-[#446900]">"Hey! Yes, we do! Want me to send you the link to book? 🚀"</p>
+//             </div>
+//           </div>
+//         </div>
+//       </header>
+
+//       {/* Social Proof */}
+//       <section className="py-12 bg-white border-y border-[#c2c9b1]/30">
+//         <div className="max-w-[1440px] mx-auto px-4 md:px-16 flex flex-col md:flex-row items-center gap-12">
+//           <div className="flex flex-col gap-2 shrink-0">
+//             <h3 className="text-5xl font-extrabold leading-tight text-[#446900]">1M+</h3>
+//             <p className="font-bold text-sm text-[#424937] uppercase">Creators Trust Us</p>
+//           </div>
+//           <div className="flex flex-wrap justify-center md:justify-start gap-8 md:gap-12 opacity-50 hover:opacity-100 transition-all duration-500 flex-grow">
+//             {['Meta', 'TikTok', 'Instagram', 'Facebook', 'WhatsApp'].map((brand) => (
+//               <span key={brand} className="text-xl md:text-2xl font-extrabold text-[#191c1d]">{brand}</span>
+//             ))}
+//           </div>
+//         </div>
+//       </section>
+
+//       {/* Everywhere Section */}
+//       <section className="py-24 bg-[#f8f9fa] relative overflow-hidden">
+//         <div className="max-w-[1440px] mx-auto px-4 md:px-16">
+//           <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-8">
+//             <div className="max-w-2xl">
+//               <h2 className="text-4xl md:text-5xl font-extrabold mb-4 text-[#191c1d]">
+//                 Everywhere your <span className="text-[#a43c12]">vision</span> lives.
+//               </h2>
+//               <p className="text-lg text-[#424937]">The most sophisticated network of creative square footage on the planet. Specialized for every niche.</p>
+//             </div>
+//             <Link href="/spaces" className="group flex items-center gap-2 text-[#446900] font-bold text-sm uppercase">
+//               Explore all categories 
+//               <span className="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
+//             </Link>
+//           </div>
+          
+//           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+//             {[
+//               { image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBDSHg0tkd_xlXbd8XLxjvdWaUgh-Wgi_B2ogcGWvBQHu5itBc6wfvLL7Uks_ztfZQAqK7lWfTx4O_i13JCWPmO7gTmeYzxQaPrG_tsy3pbEsLcTdP08ztwgndHP1-Jt9pOad3BL9ib-gPyEx0GUvwlrJA2niuV8FD2JBh6h_ZsS8F0VriH2HZEpRKhFr-IScJrOEIwiePqm4kvFD-P41nwFMfMsU0MPd9kycWXkGl_DsOrZfIzoQzj7KEuW1hAx2iGIw-gZyhNPqb', badge: 'Audio Production', badgeColor: 'bg-[#635979] text-white', title: 'Music & Podcast Studios', desc: 'Acoustically perfect environments for your next hit.' },
+//               { image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuB74YlBwI2kAzcpnrBVppH7dn6wM8Dpt5QmxAEKu3ImGGFSmPvz6AFW8tpeSIuKjkVDfRNSBFlNTxyizEu5zu2dstawrNFjmsy9aWG2giHSpNp1bHh_sCvEe5wjmkhOdFYNouCLbm00PkvPtRPTZWCftj0Qxhkuxy7jcfAt-TXbLa6CQgrvS2k7EUCcOSdozHLPPI_JNZQU11IxT7PtjMXuob_u02TdqLxb-Y2FgGONZYZcn5a5vXzDcb3hO1WGokfGXEgRAX-JP-cy', badge: 'Visual Arts', badgeColor: 'bg-[#beff5f] text-[#111f00]', title: 'Photography & Film', desc: 'Natural light lofts and professional cyc walls.' },
+//               { image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBRVPUuNYkbGYO_2TrCnEpkpXhaEJChhEI1eKHDnEIWVrkbPKAsranLkrOZncliRk2uhvXtaFPKcbz4MDlHZgYT5SqCiqkSOQlMb8D0s5WK-43lw61XoC26Wo5ZXj5cObwwVxdLO7jO_S2PtrSDCCWz86klSzEz1ZMJjL30RdAsth_8VUnAUTAcHYJ97bykBsJXrEtN7fy9JWeS_BGScrktCVk56-UDJeEfuZPAjY8aMOKHsQBQ2n4Q7S6CWgXnIbM2U5dXgpxB1_VI', badge: 'Co-Creation', badgeColor: 'bg-[#ffe6de] text-[#b4471d]', title: 'Pop-up & Design Hubs', desc: 'Dynamic spaces for teams to build the future.' },
+//             ].map((card, i) => (
+//               <div key={i} className="group relative rounded-[32px] overflow-hidden h-[500px] shadow-xl hover:-translate-y-2 transition-transform duration-500">
+//                 <img className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" src={card.image} alt={card.title} />
+//                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+//                 <div className="absolute bottom-0 left-0 p-8 w-full">
+//                   <span className={`inline-block px-3 py-1 rounded-full font-bold text-xs mb-4 uppercase ${card.badgeColor}`}>{card.badge}</span>
+//                   <h4 className="text-white text-2xl font-bold mb-2">{card.title}</h4>
+//                   <p className="text-white/70 text-sm opacity-0 group-hover:opacity-100 transition-opacity">{card.desc}</p>
+//                 </div>
+//               </div>
+//             ))}
+//           </div>
+//         </div>
+//       </section>
+
+//       {/* The Crew Collective */}
+//       <section className="py-24 bg-white relative overflow-hidden">
+//         <div className="max-w-[1440px] mx-auto px-4 md:px-16">
+//           <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-8">
+//             <div className="max-w-2xl">
+//               <span className="inline-block px-4 py-1 rounded-full bg-[#beff5f] text-[#111f00] font-bold text-sm uppercase tracking-wider mb-4">The Crew Collective</span>
+//               <h2 className="text-4xl md:text-5xl font-extrabold mb-4 text-[#191c1d]">
+//                 Hire the <span className="text-[#446900]">pros</span> who make it happen.
+//               </h2>
+//               <p className="text-lg text-[#424937]">Don't just book a space—build your dream team. Access our vetted network of creative professionals ready to elevate your production.</p>
+//             </div>
+//             <Link href="/services" className="group flex items-center gap-2 text-[#446900] font-bold text-sm uppercase">
+//               Browse all professionals <span className="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
+//             </Link>
+//           </div>
+//           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+//             {[
+//               { title: 'Photographers', desc: 'Editorial, Commercial & Portrait', image: 'https://images.unsplash.com/photo-1542038784456-1ea8e935640e?auto=format&fit=crop&q=80&w=800' },
+//               { title: 'Videographers', desc: 'DPs, Editors & Drone Pilots', image: 'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?auto=format&fit=crop&q=80&w=800' },
+//               { title: 'HMU Artists', desc: 'Beauty, SFX & High-Fashion', image: 'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&q=80&w=800' },
+//               { title: 'Studio Support', desc: 'Cleaners, PAs & Set Builders', image: 'https://images.unsplash.com/photo-1581578731548-c64695cc6958?auto=format&fit=crop&q=80&w=800' },
+//             ].map((service, i) => (
+//               <div key={i} className="group relative rounded-[32px] overflow-hidden h-[400px] shadow-lg hover:-translate-y-2 transition-transform duration-500 cursor-pointer">
+//                 <img className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" src={service.image} alt={service.title} />
+//                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+//                 <div className="absolute bottom-0 left-0 p-6 w-full">
+//                   <h4 className="text-white text-xl font-bold mb-1">{service.title}</h4>
+//                   <p className="text-white/70 text-sm">{service.desc}</p>
+//                 </div>
+//               </div>
+//             ))}
+//           </div>
+//         </div>
+//       </section>
+
+//       {/* Before/After Comparison */}
+//       <section className="py-24 bg-[#f3f4f5]">
+//         <div className="max-w-[1440px] mx-auto px-4 md:px-16">
+//           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+//             <div className="bg-[#e1e3e4] rounded-[40px] p-8 md:p-12 flex flex-col items-center text-center">
+//               <span className="text-sm font-bold text-[#424937] uppercase mb-8">Before ManyRooms</span>
+//               <h2 className="text-4xl md:text-5xl font-extrabold mb-12 text-[#191c1d]">All work<br/>and no play.</h2>
+//               <ul className="w-full space-y-6 text-left">
+//                 {['Manual booking coordination.', 'Hidden studio fees.', 'Inconsistent vibe matching.', 'Slow creative output.'].map((item) => (
+//                   <li key={item} className="flex items-center justify-between border-b border-[#c2c9b1]/30 pb-4">
+//                     <span className="text-lg font-bold text-[#191c1d]">{item}</span>
+//                     <span className="material-symbols-outlined text-[#ba1a1a]">close</span>
+//                   </li>
+//                 ))}
+//               </ul>
+//             </div>
+//             <div className="bg-[#446900] text-white rounded-[40px] p-8 md:p-12 flex flex-col items-center text-center relative overflow-hidden">
+//               <div className="absolute top-0 right-0 p-8">
+//                 <span className="material-symbols-outlined text-[#beff5f] text-6xl animate-pulse" style={{ fontVariationSettings: "'FILL' 1" }}>monetization_on</span>
+//               </div>
+//               <span className="text-sm font-bold text-[#beff5f] uppercase mb-8 relative z-10">After ManyRooms</span>
+//               <h2 className="text-4xl md:text-5xl font-extrabold mb-12 text-white relative z-10">Less grind<br/>and more pay.</h2>
+//               <ul className="w-full space-y-6 text-left relative z-10">
+//                 {['Auto-pilot studio management.', 'Transparent fixed pricing.', 'AI Vibe Search technology.', '24/7 revenue generation.'].map((item) => (
+//                   <li key={item} className="flex items-center justify-between border-b border-white/20 pb-4">
+//                     <span className="text-lg font-bold">{item}</span>
+//                     <span className="material-symbols-outlined text-[#beff5f]">check_circle</span>
+//                   </li>
+//                 ))}
+//               </ul>
+//               <Link href="/signup" className="mt-12 w-full bg-[#beff5f] text-[#111f00] py-5 rounded-2xl font-extrabold text-lg hover:scale-105 transition-transform duration-200 relative z-10 text-center">
+//                 Get Started for Free
+//               </Link>
+//             </div>
+//           </div>
+//         </div>
+//       </section>
+
+//       {/* Steps Section */}
+//       <section className="py-24 bg-white">
+//         <div className="max-w-[1440px] mx-auto px-4 md:px-16 text-center mb-16">
+//           <h2 className="text-4xl md:text-5xl font-extrabold mb-4 text-[#191c1d]">
+//             Get up and running in <span className="italic text-[#446900]">3 simple steps</span>.
+//           </h2>
+//         </div>
+//         <div className="max-w-[1440px] mx-auto px-4 md:px-16 grid grid-cols-1 md:grid-cols-3 gap-12">
+//           {[
+//             { icon: 'add_photo_alternate', title: 'List your space', desc: 'Upload photos, set your vibe tokens, and define your hours. It takes less than 5 minutes.', bg: 'bg-[#e4d7fd]' },
+//             { icon: 'smart_toy', title: 'Automate bookings', desc: 'Let our Studio AI handle inquiries, vetting, and scheduling while you focus on creating.', bg: 'bg-[#beff5f]' },
+//             { icon: 'account_balance_wallet', title: 'Collect revenue', desc: 'Instant payouts directly to your account. No more chasing invoices or "exposure" deals.', bg: 'bg-[#ffe6de]' },
+//           ].map((step, i) => (
+//             <div key={i} className="flex flex-col items-center gap-6 text-center">
+//               <div className={`w-24 h-24 rounded-full ${step.bg} flex items-center justify-center mb-2`}>
+//                 <span className="material-symbols-outlined text-4xl text-[#446900]" style={{ fontVariationSettings: "'FILL' 1" }}>{step.icon}</span>
+//               </div>
+//               <h3 className="text-2xl font-bold text-[#191c1d]">{step.title}</h3>
+//               <p className="text-lg text-[#424937]">{step.desc}</p>
+//             </div>
+//           ))}
+//         </div>
+//       </section>
+
+//       {/* Featured Studios Gallery */}
+//       <section className="py-24 bg-[#f3f4f5] overflow-hidden">
+//         <div className="max-w-[1440px] mx-auto px-4 md:px-16 flex justify-between items-end mb-12">
+//           <h2 className="text-3xl font-bold text-[#191c1d]">
+//             Featured Studios <span className="text-[#446900] bg-[#beff5f]/30 px-3 py-1 rounded-lg text-sm">New This Week</span>
+//           </h2>
+//           <div className="flex gap-2">
+//             <button className="w-12 h-12 rounded-full border border-[#c2c9b1] flex items-center justify-center hover:bg-[#edeeef] transition-colors">
+//               <ChevronLeftIcon className="w-5 h-5 text-[#191c1d]" />
+//             </button>
+//             <button className="w-12 h-12 rounded-full border border-[#c2c9b1] flex items-center justify-center hover:bg-[#edeeef] transition-colors">
+//               <ChevronRightIcon className="w-5 h-5 text-[#191c1d]" />
+//             </button>
+//           </div>
+//         </div>
+//         <div className="flex gap-6 px-4 md:px-16 overflow-x-auto pb-8">
+//           {loading ? (
+//             <div className="flex justify-center w-full py-20">
+//               <div className="animate-pulse text-center">
+//                 <div className="w-16 h-16 bg-[#446900]/20 rounded-full mx-auto mb-4"></div>
+//                 <p className="text-[#424937]">Loading studios...</p>
+//               </div>
+//             </div>
+//           ) : (
+//             featuredSpaces.map((space) => {
+//               const coverImage = getFirstImage(space.images);
+//               return (
+//                 <Link key={space.id} href={`/spaces/${space.id}`} className="min-w-[380px] bg-white rounded-3xl overflow-hidden shadow-md group flex-shrink-0">
+//                   <div className="h-64 relative overflow-hidden">
+//                     {coverImage ? (
+//                       <img className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src={coverImage} alt={space.name} />
+//                     ) : (
+//                       <div className="w-full h-full flex items-center justify-center bg-[#edeeef]">
+//                         <span className="material-symbols-outlined text-4xl text-[#c2c9b1]">image</span>
+//                       </div>
+//                     )}
+//                     <div className="absolute top-4 right-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full flex items-center gap-1">
+//                       <StarIcon className="w-4 h-4 text-[#446900] fill-current" />
+//                       <span className="font-bold text-sm text-[#191c1d]">4.9</span>
+//                     </div>
+//                   </div>
+//                   <div className="p-6">
+//                     <div className="flex justify-between items-start mb-2">
+//                       <h5 className="text-xl font-bold text-[#191c1d]">{space.name}</h5>
+//                       <p className="font-bold text-[#446900]">${space.hourly_rate}/hr</p>
+//                     </div>
+//                     <p className="text-[#424937] text-sm mb-4 flex items-center gap-1">
+//                       <MapPinIcon className="w-4 h-4" />
+//                       {space.city || 'Location'}{space.state ? `, ${space.state}` : ''}
+//                     </p>
+//                     <div className="flex gap-2">
+//                       <span className="px-2 py-1 bg-[#f3f4f5] rounded-md text-xs font-bold text-[#424937]">#Creative</span>
+//                       <span className="px-2 py-1 bg-[#f3f4f5] rounded-md text-xs font-bold text-[#424937]">#Studio</span>
+//                     </div>
+//                   </div>
+//                 </Link>
+//               );
+//             })
+//           )}
+//         </div>
+//       </section>
+
+//       <Footer />
+//       <Chatbot />
+
+//       <style jsx>{`
+//         @keyframes float {
+//           0%, 100% { transform: translateY(0px); }
+//           50% { transform: translateY(-20px); }
+//         }
+//       `}</style>
+//     </div>
+//   );
+// }
 
 
 
