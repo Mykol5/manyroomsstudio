@@ -3,6 +3,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import {
   MagnifyingGlassIcon,
@@ -17,11 +18,20 @@ import Chatbot from '@/components/Chatbot';
 import Footer from '@/components/Footer';
 import './home.css';
 
+// Brand Colors
+const brand = {
+  yellow: '#F1CB81',
+  blue: '#91ADCD',
+  brown: '#DB8B8C',
+  dark: '#3C291C',
+};
+
 interface Studio {
   id: string;
   name: string;
   city: string;
   state: string;
+  country: string;
   hourly_rate: number;
   images: string[];
   status: string;
@@ -34,6 +44,7 @@ interface ChatMessage {
 }
 
 export default function HomePage() {
+  const router = useRouter();
   const [featuredSpaces, setFeaturedSpaces] = useState<Studio[]>([]);
   const [loading, setLoading] = useState(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -42,39 +53,41 @@ export default function HomePage() {
   const [scrolled, setScrolled] = useState(false);
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
+  // Search states
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchLocation, setSearchLocation] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
+
   const chatSequence: ChatMessage[] = [
-    { text: "Hi! Is Studio A available for a 4-hour shoot this Friday?", type: "user" },
-    { text: "Hey! Yes, we have a slot from 2 PM - 6 PM. Would you like to book?", type: "owner" },
+    { text: "Hi! Is the studio available for a 4-hour shoot this Friday?", type: "user" },
+    { text: "Hey! Yes, we have a slot from 2 PM - 6 PM. Want me to book you in?", type: "owner" },
     { text: "Perfect, sending the request now! 🚀", type: "user" },
   ];
 
   const allReviews = [
-    { text: "ManyRooms transformed how we book studio spaces. The vibe search is incredibly accurate and saves us hours every week.", name: "Sarah Chen", role: "Creative Director, Vogue", initials: "SC", avatarBg: "bg-[#e4d7fd] text-[#665c7c]" },
-    { text: "I've saved countless hours on booking coordination. The automation is a game-changer for our production team.", name: "Marcus Thorne", role: "Editorial Photographer", initials: "MT", avatarBg: "bg-[#beff5f] text-[#111f00]" },
-    { text: "The quality of studios on this platform is unmatched. Every space I've booked has exceeded my expectations.", name: "Elena Rodriguez", role: "Independent Filmmaker", initials: "ER", avatarBg: "bg-[#ffe6de] text-[#b4471d]" },
-    { text: "Finally, a platform that understands creative professionals. The booking process is seamless and intuitive.", name: "James Wilson", role: "Art Director, Nike", initials: "JW", avatarBg: "bg-[#e4d7fd] text-[#665c7c]" },
-    { text: "From podcast studios to photography lofts, ManyRooms has every vibe we need for our productions.", name: "Amara Okafor", role: "Content Creator", initials: "AO", avatarBg: "bg-[#beff5f] text-[#111f00]" },
-    { text: "The AI vibe matching is scary good. It found exactly the industrial loft we needed for our campaign.", name: "David Park", role: "Creative Lead, Adobe", initials: "DP", avatarBg: "bg-[#ffe6de] text-[#b4471d]" },
-    { text: "We've increased our studio bookings by 300% since listing on ManyRooms. Best business decision ever.", name: "Lisa Thompson", role: "Studio Owner, DTLA", initials: "LT", avatarBg: "bg-[#e4d7fd] text-[#665c7c]" },
-    { text: "The transparent pricing and instant booking confirmations make my job so much easier. Highly recommend!", name: "Alex Rivera", role: "Production Manager", initials: "AR", avatarBg: "bg-[#beff5f] text-[#111f00]" },
-    { text: "I love how I can message studio owners directly and get quick responses. No more endless email chains!", name: "Nina Patel", role: "Fashion Photographer", initials: "NP", avatarBg: "bg-[#ffe6de] text-[#b4471d]" },
-    { text: "ManyRooms has become an essential part of our creative workflow. Can't imagine working without it now.", name: "Chris Mendoza", role: "Music Producer", initials: "CM", avatarBg: "bg-[#e4d7fd] text-[#665c7c]" },
-    { text: "The curated vibe categories are spot on. Found a brutalist loft that was perfect for our streetwear shoot.", name: "Keisha Williams", role: "Brand Strategist", initials: "KW", avatarBg: "bg-[#beff5f] text-[#111f00]" },
-    { text: "As a studio owner, the dashboard gives me complete control. Managing bookings has never been this smooth.", name: "Robert Kim", role: "Studio Owner, Brooklyn", initials: "RK", avatarBg: "bg-[#ffe6de] text-[#b4471d]" },
+    { text: "ManyRooms transformed how we book studio spaces. The search is incredibly accurate and saves us hours every week.", name: "Sarah Chen", role: "Creative Director, Vogue", initials: "SC" },
+    { text: "I've saved countless hours on booking coordination. The automation is a game-changer for our production team.", name: "Marcus Thorne", role: "Editorial Photographer", initials: "MT" },
+    { text: "The quality of studios on this platform is unmatched. Every space I've booked has exceeded expectations.", name: "Elena Rodriguez", role: "Independent Filmmaker", initials: "ER" },
+    { text: "Finally, a platform that understands creative professionals. The booking process is seamless.", name: "James Wilson", role: "Art Director, Nike", initials: "JW" },
+    { text: "From podcast studios to photography lofts, ManyRooms has every space we need for our productions.", name: "Amara Okafor", role: "Content Creator", initials: "AO" },
+    { text: "The matching is scary good. It found exactly the industrial loft we needed for our campaign shoot.", name: "David Park", role: "Creative Lead, Adobe", initials: "DP" },
+    { text: "We've increased our studio bookings by 300% since listing on ManyRooms. Best decision ever.", name: "Lisa Thompson", role: "Studio Owner, DTLA", initials: "LT" },
+    { text: "Transparent pricing and instant booking confirmations make my job so much easier. Highly recommend!", name: "Alex Rivera", role: "Production Manager", initials: "AR" },
+    { text: "I love messaging studio owners directly and getting quick responses. No more endless email chains!", name: "Nina Patel", role: "Fashion Photographer", initials: "NP" },
+    { text: "ManyRooms has become essential to our creative workflow. Can't imagine working without it.", name: "Chris Mendoza", role: "Music Producer", initials: "CM" },
+    { text: "The curated categories are spot on. Found a brutalist loft perfect for our streetwear shoot.", name: "Keisha Williams", role: "Brand Strategist", initials: "KW" },
+    { text: "As a studio owner, the dashboard gives me complete control. Managing bookings has never been smoother.", name: "Robert Kim", role: "Studio Owner, Brooklyn", initials: "RK" },
   ];
 
-  // Track scroll for nav
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Phone chat animation
   useEffect(() => {
     let isMounted = true;
     let timeoutIds: NodeJS.Timeout[] = [];
-
     const animateMessages = async () => {
       setPhoneMessages([]);
       for (const msg of chatSequence) {
@@ -118,48 +131,77 @@ export default function HomePage() {
 
   const getFirstImage = (images: string[]) => (!images || images.length === 0 ? null : images[0]);
 
+  // Search function - searches by query, location, and country
+  const handleSearch = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!searchQuery.trim() && !searchLocation.trim()) return;
+    
+    setIsSearching(true);
+    
+    try {
+      let query = supabase.from('studios').select('*').eq('status', 'approved');
+      
+      // Search by name or description matching the query
+      if (searchQuery.trim()) {
+        query = query.or(`name.ilike.%${searchQuery.trim()}%,description.ilike.%${searchQuery.trim()}%,city.ilike.%${searchQuery.trim()}%`);
+      }
+      
+      // Filter by location/country
+      if (searchLocation.trim()) {
+        const locLower = searchLocation.trim().toLowerCase();
+        query = query.or(`city.ilike.%${locLower}%,state.ilike.%${locLower}%,country.ilike.%${locLower}%`);
+      }
+      
+      query = query.limit(20);
+      
+      const { data, error } = await query;
+      
+      if (error) throw error;
+      
+      // Store results and navigate to spaces page with search params
+      const params = new URLSearchParams();
+      if (searchQuery.trim()) params.set('q', searchQuery.trim());
+      if (searchLocation.trim()) params.set('location', searchLocation.trim());
+      
+      router.push(`/spaces?${params.toString()}`);
+    } catch (error) {
+      console.error('Search error:', error);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
   return (
-    <div className="home-page bg-[#f8f9fa] text-[#191c1d] overflow-x-hidden">
+    <div className="home-page bg-[#FFFBF5] text-[#3C291C] overflow-x-hidden">
       
       {/* Navigation */}
       <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${
-        scrolled ? 'bg-white/95 backdrop-blur-xl border-b border-[#c2c9b1]/30 shadow-sm' : 'bg-transparent'
+        scrolled ? 'bg-white/95 backdrop-blur-xl border-b border-[#3C291C]/10 shadow-sm' : 'bg-transparent'
       }`}>
         <div className="flex justify-between items-center px-4 md:px-16 py-3 md:py-4 w-full max-w-[1440px] mx-auto">
           <div className="flex items-center gap-4 md:gap-8">
             <Link href="/" className="group flex-shrink-0">
-              <img 
-                alt="ManyRooms Logo" 
-                className="h-6 md:h-7 w-auto object-contain transition-transform duration-300 group-hover:scale-105" 
-                src={scrolled 
-                  ? "https://lh3.googleusercontent.com/aida-public/AB6AXuCj4l-7dKP6wsFLJVaha-0y6angmGBQIrc_25ZvzO4pYfo99ccX_Ez1Cr3eaBLwN7TpKfnyO2bQjSn2zi9-LvZwbIx095MYCOY5NMW4gv_1xZDjSqd1yOSaZpl9UPmKSQzsq3wUOQRyBffYS8_CHESXwD6FVa7gSAvRkqKad5Z2VLh7D8rkyBc0urG8eBfXgU2XyL9Ohy0_XdDvhHwLburvvSENjkI-jy9_qsIBmEaKAXA32QCjHabBj5ySLxFjbMrCKn3Im8WkmVQ0"
-                  : "https://lh3.googleusercontent.com/aida-public/AB6AXuD5FLM8-4gkEVM-BXx2UavjnDgn6M0FUmJ6Bk1w3CULYHwEX1fOAaY-QphGbvgWSrB3RdVSpj3WrMC49P5iq6kl_vvHgpx_AuSLcJdlbRg09aHWQXJyQam7RlSurFiTj8YJh0OS6zJ-1jzmoj2ULwUcna7EU19o2ir6INe3VobDCmoxjzy0hCxI9hlFSu2xfImBjxGupSYCnc6M2u0WDsUzVSt91gIHe23DbN4VUj7cutX0oFDmtMkhCcFZ0InWTn7MbEKfslaxFyis"
-                }
-              />
+              <span className={`text-xl md:text-2xl font-extrabold tracking-tighter transition-colors ${scrolled ? 'text-[#3C291C]' : 'text-white'}`}>
+                Many<span className="text-[#F1CB81]">Rooms</span>
+              </span>
             </Link>
             <div className="hidden lg:flex gap-6 items-center">
-              {['Marketplace', 'Studios', 'Vibes', 'Journal', 'Services'].map((item) => (
+              {['Marketplace', 'Studios', 'Spaces', 'Journal', 'Services'].map((item) => (
                 <Link key={item} href={item === 'Marketplace' ? '/' : `/${item.toLowerCase()}`} 
                   className={`py-1 font-bold text-sm transition-colors ${
-                    scrolled ? 'text-[#424937] hover:text-[#446900]' : 'text-white/80 hover:text-white'
-                  } ${item === 'Marketplace' && scrolled ? 'border-b-2 border-[#446900]' : ''} ${item === 'Marketplace' && !scrolled ? 'border-b-2 border-[#beff5f]' : ''}`}
+                    scrolled ? 'text-[#3C291C]/70 hover:text-[#3C291C]' : 'text-white/80 hover:text-white'
+                  } ${item === 'Marketplace' && scrolled ? 'border-b-2 border-[#DB8B8C]' : ''} ${item === 'Marketplace' && !scrolled ? 'border-b-2 border-[#F1CB81]' : ''}`}
                 >{item}</Link>
               ))}
             </div>
           </div>
           <div className="flex items-center gap-3 md:gap-4">
-            <div className="hidden md:flex relative items-center">
-              <MagnifyingGlassIcon className={`absolute left-3 w-4 h-4 ${scrolled ? 'text-[#737a65]' : 'text-white/60'}`} />
-              <input className={`pl-10 pr-4 py-2 border-none rounded-full w-48 lg:w-64 focus:ring-2 focus:ring-[#beff5f] text-sm outline-none transition-all ${
-                scrolled ? 'bg-[#f3f4f5] text-[#191c1d]' : 'bg-white/10 text-white placeholder:text-white/50'
-              }`} placeholder="Search by vibe..." type="text" />
-            </div>
-            <Link href="/signup?role=owner" className="hidden md:block px-6 py-2 bg-[#beff5f] text-[#111f00] font-bold text-sm rounded-full hover:brightness-105 transition-all">List Studio</Link>
+            <Link href="/signup?role=owner" className="hidden md:block px-6 py-2 bg-[#F1CB81] text-[#3C291C] font-bold text-sm rounded-full hover:bg-[#DB8B8C] hover:text-white transition-all">List Your Space</Link>
             <div className="hidden md:flex items-center gap-3">
-              <span className={`material-symbols-outlined cursor-pointer hover:scale-105 transition-transform ${scrolled ? 'text-[#424937]' : 'text-white/80'}`}>favorite</span>
-              <span className={`material-symbols-outlined cursor-pointer hover:scale-105 transition-transform ${scrolled ? 'text-[#424937]' : 'text-white/80'}`}>account_circle</span>
+              <span className={`material-symbols-outlined cursor-pointer hover:scale-105 transition-transform ${scrolled ? 'text-[#3C291C]' : 'text-white/80'}`}>favorite</span>
+              <span className={`material-symbols-outlined cursor-pointer hover:scale-105 transition-transform ${scrolled ? 'text-[#3C291C]' : 'text-white/80'}`}>account_circle</span>
             </div>
-            <button onClick={() => setIsMobileMenuOpen(true)} className={`md:hidden p-2 rounded-full ${scrolled ? 'hover:bg-gray-100 text-[#191c1d]' : 'text-white hover:bg-white/10'}`}>
+            <button onClick={() => setIsMobileMenuOpen(true)} className={`md:hidden p-2 rounded-full ${scrolled ? 'hover:bg-gray-100 text-[#3C291C]' : 'text-white hover:bg-white/10'}`}>
               <Bars3Icon className="w-5 h-5" />
             </button>
           </div>
@@ -172,169 +214,186 @@ export default function HomePage() {
         <div className={`absolute top-0 right-0 h-full w-[300px] bg-white shadow-2xl transition-transform duration-300 ${isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}>
           <div className="p-6">
             <div className="flex justify-between items-center mb-10">
-              <span className="text-2xl font-bold text-[#446900]">ManyRooms</span>
-              <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 hover:bg-gray-100 rounded-full"><XMarkIcon className="w-6 h-6 text-[#191c1d]" /></button>
+              <span className="text-2xl font-bold text-[#3C291C]">ManyRooms</span>
+              <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 hover:bg-gray-100 rounded-full"><XMarkIcon className="w-6 h-6 text-[#3C291C]" /></button>
             </div>
             <nav className="flex flex-col gap-6">
-              {['Marketplace', 'Studios', 'Vibes', 'Journal', 'Services'].map((item) => (
-                <Link key={item} href={item === 'Marketplace' ? '/' : `/${item.toLowerCase()}`} className="text-base font-semibold text-[#191c1d] hover:text-[#446900]" onClick={() => setIsMobileMenuOpen(false)}>{item}</Link>
+              {['Marketplace', 'Studios', 'Spaces', 'Journal', 'Services'].map((item) => (
+                <Link key={item} href={item === 'Marketplace' ? '/' : `/${item.toLowerCase()}`} className="text-base font-semibold text-[#3C291C] hover:text-[#DB8B8C]" onClick={() => setIsMobileMenuOpen(false)}>{item}</Link>
               ))}
               <div className="border-t border-gray-200 pt-6 mt-2">
-                <Link href="/signup?role=owner" className="block text-base font-semibold text-[#191c1d] hover:text-[#446900] mb-4" onClick={() => setIsMobileMenuOpen(false)}>List Studio</Link>
-                <Link href="/login" className="block text-base font-semibold text-[#191c1d] hover:text-[#446900] mb-4" onClick={() => setIsMobileMenuOpen(false)}>Log in</Link>
-                <Link href="/signup" className="block text-base font-semibold text-[#191c1d] hover:text-[#446900] mb-4" onClick={() => setIsMobileMenuOpen(false)}>Sign up</Link>
+                <Link href="/signup?role=owner" className="block text-base font-semibold text-[#3C291C] hover:text-[#DB8B8C] mb-4" onClick={() => setIsMobileMenuOpen(false)}>List Your Space</Link>
+                <Link href="/login" className="block text-base font-semibold text-[#3C291C] hover:text-[#DB8B8C] mb-4" onClick={() => setIsMobileMenuOpen(false)}>Log in</Link>
+                <Link href="/signup" className="block text-base font-semibold text-[#3C291C] hover:text-[#DB8B8C] mb-4" onClick={() => setIsMobileMenuOpen(false)}>Sign up</Link>
               </div>
             </nav>
           </div>
         </div>
       </div>
 
-      {/* Hero - NO white fade at bottom, just left gradient */}
-      <header className="relative min-h-screen flex items-center pt-24 overflow-hidden bg-[#0a0a0a]">
+      {/* Hero Section */}
+      <header className="relative min-h-screen flex items-center pt-24 overflow-hidden bg-[#3C291C]">
         <div className="absolute inset-0 z-0">
           <img 
             src="https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?auto=format&fit=crop&q=80&w=2000"
-            alt="Professional photography studio"
-            className="w-full h-full object-cover"
+            alt="Creative studio space"
+            className="w-full h-full object-cover opacity-60"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/95 via-black/60 to-black/20"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-[#3C291C] via-[#3C291C]/80 to-transparent"></div>
         </div>
 
         <div className="relative z-10 w-full max-w-[1440px] mx-auto px-4 md:px-16 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
           <div className="lg:col-span-7 flex flex-col items-start gap-6">
             <div className={`transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-              <span className="inline-block px-4 py-1 rounded-full bg-[#beff5f] text-[#111f00] font-bold text-sm uppercase tracking-wider mb-4">The Creative Evolution</span>
-              <h1 className="text-[56px] leading-[62px] md:text-[84px] md:leading-[92px] font-extrabold text-white tracking-tighter drop-shadow-lg">
-                Space <span className="text-[#beff5f] italic">smarter</span>,<br/>not harder.
+              <span className="inline-block px-4 py-1 rounded-full bg-[#F1CB81] text-[#3C291C] font-bold text-sm uppercase tracking-wider mb-4">The Creative Evolution</span>
+              <h1 className="text-[56px] leading-[62px] md:text-[84px] md:leading-[92px] font-extrabold text-white tracking-tighter">
+                Space <span className="text-[#F1CB81] italic">smarter</span>,<br/>not harder.
               </h1>
             </div>
             <p className={`text-lg text-white/80 max-w-xl transition-all duration-700 delay-100 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
               Monetize your creative square footage with powerful automations for booking, lighting, and access. Join 1M+ creators worldwide.
             </p>
+            
+            {/* Search Bar - Full working search */}
             <div className={`w-full max-w-2xl transition-all duration-700 delay-200 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-              <div className="bg-white/10 backdrop-blur-md border border-white/20 p-2 rounded-[32px] flex items-center shadow-xl">
+              <form onSubmit={handleSearch} className="bg-white/10 backdrop-blur-md border border-white/20 p-2 rounded-[32px] flex flex-col md:flex-row items-stretch md:items-center gap-2 shadow-xl">
                 <div className="flex-grow flex items-center px-4">
-                  <span className="material-symbols-outlined text-[#beff5f] mr-3" style={{ fontVariationSettings: "'FILL' 1" }}>temp_preferences_custom</span>
-                  <input className="w-full bg-transparent border-none focus:ring-0 text-lg outline-none text-white placeholder:text-white/60" placeholder="Describe the aesthetic..." type="text" />
+                  <MagnifyingGlassIcon className="w-5 h-5 text-[#F1CB81] mr-3 flex-shrink-0" />
+                  <input 
+                    className="w-full bg-transparent border-none focus:ring-0 text-base outline-none text-white placeholder:text-white/60" 
+                    placeholder="Describe the aesthetic (e.g. '70s synth-wave desert loft')" 
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
                 </div>
-                <Link href="/spaces" className="bg-[#beff5f] text-[#111f00] px-8 py-4 rounded-[24px] font-bold flex items-center gap-2 hover:brightness-110 transition-all whitespace-nowrap">
-                  <span className="material-symbols-outlined">auto_awesome</span>Search by Vibe
-                </Link>
-              </div>
+                <div className="hidden md:block w-px h-8 bg-white/20"></div>
+                <div className="flex-grow flex items-center px-4">
+                  <MapPinIcon className="w-5 h-5 text-[#F1CB81] mr-3 flex-shrink-0" />
+                  <input 
+                    className="w-full bg-transparent border-none focus:ring-0 text-base outline-none text-white placeholder:text-white/60" 
+                    placeholder="Location or country" 
+                    type="text"
+                    value={searchLocation}
+                    onChange={(e) => setSearchLocation(e.target.value)}
+                  />
+                </div>
+                <button 
+                  type="submit"
+                  disabled={isSearching}
+                  className="bg-[#F1CB81] text-[#3C291C] px-8 py-4 rounded-[24px] font-bold flex items-center justify-center gap-2 hover:bg-[#DB8B8C] hover:text-white transition-all whitespace-nowrap disabled:opacity-50"
+                >
+                  <MagnifyingGlassIcon className="w-4 h-4" />
+                  {isSearching ? 'Searching...' : 'Search'}
+                </button>
+              </form>
               <div className="flex gap-4 mt-4 px-4 overflow-x-auto whitespace-nowrap">
-                <span className="text-white/60 text-sm font-bold">Trending:</span>
-                <Link href="/spaces?vibe=concrete" className="text-[#beff5f] hover:underline text-sm">#ConcreteMinimalism</Link>
-                <Link href="/spaces?vibe=music" className="text-[#beff5f] hover:underline text-sm">#SoftGlowMusic</Link>
-                <Link href="/spaces?vibe=podcast" className="text-[#beff5f] hover:underline text-sm">#PodcastNook</Link>
+                <span className="text-white/60 text-sm font-bold">Popular:</span>
+                <button onClick={() => { setSearchQuery('photography studio'); setSearchLocation('London'); handleSearch(); }} className="text-[#F1CB81] hover:underline text-sm">#PhotographyStudios</button>
+                <button onClick={() => { setSearchQuery('music recording'); handleSearch(); }} className="text-[#F1CB81] hover:underline text-sm">#MusicRooms</button>
+                <button onClick={() => { setSearchQuery('podcast space'); handleSearch(); }} className="text-[#F1CB81] hover:underline text-sm">#PodcastSpaces</button>
               </div>
             </div>
           </div>
 
           {/* Phone Mockup */}
           <div className="lg:col-span-5 relative hidden lg:flex justify-center items-center h-[650px]">
-            <div className="w-72 h-[580px] bg-slate-900 rounded-[3rem] border-[12px] border-slate-800 shadow-[0_40px_100px_-20px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col">
-              <div className="h-10 bg-slate-800 flex justify-center items-end pb-1"><div className="w-20 h-4 bg-slate-900 rounded-full"></div></div>
-              <div className="flex-grow bg-slate-50 p-4 flex flex-col overflow-hidden">
-                <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-200">
-                  <div className="w-10 h-10 rounded-full bg-[#beff5f] flex items-center justify-center text-[#111f00]"><span className="material-symbols-outlined">person</span></div>
+            <div className="w-72 h-[580px] bg-[#3C291C] rounded-[3rem] border-[12px] border-[#3C291C]/80 shadow-[0_40px_100px_-20px_rgba(0,0,0,0.6)] overflow-hidden flex flex-col">
+              <div className="h-10 bg-[#3C291C]/90 flex justify-center items-end pb-1"><div className="w-20 h-4 bg-[#3C291C]/60 rounded-full"></div></div>
+              <div className="flex-grow bg-[#FFFBF5] p-4 flex flex-col overflow-hidden">
+                <div className="flex items-center gap-3 mb-6 pb-4 border-b border-[#3C291C]/10">
+                  <div className="w-10 h-10 rounded-full bg-[#F1CB81] flex items-center justify-center text-[#3C291C]"><span className="material-symbols-outlined">person</span></div>
                   <div>
-                    <div className="font-bold text-slate-900 text-sm">Studio Manager</div>
-                    <div className="text-[10px] text-green-500 font-bold flex items-center gap-1"><span className="w-1.5 h-1.5 bg-green-500 rounded-full"></span> Online</div>
+                    <div className="font-bold text-[#3C291C] text-sm">Studio Manager</div>
+                    <div className="text-[10px] text-green-600 font-bold flex items-center gap-1"><span className="w-1.5 h-1.5 bg-green-600 rounded-full"></span> Online</div>
                   </div>
                 </div>
                 <div ref={chatContainerRef} className="flex flex-col gap-4 overflow-y-auto flex-grow chat-container" style={{ scrollbarWidth: 'none' }}>
                   {phoneMessages.map((msg, idx) => (
                     <div key={idx} className={`flex ${msg.type === 'user' ? 'justify-end' : 'justify-start'} animate-message`}>
-                      <div className={`max-w-[85%] rounded-2xl px-4 py-2 text-xs font-medium shadow-sm ${msg.type === 'user' ? 'bg-[#e4d7fd] text-[#1f1732] rounded-tr-none' : 'bg-[#beff5f] text-[#111f00] rounded-tl-none'}`}>{msg.text}</div>
+                      <div className={`max-w-[85%] rounded-2xl px-4 py-2 text-xs font-medium shadow-sm ${msg.type === 'user' ? 'bg-[#91ADCD]/30 text-[#3C291C] rounded-tr-none' : 'bg-[#F1CB81] text-[#3C291C] rounded-tl-none'}`}>{msg.text}</div>
                     </div>
                   ))}
-                  {phoneMessages.length === 0 && <div className="flex items-center justify-center h-full text-slate-400 text-xs">Loading...</div>}
+                  {phoneMessages.length === 0 && <div className="flex items-center justify-center h-full text-[#3C291C]/40 text-xs">Loading...</div>}
                 </div>
               </div>
-              <div className="h-16 bg-white p-3 border-t border-slate-200 flex items-center gap-2">
-                <div className="flex-grow h-8 bg-slate-100 rounded-full px-4 text-[10px] flex items-center text-slate-400">Message...</div>
-                <div className="w-8 h-8 rounded-full bg-[#beff5f] flex items-center justify-center text-[#111f00]"><span className="material-symbols-outlined text-sm">send</span></div>
+              <div className="h-16 bg-white p-3 border-t border-[#3C291C]/10 flex items-center gap-2">
+                <div className="flex-grow h-8 bg-[#3C291C]/5 rounded-full px-4 text-[10px] flex items-center text-[#3C291C]/40">Message...</div>
+                <div className="w-8 h-8 rounded-full bg-[#F1CB81] flex items-center justify-center text-[#3C291C]"><span className="material-symbols-outlined text-sm">send</span></div>
               </div>
             </div>
           </div>
         </div>
       </header>
 
-      {/* Social Proof - Animated Review Cards */}
+      {/* Reviews Section */}
       <section className="py-16 md:py-20 bg-white overflow-hidden">
         <div className="max-w-[1440px] mx-auto px-4 md:px-16 mb-10">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div>
               <div className="flex items-center gap-2 mb-2">
-                <span className="inline-block px-3 py-1 rounded-full bg-[#beff5f]/20 text-[#446900] font-bold text-xs uppercase tracking-wider">
-                  ★ Trusted by Creators
-                </span>
+                <span className="inline-block px-3 py-1 rounded-full bg-[#F1CB81]/30 text-[#3C291C] font-bold text-xs uppercase tracking-wider">★ Trusted by Creators</span>
               </div>
-              <h3 className="text-3xl md:text-4xl font-extrabold text-[#191c1d]">
-                What our <span className="text-[#446900] italic">community</span> says
+              <h3 className="text-3xl md:text-4xl font-extrabold text-[#3C291C]">
+                What our <span className="text-[#DB8B8C] italic">community</span> says
               </h3>
             </div>
             <div className="flex items-center gap-3">
               <div className="flex -space-x-2">
                 {[1,2,3,4,5].map(i => (
-                  <div key={i} className="w-9 h-9 rounded-full bg-[#beff5f] border-2 border-white flex items-center justify-center text-xs font-bold text-[#111f00] shadow-sm">★</div>
+                  <div key={i} className="w-9 h-9 rounded-full bg-[#F1CB81] border-2 border-white flex items-center justify-center text-xs font-bold text-[#3C291C] shadow-sm">★</div>
                 ))}
               </div>
               <div>
-                <p className="text-sm font-bold text-[#191c1d]">4.9 out of 5</p>
-                <p className="text-xs text-[#737a65]">from 2,000+ reviews</p>
+                <p className="text-sm font-bold text-[#3C291C]">4.9 out of 5</p>
+                <p className="text-xs text-[#3C291C]/60">from 2,000+ reviews</p>
               </div>
             </div>
           </div>
         </div>
-        
-        {/* Single scrolling row - Right to Left */}
         <div className="flex gap-5 animate-scroll-right hover:pause-animation pb-4">
           {[...allReviews, ...allReviews].map((review, i) => (
-            <div 
-              key={`review-${i}`} 
-              className="min-w-[320px] md:min-w-[380px] bg-white rounded-2xl p-6 border-2 border-[#c2c9b1]/20 hover:border-[#beff5f]/40 transition-all duration-300 flex-shrink-0 flex flex-col justify-between"
-            >
+            <div key={`review-${i}`} className="min-w-[320px] md:min-w-[380px] bg-white rounded-2xl p-6 border-2 border-[#3C291C]/10 hover:border-[#F1CB81]/60 transition-all duration-300 flex-shrink-0 flex flex-col justify-between">
               <div className="flex items-center gap-0.5 mb-4">
                 {[...Array(5)].map((_, s) => (
-                  <span key={s} className="material-symbols-outlined text-[#446900] text-lg" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+                  <span key={s} className="material-symbols-outlined text-[#F1CB81] text-lg" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
                 ))}
               </div>
-              <p className="text-[#191c1d] text-sm leading-relaxed mb-5 flex-grow">"{review.text}"</p>
-              <div className="flex items-center gap-3 pt-4 border-t border-[#c2c9b1]/20">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm shrink-0 ${review.avatarBg}`}>{review.initials}</div>
+              <p className="text-[#3C291C] text-sm leading-relaxed mb-5 flex-grow">"{review.text}"</p>
+              <div className="flex items-center gap-3 pt-4 border-t border-[#3C291C]/10">
+                <div className="w-10 h-10 rounded-full bg-[#F1CB81]/30 flex items-center justify-center font-bold text-sm text-[#3C291C] shrink-0">{review.initials}</div>
                 <div className="min-w-0">
-                  <p className="font-bold text-sm text-[#191c1d] truncate">{review.name}</p>
-                  <p className="text-xs text-[#737a65] truncate">{review.role}</p>
+                  <p className="font-bold text-sm text-[#3C291C] truncate">{review.name}</p>
+                  <p className="text-xs text-[#3C291C]/60 truncate">{review.role}</p>
                 </div>
-                <span className="material-symbols-outlined text-[#446900] ml-auto text-lg shrink-0">format_quote</span>
+                <span className="material-symbols-outlined text-[#F1CB81] ml-auto text-lg shrink-0">format_quote</span>
               </div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* Everywhere Section - Horizontal scroll on mobile */}
-      <section className="py-20 md:py-24 bg-[#f8f9fa]">
+      {/* Everywhere Section */}
+      <section className="py-20 md:py-24 bg-[#91ADCD]/10">
         <div className="max-w-[1440px] mx-auto px-4 md:px-16">
           <div className="flex flex-col md:flex-row justify-between items-end mb-10 md:mb-16 gap-8">
             <div className="max-w-2xl">
-              <h2 className="text-3xl md:text-5xl font-extrabold mb-4 text-[#191c1d]">Everywhere your <span className="text-[#a43c12]">vision</span> lives.</h2>
-              <p className="text-base md:text-lg text-[#424937]">The most sophisticated network of creative square footage on the planet. Specialized for every niche.</p>
+              <h2 className="text-3xl md:text-5xl font-extrabold mb-4 text-[#3C291C]">Everywhere your <span className="text-[#DB8B8C]">vision</span> lives.</h2>
+              <p className="text-base md:text-lg text-[#3C291C]/70">The most sophisticated network of creative square footage on the planet.</p>
             </div>
-            <Link href="/spaces" className="group flex items-center gap-2 text-[#446900] font-bold text-sm uppercase shrink-0">
+            <Link href="/spaces" className="group flex items-center gap-2 text-[#3C291C] font-bold text-sm uppercase shrink-0 border-2 border-[#3C291C] px-5 py-2.5 rounded-full hover:bg-[#3C291C] hover:text-white transition-all">
               Explore all <span className="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
             </Link>
           </div>
           <div className="flex md:grid md:grid-cols-3 gap-6 overflow-x-auto md:overflow-visible pb-4 md:pb-0 snap-x snap-mandatory scrollbar-hide">
             {[
-              { image: 'https://images.unsplash.com/photo-1598653222000-6b7b7a552625?auto=format&fit=crop&q=80&w=800', badge: 'Audio Production', badgeColor: 'bg-[#635979] text-white', title: 'Music & Podcast Studios', desc: 'Acoustically perfect environments for your next hit.' },
-              { image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=800', badge: 'Visual Arts', badgeColor: 'bg-[#beff5f] text-[#111f00]', title: 'Photography & Film', desc: 'Natural light lofts and professional cyc walls.' },
-              { image: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=800', badge: 'Co-Creation', badgeColor: 'bg-[#ffe6de] text-[#b4471d]', title: 'Pop-up & Design Hubs', desc: 'Dynamic spaces for teams to build the future.' },
+              { image: 'https://images.unsplash.com/photo-1598653222000-6b7b7a552625?auto=format&fit=crop&q=80&w=800', badge: 'Music & Podcast', badgeColor: 'bg-[#F1CB81] text-[#3C291C]', title: 'Recording Studios', desc: 'Acoustically perfect environments.' },
+              { image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=800', badge: 'Photo & Film', badgeColor: 'bg-[#91ADCD] text-[#3C291C]', title: 'Visual Arts Spaces', desc: 'Natural light lofts and cyc walls.' },
+              { image: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=800', badge: 'Creative Hubs', badgeColor: 'bg-[#DB8B8C] text-white', title: 'Design & Pop-ups', desc: 'Dynamic spaces for teams.' },
             ].map((card, i) => (
               <div key={i} className="group relative rounded-[32px] overflow-hidden h-[400px] md:h-[500px] shadow-xl hover:-translate-y-2 transition-transform duration-500 min-w-[85vw] md:min-w-0 snap-center flex-shrink-0">
                 <img className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" src={card.image} alt={card.title} />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
+                <div className="absolute inset-0 bg-gradient-to-t from-[#3C291C]/90 via-transparent to-transparent"></div>
                 <div className="absolute bottom-0 left-0 p-6 md:p-8 w-full">
                   <span className={`inline-block px-3 py-1 rounded-full font-bold text-xs mb-3 md:mb-4 uppercase ${card.badgeColor}`}>{card.badge}</span>
                   <h4 className="text-white text-xl md:text-2xl font-bold mb-2">{card.title}</h4>
@@ -346,185 +405,96 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* The Crew Collective
-      <section className="py-20 md:py-24 bg-white">
-        <div className="max-w-[1440px] mx-auto px-4 md:px-16">
+      {/* The Crew Collective */}
+      <section className="py-20 md:py-24 bg-[#F1CB81] relative overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none opacity-[0.04]" style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%233C291C' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+        }}></div>
+        <div className="max-w-[1440px] mx-auto px-4 md:px-16 relative z-10">
           <div className="flex flex-col md:flex-row justify-between items-end mb-10 md:mb-16 gap-8">
             <div className="max-w-2xl">
-              <span className="inline-block px-4 py-1 rounded-full bg-[#beff5f] text-[#111f00] font-bold text-sm uppercase tracking-wider mb-4">The Crew Collective</span>
-              <h2 className="text-3xl md:text-5xl font-extrabold mb-4 text-[#191c1d]">Hire the <span className="text-[#446900]">pros</span> who make it happen.</h2>
-              <p className="text-base md:text-lg text-[#424937]">Don't just book a space—build your dream team. Access our vetted network of creative professionals ready to elevate your production.</p>
+              <span className="inline-block px-4 py-1 rounded-full bg-[#3C291C] text-[#F1CB81] font-bold text-sm uppercase tracking-wider mb-4">The Crew Collective</span>
+              <h2 className="text-3xl md:text-5xl font-extrabold mb-4 text-[#3C291C]">Hire the <span className="italic">pros</span> who make it happen.</h2>
+              <p className="text-base md:text-lg text-[#3C291C]/70">Don't just book a space—build your dream team.</p>
             </div>
-            <Link href="/services" className="group flex items-center gap-2 text-[#446900] font-bold text-sm uppercase shrink-0">
+            <Link href="/services" className="group flex items-center gap-2 text-[#3C291C] font-bold text-sm uppercase shrink-0 border-2 border-[#3C291C] px-6 py-3 rounded-full hover:bg-[#3C291C] hover:text-[#F1CB81] transition-all duration-300">
               Browse all pros <span className="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
             </Link>
           </div>
-          <div className="flex md:grid md:grid-cols-4 gap-5 overflow-x-auto md:overflow-visible pb-4 md:pb-0 snap-x snap-mandatory scrollbar-hide">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              { title: 'Photographers', desc: 'Editorial, Commercial & Portrait', image: 'https://images.unsplash.com/photo-1554048612-b6a482bc67e5?auto=format&fit=crop&q=80&w=800' },
-              { title: 'Videographers', desc: 'DPs, Editors & Drone Pilots', image: 'https://images.unsplash.com/photo-1585646794396-3c34d6f3ea4e?auto=format&fit=crop&q=80&w=800' },
-              { title: 'HMU Artists', desc: 'Beauty, SFX & High-Fashion', image: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&q=80&w=800' },
-              { title: 'Studio Support', desc: 'Cleaners, PAs & Set Builders', image: 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?auto=format&fit=crop&q=80&w=800' },
+              { title: 'Photographers', subtitle: 'Editorial & Commercial', image: 'https://images.unsplash.com/photo-1554048612-b6a482bc67e5?auto=format&fit=crop&q=80&w=600', stat: '2,400+ available' },
+              { title: 'Videographers', subtitle: 'DPs & Drone Pilots', image: 'https://images.unsplash.com/photo-1585646794396-3c34d6f3ea4e?auto=format&fit=crop&q=80&w=600', stat: '1,800+ available' },
+              { title: 'HMU Artists', subtitle: 'Beauty & SFX', image: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&q=80&w=600', stat: '950+ available' },
+              { title: 'Studio Support', subtitle: 'PAs & Set Builders', image: 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?auto=format&fit=crop&q=80&w=600', stat: '1,200+ available' },
             ].map((service, i) => (
-              <div key={i} className="group relative rounded-[32px] overflow-hidden h-[350px] md:h-[400px] shadow-lg hover:-translate-y-2 transition-transform duration-500 cursor-pointer min-w-[75vw] md:min-w-0 snap-center flex-shrink-0">
-                <img className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" src={service.image} alt={service.title} />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
-                <div className="absolute bottom-0 left-0 p-5 md:p-6 w-full">
-                  <h4 className="text-white text-lg md:text-xl font-bold mb-1">{service.title}</h4>
-                  <p className="text-white/70 text-sm">{service.desc}</p>
+              <div key={i} className="group cursor-pointer">
+                <div className="relative overflow-hidden rounded-2xl mb-4 aspect-[3/4] bg-[#3C291C]/5">
+                  <img src={service.image} alt={service.title} className="w-full h-full object-cover transition-all duration-700 ease-in-out grayscale group-hover:grayscale-0 group-hover:scale-105" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#3C291C]/90 via-[#3C291C]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-end p-6">
+                    <p className="text-white/90 text-sm font-medium transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500 delay-100">{service.subtitle}</p>
+                    <p className="text-[#F1CB81] text-xs font-bold mt-2 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500 delay-200">{service.stat}</p>
+                  </div>
+                  <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-all duration-300 transform -translate-y-2 group-hover:translate-y-0">
+                    <div className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-lg">
+                      <span className="material-symbols-outlined text-[#3C291C] text-lg">arrow_forward</span>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <h4 className="text-lg font-extrabold text-[#3C291C] group-hover:text-[#DB8B8C] transition-colors">{service.title}</h4>
+                  <p className="text-sm text-[#3C291C]/60">{service.subtitle}</p>
                 </div>
               </div>
             ))}
           </div>
-        </div>
-      </section> */}
-
-
-
-{/* The Crew Collective - Yellow background with classic animations */}
-<section className="py-20 md:py-24 bg-[#beff5f] relative overflow-hidden">
-  {/* Subtle background texture */}
-  <div className="absolute inset-0 pointer-events-none opacity-[0.04]" style={{
-    backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23111f00' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-  }}></div>
-
-  <div className="max-w-[1440px] mx-auto px-4 md:px-16 relative z-10">
-    <div className="flex flex-col md:flex-row justify-between items-end mb-10 md:mb-16 gap-8">
-      <div className="max-w-2xl">
-        <span className="inline-block px-4 py-1 rounded-full bg-[#111f00] text-[#beff5f] font-bold text-sm uppercase tracking-wider mb-4">
-          The Crew Collective
-        </span>
-        <h2 className="text-3xl md:text-5xl font-extrabold mb-4 text-[#111f00]">
-          Hire the <span className="italic">pros</span> who make it happen.
-        </h2>
-        <p className="text-base md:text-lg text-[#324f00]">
-          Don't just book a space—build your dream team. Access our vetted network of creative professionals ready to elevate your production.
-        </p>
-      </div>
-      <Link href="/services" className="group flex items-center gap-2 text-[#111f00] font-bold text-sm uppercase shrink-0 border-2 border-[#111f00] px-6 py-3 rounded-full hover:bg-[#111f00] hover:text-[#beff5f] transition-all duration-300">
-        Browse all pros 
-        <span className="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
-      </Link>
-    </div>
-    
-    {/* Classic Portrait Cards */}
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-      {[
-        { 
-          title: 'Photographers', 
-          subtitle: 'Editorial & Commercial',
-          image: 'https://images.unsplash.com/photo-1554048612-b6a482bc67e5?auto=format&fit=crop&q=80&w=600',
-          stat: '2,400+ available'
-        },
-        { 
-          title: 'Videographers', 
-          subtitle: 'DPs & Drone Pilots',
-          image: 'https://images.unsplash.com/photo-1585646794396-3c34d6f3ea4e?auto=format&fit=crop&q=80&w=600',
-          stat: '1,800+ available'
-        },
-        { 
-          title: 'HMU Artists', 
-          subtitle: 'Beauty & SFX',
-          image: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&q=80&w=600',
-          stat: '950+ available'
-        },
-        { 
-          title: 'Studio Support', 
-          subtitle: 'PAs & Set Builders',
-          image: 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?auto=format&fit=crop&q=80&w=600',
-          stat: '1,200+ available'
-        },
-      ].map((service, i) => (
-        <div key={i} className="group cursor-pointer">
-          {/* Classic framed image with hover reveal */}
-          <div className="relative overflow-hidden rounded-2xl mb-4 aspect-[3/4] bg-[#111f00]/5">
-            {/* Default state - subtle zoom */}
-            <img 
-              src={service.image} 
-              alt={service.title}
-              className="w-full h-full object-cover transition-all duration-700 ease-in-out grayscale group-hover:grayscale-0 group-hover:scale-105"
-            />
-            
-            {/* Overlay that reveals on hover */}
-            <div className="absolute inset-0 bg-gradient-to-t from-[#111f00]/90 via-[#111f00]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-end p-6">
-              <p className="text-white/90 text-sm font-medium leading-relaxed transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500 delay-100">
-                {service.subtitle}
-              </p>
-              <p className="text-[#beff5f] text-xs font-bold mt-2 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500 delay-200">
-                {service.stat}
-              </p>
-            </div>
-            
-            {/* View button */}
-            <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-all duration-300 transform -translate-y-2 group-hover:translate-y-0">
-              <div className="w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-lg">
-                <span className="material-symbols-outlined text-[#111f00] text-lg">arrow_forward</span>
+          <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-6 border-t-2 border-[#3C291C]/20 pt-8">
+            {[
+              { value: '6,350+', label: 'Vetted Professionals' },
+              { value: '98%', label: 'Client Satisfaction' },
+              { value: '48h', label: 'Avg. Response Time' },
+              { value: '50+', label: 'Creative Categories' },
+            ].map((stat, i) => (
+              <div key={i} className="text-center">
+                <p className="text-2xl md:text-3xl font-extrabold text-[#3C291C]">{stat.value}</p>
+                <p className="text-sm text-[#3C291C]/60 font-medium mt-1">{stat.label}</p>
               </div>
-            </div>
-          </div>
-          
-          {/* Title below image */}
-          <div>
-            <h4 className="text-lg font-extrabold text-[#111f00] group-hover:text-[#446900] transition-colors">
-              {service.title}
-            </h4>
-            <p className="text-sm text-[#324f00]/70">{service.subtitle}</p>
+            ))}
           </div>
         </div>
-      ))}
-    </div>
-    
-    {/* Bottom stats strip */}
-    <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-6 border-t-2 border-[#111f00]/20 pt-8">
-      {[
-        { value: '6,350+', label: 'Vetted Professionals' },
-        { value: '98%', label: 'Client Satisfaction' },
-        { value: '48h', label: 'Avg. Response Time' },
-        { value: '50+', label: 'Creative Categories' },
-      ].map((stat, i) => (
-        <div key={i} className="text-center">
-          <p className="text-2xl md:text-3xl font-extrabold text-[#111f00]">{stat.value}</p>
-          <p className="text-sm text-[#324f00]/70 font-medium mt-1">{stat.label}</p>
-        </div>
-      ))}
-    </div>
-  </div>
-</section>
-
-
-
+      </section>
 
       {/* Before/After */}
-      <section className="py-20 md:py-24 bg-[#f3f4f5]">
+      <section className="py-20 md:py-24 bg-[#DB8B8C]/10">
         <div className="max-w-[1440px] mx-auto px-4 md:px-16">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-[#e1e3e4] rounded-[40px] p-8 md:p-12 flex flex-col items-center text-center">
-              <span className="text-sm font-bold text-[#424937] uppercase mb-8">Before ManyRooms</span>
-              <h2 className="text-4xl md:text-5xl font-extrabold mb-12 text-[#191c1d]">All work<br/>and no play.</h2>
+            <div className="bg-white rounded-[40px] p-8 md:p-12 flex flex-col items-center text-center border-2 border-[#3C291C]/10">
+              <span className="text-sm font-bold text-[#3C291C]/60 uppercase mb-8">Before ManyRooms</span>
+              <h2 className="text-4xl md:text-5xl font-extrabold mb-12 text-[#3C291C]">All work<br/>and no play.</h2>
               <ul className="w-full space-y-6 text-left">
-                {['Manual booking coordination.', 'Hidden studio fees.', 'Inconsistent vibe matching.', 'Slow creative output.'].map((item) => (
-                  <li key={item} className="flex items-center justify-between border-b border-[#c2c9b1]/30 pb-4">
-                    <span className="text-lg font-bold text-[#191c1d]">{item}</span>
-                    <span className="material-symbols-outlined text-[#ba1a1a]">close</span>
+                {['Manual booking coordination.', 'Hidden studio fees.', 'Inconsistent space matching.', 'Slow creative output.'].map((item) => (
+                  <li key={item} className="flex items-center justify-between border-b border-[#3C291C]/10 pb-4">
+                    <span className="text-lg font-bold text-[#3C291C]">{item}</span>
+                    <span className="material-symbols-outlined text-[#DB8B8C]">close</span>
                   </li>
                 ))}
               </ul>
             </div>
-            <div className="bg-[#446900] text-white rounded-[40px] p-8 md:p-12 flex flex-col items-center text-center relative overflow-hidden">
+            <div className="bg-[#3C291C] text-white rounded-[40px] p-8 md:p-12 flex flex-col items-center text-center relative overflow-hidden">
               <div className="absolute top-0 right-0 p-8">
-                <span className="material-symbols-outlined text-[#beff5f] text-6xl animate-pulse" style={{ fontVariationSettings: "'FILL' 1" }}>monetization_on</span>
+                <span className="material-symbols-outlined text-[#F1CB81] text-6xl animate-pulse" style={{ fontVariationSettings: "'FILL' 1" }}>monetization_on</span>
               </div>
-              <span className="text-sm font-bold text-[#beff5f] uppercase mb-8 relative z-10">After ManyRooms</span>
+              <span className="text-sm font-bold text-[#F1CB81] uppercase mb-8 relative z-10">After ManyRooms</span>
               <h2 className="text-4xl md:text-5xl font-extrabold mb-12 text-white relative z-10">Less grind<br/>and more pay.</h2>
               <ul className="w-full space-y-6 text-left relative z-10">
-                {['Auto-pilot studio management.', 'Transparent fixed pricing.', 'AI Vibe Search technology.', '24/7 revenue generation.'].map((item) => (
-                  <li key={item} className="flex items-center justify-between border-b border-white/20 pb-4">
+                {['Auto-pilot studio management.', 'Transparent fixed pricing.', 'Smart space matching.', '24/7 revenue generation.'].map((item) => (
+                  <li key={item} className="flex items-center justify-between border-b border-white/10 pb-4">
                     <span className="text-lg font-bold">{item}</span>
-                    <span className="material-symbols-outlined text-[#beff5f]">check_circle</span>
+                    <span className="material-symbols-outlined text-[#F1CB81]">check_circle</span>
                   </li>
                 ))}
               </ul>
-              <Link href="/signup" className="mt-12 w-full bg-[#beff5f] text-[#111f00] py-5 rounded-2xl font-extrabold text-lg hover:scale-105 transition-transform duration-200 relative z-10 text-center">Get Started for Free</Link>
+              <Link href="/signup" className="mt-12 w-full bg-[#F1CB81] text-[#3C291C] py-5 rounded-2xl font-extrabold text-lg hover:scale-105 transition-transform duration-200 relative z-10 text-center">Get Started for Free</Link>
             </div>
           </div>
         </div>
@@ -533,41 +503,41 @@ export default function HomePage() {
       {/* Steps */}
       <section className="py-20 md:py-24 bg-white">
         <div className="max-w-[1440px] mx-auto px-4 md:px-16 text-center mb-12 md:mb-16">
-          <h2 className="text-3xl md:text-5xl font-extrabold mb-4 text-[#191c1d]">Get up and running in <span className="italic text-[#446900]">3 simple steps</span>.</h2>
+          <h2 className="text-3xl md:text-5xl font-extrabold mb-4 text-[#3C291C]">Get up and running in <span className="italic text-[#DB8B8C]">3 simple steps</span>.</h2>
         </div>
         <div className="max-w-[1440px] mx-auto px-4 md:px-16 grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-12">
           {[
-            { icon: 'add_photo_alternate', title: 'List your space', desc: 'Upload photos, set your vibe tokens, and define your hours. Takes less than 5 minutes.', bg: 'bg-[#e4d7fd]' },
-            { icon: 'smart_toy', title: 'Automate bookings', desc: 'Let our Studio AI handle inquiries, vetting, and scheduling while you focus on creating.', bg: 'bg-[#beff5f]' },
-            { icon: 'account_balance_wallet', title: 'Collect revenue', desc: 'Instant payouts directly to your account. No more chasing invoices.', bg: 'bg-[#ffe6de]' },
+            { icon: 'add_photo_alternate', title: 'List your space', desc: 'Upload photos and define your hours. Takes less than 5 minutes.', bg: 'bg-[#91ADCD]/30' },
+            { icon: 'smart_toy', title: 'Automate bookings', desc: 'Let our AI handle inquiries and scheduling while you create.', bg: 'bg-[#F1CB81]' },
+            { icon: 'account_balance_wallet', title: 'Collect revenue', desc: 'Instant payouts directly to your account. No chasing invoices.', bg: 'bg-[#DB8B8C]/30' },
           ].map((step, i) => (
             <div key={i} className="flex flex-col items-center gap-5 text-center group">
               <div className={`w-20 h-20 md:w-24 md:h-24 rounded-full ${step.bg} flex items-center justify-center group-hover:scale-110 transition-transform duration-300`}>
-                <span className="material-symbols-outlined text-3xl md:text-4xl text-[#446900]" style={{ fontVariationSettings: "'FILL' 1" }}>{step.icon}</span>
+                <span className="material-symbols-outlined text-3xl md:text-4xl text-[#3C291C]" style={{ fontVariationSettings: "'FILL' 1" }}>{step.icon}</span>
               </div>
-              <h3 className="text-xl md:text-2xl font-bold text-[#191c1d]">{step.title}</h3>
-              <p className="text-base md:text-lg text-[#424937] max-w-xs">{step.desc}</p>
+              <h3 className="text-xl md:text-2xl font-bold text-[#3C291C]">{step.title}</h3>
+              <p className="text-base md:text-lg text-[#3C291C]/70 max-w-xs">{step.desc}</p>
             </div>
           ))}
         </div>
       </section>
 
       {/* Featured Studios */}
-      <section className="py-20 md:py-24 bg-[#f3f4f5] overflow-hidden">
+      <section className="py-20 md:py-24 bg-[#F1CB81]/20 overflow-hidden">
         <div className="max-w-[1440px] mx-auto px-4 md:px-16 flex justify-between items-end mb-10 md:mb-12">
-          <h2 className="text-2xl md:text-3xl font-bold text-[#191c1d]">Featured Studios <span className="text-[#446900] bg-[#beff5f]/30 px-3 py-1 rounded-lg text-sm">New This Week</span></h2>
+          <h2 className="text-2xl md:text-3xl font-bold text-[#3C291C]">Featured Studios <span className="text-[#3C291C] bg-[#F1CB81] px-3 py-1 rounded-lg text-sm">New This Week</span></h2>
           <div className="flex gap-2">
-            <button className="w-10 h-10 md:w-12 md:h-12 rounded-full border border-[#c2c9b1] flex items-center justify-center hover:bg-[#edeeef] transition-colors">
-              <ChevronLeftIcon className="w-4 h-4 md:w-5 md:h-5 text-[#191c1d]" />
+            <button className="w-10 h-10 md:w-12 md:h-12 rounded-full border border-[#3C291C]/20 flex items-center justify-center hover:bg-white transition-colors">
+              <ChevronLeftIcon className="w-4 h-4 md:w-5 md:h-5 text-[#3C291C]" />
             </button>
-            <button className="w-10 h-10 md:w-12 md:h-12 rounded-full border border-[#c2c9b1] flex items-center justify-center hover:bg-[#edeeef] transition-colors">
-              <ChevronRightIcon className="w-4 h-4 md:w-5 md:h-5 text-[#191c1d]" />
+            <button className="w-10 h-10 md:w-12 md:h-12 rounded-full border border-[#3C291C]/20 flex items-center justify-center hover:bg-white transition-colors">
+              <ChevronRightIcon className="w-4 h-4 md:w-5 md:h-5 text-[#3C291C]" />
             </button>
           </div>
         </div>
         <div className="flex gap-5 px-4 md:px-16 overflow-x-auto pb-4 scrollbar-hide">
           {loading ? (
-            <div className="flex justify-center w-full py-20"><div className="animate-pulse text-center"><div className="w-16 h-16 bg-[#446900]/20 rounded-full mx-auto mb-4"></div><p className="text-[#424937]">Loading studios...</p></div></div>
+            <div className="flex justify-center w-full py-20"><div className="animate-pulse text-center"><div className="w-16 h-16 bg-[#F1CB81]/40 rounded-full mx-auto mb-4"></div><p className="text-[#3C291C]/60">Loading studios...</p></div></div>
           ) : (
             featuredSpaces.map((space) => {
               const coverImage = getFirstImage(space.images);
@@ -577,21 +547,21 @@ export default function HomePage() {
                     {coverImage ? (
                       <img className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src={coverImage} alt={space.name} />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-[#edeeef]"><span className="material-symbols-outlined text-4xl text-[#c2c9b1]">image</span></div>
+                      <div className="w-full h-full flex items-center justify-center bg-[#3C291C]/5"><span className="material-symbols-outlined text-4xl text-[#3C291C]/20">image</span></div>
                     )}
                     <div className="absolute top-4 right-4 bg-white/90 backdrop-blur px-3 py-1 rounded-full flex items-center gap-1">
-                      <StarIcon className="w-4 h-4 text-[#446900] fill-current" /><span className="font-bold text-sm text-[#191c1d]">4.9</span>
+                      <StarIcon className="w-4 h-4 text-[#F1CB81] fill-current" /><span className="font-bold text-sm text-[#3C291C]">4.9</span>
                     </div>
                   </div>
                   <div className="p-5 md:p-6">
                     <div className="flex justify-between items-start mb-2">
-                      <h5 className="text-lg md:text-xl font-bold text-[#191c1d]">{space.name}</h5>
-                      <p className="font-bold text-[#446900] text-sm">${space.hourly_rate}/hr</p>
+                      <h5 className="text-lg md:text-xl font-bold text-[#3C291C]">{space.name}</h5>
+                      <p className="font-bold text-[#DB8B8C] text-sm">${space.hourly_rate}/hr</p>
                     </div>
-                    <p className="text-[#424937] text-sm mb-4 flex items-center gap-1"><MapPinIcon className="w-4 h-4" />{space.city || 'Location'}{space.state ? `, ${space.state}` : ''}</p>
+                    <p className="text-[#3C291C]/60 text-sm mb-4 flex items-center gap-1"><MapPinIcon className="w-4 h-4" />{space.city || 'Location'}{space.state ? `, ${space.state}` : ''}</p>
                     <div className="flex gap-2">
-                      <span className="px-2 py-1 bg-[#f3f4f5] rounded-md text-xs font-bold text-[#424937]">#Creative</span>
-                      <span className="px-2 py-1 bg-[#f3f4f5] rounded-md text-xs font-bold text-[#424937]">#Studio</span>
+                      <span className="px-2 py-1 bg-[#F1CB81]/20 rounded-md text-xs font-bold text-[#3C291C]">#Creative</span>
+                      <span className="px-2 py-1 bg-[#91ADCD]/20 rounded-md text-xs font-bold text-[#3C291C]">#Studio</span>
                     </div>
                   </div>
                 </Link>
@@ -604,74 +574,26 @@ export default function HomePage() {
       <Footer />
       <Chatbot />
 
-<style jsx>{`
-  @keyframes messageIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  .animate-message { animation: messageIn 0.4s ease-out forwards; }
-  .chat-container::-webkit-scrollbar { display: none; }
-  .scrollbar-hide::-webkit-scrollbar { display: none; }
-  .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
-  
-  @keyframes scrollRight {
-    0% { transform: translateX(0); }
-    100% { transform: translateX(-50%); }
-  }
-  .animate-scroll-right {
-    animation: scrollRight 50s linear infinite;
-  }
-  .hover\\:pause-animation:hover {
-    animation-play-state: paused;
-  }
-
-  /* New animations for Crew Collective */
-  @keyframes floatSlow {
-    0%, 100% { transform: translateY(0) rotate(0deg); }
-    50% { transform: translateY(-30px) rotate(10deg); }
-  }
-  @keyframes floatMedium {
-    0%, 100% { transform: translateY(0) rotate(0deg); }
-    50% { transform: translateY(-20px) rotate(-8deg); }
-  }
-  @keyframes floatFast {
-    0%, 100% { transform: translateY(0) rotate(0deg); }
-    50% { transform: translateY(-15px) rotate(5deg); }
-  }
-  @keyframes slideUp {
-    from { opacity: 0; transform: translateY(30px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  @keyframes cardIn {
-    from { opacity: 0; transform: translateY(40px) scale(0.95); }
-    to { opacity: 1; transform: translateY(0) scale(1); }
-  }
-  
-  .animate-float-slow {
-    animation: floatSlow 8s ease-in-out infinite;
-  }
-  .animate-float-medium {
-    animation: floatMedium 6s ease-in-out infinite;
-  }
-  .animate-float-fast {
-    animation: floatFast 4s ease-in-out infinite;
-  }
-  .animate-slide-up {
-    animation: slideUp 0.8s ease-out forwards;
-  }
-  .stagger-1 { animation-delay: 0.1s; opacity: 0; }
-  .stagger-2 { animation-delay: 0.2s; opacity: 0; }
-  .stagger-3 { animation-delay: 0.3s; opacity: 0; }
-  .animate-card-in {
-    animation: cardIn 0.8s ease-out forwards;
-    opacity: 0;
-  }
-`}</style>
+      <style jsx>{`
+        @keyframes messageIn {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-message { animation: messageIn 0.4s ease-out forwards; }
+        .chat-container::-webkit-scrollbar { display: none; }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        @keyframes scrollRight {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+        .animate-scroll-right { animation: scrollRight 50s linear infinite; }
+        .hover\\:pause-animation:hover { animation-play-state: paused; }
+      `}</style>
     </div>
   );
 }
-
-
 
 // // app/page.tsx
 // 'use client';
