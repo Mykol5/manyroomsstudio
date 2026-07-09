@@ -5,18 +5,18 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
-import {
-  Bars3Icon,
-  XMarkIcon,
-} from '@heroicons/react/24/outline';
+import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline';
+
+// Brand Colors
+const brand = {
+  yellow: '#F1CB81',
+  blue: '#91ADCD',
+  brown: '#DB8B8C',
+  dark: '#3C291C',
+};
 
 const MaterialIcon = ({ icon, className = '', fill = false }: { icon: string; className?: string; fill?: boolean }) => (
-  <span 
-    className={`material-symbols-outlined ${className}`} 
-    style={fill ? { fontVariationSettings: "'FILL' 1" } : undefined}
-  >
-    {icon}
-  </span>
+  <span className={`material-symbols-outlined ${className}`} style={fill ? { fontVariationSettings: "'FILL' 1" } : undefined}>{icon}</span>
 );
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -27,9 +27,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [notifications] = useState(3);
 
   useEffect(() => {
-    if (!loading && !user) {
-      router.push('/login');
-    }
+    if (!loading && !user) router.push('/login');
   }, [user, loading, router]);
 
   const sidebarItems = [
@@ -54,119 +52,84 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#f8f9fa] flex items-center justify-center">
+      <div className="min-h-screen bg-[#FFFBF5] flex items-center justify-center">
         <div className="animate-pulse space-y-4 text-center">
-          <div className="w-16 h-16 bg-[#446900]/20 rounded-full mx-auto"></div>
-          <p className="text-[#446900] font-bold">Loading Admin Panel...</p>
+          <div className="w-16 h-16 bg-[#F1CB81]/40 rounded-full mx-auto"></div>
+          <p className="text-[#3C291C] font-bold">Loading Admin Panel...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#f8f9fa]">
+    <div className="min-h-screen bg-[#FFFBF5]">
+      
       {/* Top Navigation */}
-      <nav className="fixed top-0 w-full z-50 bg-white/70 backdrop-blur-xl border-b border-[#c2c9b1]/30 shadow-sm">
+      <nav className="fixed top-0 w-full z-50 bg-white/95 backdrop-blur-xl border-b border-[#3C291C]/10 shadow-sm">
         <div className="flex justify-between items-center px-4 md:px-8 py-3 w-full max-w-[1440px] mx-auto">
           <div className="flex items-center gap-4 md:gap-8">
-            <Link href="/">
-              <img 
-                alt="ManyRooms Logo" 
-                className="h-8 md:h-10 w-auto hover:scale-105 transition-transform" 
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuB9DZnYRdMuRfh66s2y0aufTN6zhyFmIsA5aK66cuCBeLINs4QoP8IyjpBAQjHuPpHixsYPB1HMPOBhT7mUKu2qy7il9h__oTnAUvQ8EU5qv270iXUsGRbz-PlJjGMU5ixs4CUyHd9GoHjR9KulnOy4sz-3QN2VkRzW39ONL6ynO2nSLAUh3VRvj_U51r7i6CxOGm9pnjSOVDUTZd2P3m_LTCAchKE5VwHb0k6YYjDoduMHQU4iyejUYtTsGr0VhJR4tasKZ-e6qrWQ"
-              />
+            <Link href="/" className="group flex-shrink-0">
+              <span className="text-xl md:text-2xl font-extrabold tracking-tighter text-[#3C291C]">
+                Many<span className="text-[#F1CB81]">Rooms</span>
+              </span>
             </Link>
-            <span className="hidden md:inline-block px-3 py-1 bg-[#beff5f]/20 text-[#446900] text-xs font-bold rounded-full">
+            <span className="hidden md:inline-block px-3 py-1 bg-[#F1CB81]/20 text-[#3C291C] text-xs font-bold rounded-full">
               Admin Control Panel
             </span>
           </div>
           <div className="flex items-center gap-3">
-            <div className="hidden md:flex items-center bg-[#edeeef] rounded-full px-4 py-2">
-              <span className="material-symbols-outlined text-[#737a65] text-xl">search</span>
-              <input 
-                className="bg-transparent border-none focus:ring-0 text-sm ml-2 w-40 outline-none text-[#191c1d] placeholder:text-[#737a65]" 
-                placeholder="Global search..." 
-                type="text" 
-              />
+            <div className="hidden md:flex items-center bg-[#3C291C]/5 rounded-full px-4 py-2">
+              <span className="material-symbols-outlined text-[#3C291C]/40 text-xl">search</span>
+              <input className="bg-transparent border-none focus:ring-0 text-sm ml-2 w-40 outline-none text-[#3C291C] placeholder:text-[#3C291C]/30" placeholder="Global search..." type="text" />
             </div>
-            <button className="p-2 hover:bg-[#edeeef] rounded-full transition-colors relative">
-              <span className="material-symbols-outlined text-[#191c1d]">notifications</span>
-              {notifications > 0 && (
-                <span className="absolute top-1 right-1 w-2 h-2 bg-[#ba1a1a] rounded-full"></span>
-              )}
+            <button className="p-2 hover:bg-[#3C291C]/5 rounded-full transition-colors relative">
+              <span className="material-symbols-outlined text-[#3C291C]">notifications</span>
+              {notifications > 0 && <span className="absolute top-1 right-1 w-2 h-2 bg-[#DB8B8C] rounded-full"></span>}
             </button>
-            <button 
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="lg:hidden p-2 hover:bg-[#edeeef] rounded-full"
-            >
-              <span className="material-symbols-outlined">{isMobileMenuOpen ? 'close' : 'menu'}</span>
+            <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="lg:hidden p-2 hover:bg-[#3C291C]/5 rounded-full">
+              <span className="material-symbols-outlined text-[#3C291C]">{isMobileMenuOpen ? 'close' : 'menu'}</span>
             </button>
           </div>
         </div>
       </nav>
 
-      {/* Mobile Menu Overlay */}
-      {isMobileMenuOpen && (
-        <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={() => setIsMobileMenuOpen(false)} />
-      )}
+      {/* Mobile Overlay */}
+      {isMobileMenuOpen && <div className="fixed inset-0 bg-[#3C291C]/50 z-40 lg:hidden" onClick={() => setIsMobileMenuOpen(false)} />}
 
       <div className="flex pt-16">
+        
         {/* Sidebar */}
-        <aside className={`
-          h-screen fixed left-0 top-0 z-40
-          flex flex-col bg-white border-r border-[#c2c9b1]/20 shadow-xl
-          pt-20 pb-8 px-4
-          w-72
-          transition-transform duration-300
-          ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-          lg:sticky lg:top-0
-        `}>
+        <aside className={`h-screen fixed left-0 top-0 z-40 flex flex-col bg-white border-r border-[#3C291C]/10 shadow-xl pt-20 pb-8 px-4 w-72 transition-transform duration-300 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'} lg:sticky lg:top-0`}>
+          
           <div className="px-4 mb-8">
-            <h1 className="text-2xl font-extrabold text-[#446900] leading-none">Admin Panel</h1>
-            <p className="text-xs font-bold text-[#737a65] uppercase tracking-widest mt-1">Creative Control</p>
+            <h1 className="text-2xl font-extrabold text-[#3C291C] leading-none">Admin Panel</h1>
+            <p className="text-xs font-bold text-[#3C291C]/40 uppercase tracking-widest mt-1">Creative Control</p>
           </div>
 
           <nav className="flex-grow space-y-1">
             {sidebarItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => setIsMobileMenuOpen(false)}
+              <Link key={item.href} href={item.href} onClick={() => setIsMobileMenuOpen(false)}
                 className={`flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${
-                  isActive(item.href)
-                    ? 'bg-[#beff5f] text-[#4c7500]'
-                    : 'text-[#424937] hover:bg-[#e7e8e9]'
-                }`}
-              >
-                <span 
-                  className="material-symbols-outlined"
-                  style={isActive(item.href) ? { fontVariationSettings: "'FILL' 1" } : {}}
-                >
-                  {item.icon}
-                </span>
+                  isActive(item.href) ? 'bg-[#F1CB81] text-[#3C291C]' : 'text-[#3C291C]/60 hover:bg-[#3C291C]/5 hover:text-[#3C291C]'
+                }`}>
+                <span className="material-symbols-outlined" style={isActive(item.href) ? { fontVariationSettings: "'FILL' 1" } : {}}>{item.icon}</span>
                 <span>{item.label}</span>
               </Link>
             ))}
           </nav>
 
           <div className="mt-auto px-4 mb-8">
-            <button className="w-full py-4 bg-[#beff5f] text-[#111f00] rounded-xl font-extrabold text-sm uppercase tracking-widest hover:scale-105 transition-transform duration-200 shadow-lg">
+            <button className="w-full py-4 bg-[#F1CB81] text-[#3C291C] rounded-xl font-extrabold text-sm uppercase tracking-widest hover:bg-[#DB8B8C] hover:text-white transition-all shadow-lg">
               Generate Report
             </button>
           </div>
 
-          <div className="pt-6 border-t border-[#c2c9b1]/30 space-y-1">
-            <Link
-              href="/support"
-              className="flex items-center gap-3 px-4 py-2 text-[#424937] hover:text-[#446900] transition-all text-sm"
-            >
+          <div className="pt-6 border-t border-[#3C291C]/10 space-y-1">
+            <Link href="/support" className="flex items-center gap-3 px-4 py-2 text-[#3C291C]/60 hover:text-[#3C291C] transition-all text-sm">
               <span className="material-symbols-outlined text-xl">help</span>
               <span>Help Center</span>
             </Link>
-            <button
-              onClick={handleLogout}
-              className="flex items-center gap-3 px-4 py-2 text-[#ba1a1a] hover:text-[#ba1a1a]/80 transition-all text-sm"
-            >
+            <button onClick={handleLogout} className="flex items-center gap-3 px-4 py-2 text-[#DB8B8C] hover:text-[#DB8B8C]/80 transition-all text-sm">
               <span className="material-symbols-outlined text-xl">logout</span>
               <span>Logout</span>
             </button>
@@ -174,13 +137,198 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 lg:pl-0">
-          {children}
-        </main>
+        <main className="flex-1 lg:pl-0">{children}</main>
       </div>
     </div>
   );
 }
+
+
+
+
+// // app/admin/layout.tsx
+// 'use client';
+
+// import { useState, useEffect } from 'react';
+// import Link from 'next/link';
+// import { usePathname, useRouter } from 'next/navigation';
+// import { useAuth } from '@/context/AuthContext';
+// import {
+//   Bars3Icon,
+//   XMarkIcon,
+// } from '@heroicons/react/24/outline';
+
+// const MaterialIcon = ({ icon, className = '', fill = false }: { icon: string; className?: string; fill?: boolean }) => (
+//   <span 
+//     className={`material-symbols-outlined ${className}`} 
+//     style={fill ? { fontVariationSettings: "'FILL' 1" } : undefined}
+//   >
+//     {icon}
+//   </span>
+// );
+
+// export default function AdminLayout({ children }: { children: React.ReactNode }) {
+//   const { user, loading, logout } = useAuth();
+//   const router = useRouter();
+//   const pathname = usePathname();
+//   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+//   const [notifications] = useState(3);
+
+//   useEffect(() => {
+//     if (!loading && !user) {
+//       router.push('/login');
+//     }
+//   }, [user, loading, router]);
+
+//   const sidebarItems = [
+//     { href: '/admin', icon: 'dashboard', label: 'Dashboard' },
+//     { href: '/admin/moderation', icon: 'gavel', label: 'Moderation' },
+//     { href: '/admin/studios', icon: 'apartment', label: 'Studio Listings' },
+//     { href: '/admin/users', icon: 'group', label: 'Users' },
+//     { href: '/admin/messages', icon: 'forum', label: 'Chat Queue' },
+//     { href: '/admin/financials', icon: 'payments', label: 'Financials' },
+//     { href: '/admin/settings', icon: 'settings', label: 'Settings' },
+//   ];
+
+//   const isActive = (href: string) => {
+//     if (href === '/admin') return pathname === '/admin';
+//     return pathname.startsWith(href);
+//   };
+
+//   const handleLogout = async () => {
+//     await logout();
+//     router.push('/');
+//   };
+
+//   if (loading) {
+//     return (
+//       <div className="min-h-screen bg-[#f8f9fa] flex items-center justify-center">
+//         <div className="animate-pulse space-y-4 text-center">
+//           <div className="w-16 h-16 bg-[#446900]/20 rounded-full mx-auto"></div>
+//           <p className="text-[#446900] font-bold">Loading Admin Panel...</p>
+//         </div>
+//       </div>
+//     );
+//   }
+
+//   return (
+//     <div className="min-h-screen bg-[#f8f9fa]">
+//       {/* Top Navigation */}
+//       <nav className="fixed top-0 w-full z-50 bg-white/70 backdrop-blur-xl border-b border-[#c2c9b1]/30 shadow-sm">
+//         <div className="flex justify-between items-center px-4 md:px-8 py-3 w-full max-w-[1440px] mx-auto">
+//           <div className="flex items-center gap-4 md:gap-8">
+//             <Link href="/">
+//               <img 
+//                 alt="ManyRooms Logo" 
+//                 className="h-8 md:h-10 w-auto hover:scale-105 transition-transform" 
+//                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuB9DZnYRdMuRfh66s2y0aufTN6zhyFmIsA5aK66cuCBeLINs4QoP8IyjpBAQjHuPpHixsYPB1HMPOBhT7mUKu2qy7il9h__oTnAUvQ8EU5qv270iXUsGRbz-PlJjGMU5ixs4CUyHd9GoHjR9KulnOy4sz-3QN2VkRzW39ONL6ynO2nSLAUh3VRvj_U51r7i6CxOGm9pnjSOVDUTZd2P3m_LTCAchKE5VwHb0k6YYjDoduMHQU4iyejUYtTsGr0VhJR4tasKZ-e6qrWQ"
+//               />
+//             </Link>
+//             <span className="hidden md:inline-block px-3 py-1 bg-[#beff5f]/20 text-[#446900] text-xs font-bold rounded-full">
+//               Admin Control Panel
+//             </span>
+//           </div>
+//           <div className="flex items-center gap-3">
+//             <div className="hidden md:flex items-center bg-[#edeeef] rounded-full px-4 py-2">
+//               <span className="material-symbols-outlined text-[#737a65] text-xl">search</span>
+//               <input 
+//                 className="bg-transparent border-none focus:ring-0 text-sm ml-2 w-40 outline-none text-[#191c1d] placeholder:text-[#737a65]" 
+//                 placeholder="Global search..." 
+//                 type="text" 
+//               />
+//             </div>
+//             <button className="p-2 hover:bg-[#edeeef] rounded-full transition-colors relative">
+//               <span className="material-symbols-outlined text-[#191c1d]">notifications</span>
+//               {notifications > 0 && (
+//                 <span className="absolute top-1 right-1 w-2 h-2 bg-[#ba1a1a] rounded-full"></span>
+//               )}
+//             </button>
+//             <button 
+//               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+//               className="lg:hidden p-2 hover:bg-[#edeeef] rounded-full"
+//             >
+//               <span className="material-symbols-outlined">{isMobileMenuOpen ? 'close' : 'menu'}</span>
+//             </button>
+//           </div>
+//         </div>
+//       </nav>
+
+//       {/* Mobile Menu Overlay */}
+//       {isMobileMenuOpen && (
+//         <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={() => setIsMobileMenuOpen(false)} />
+//       )}
+
+//       <div className="flex pt-16">
+//         {/* Sidebar */}
+//         <aside className={`
+//           h-screen fixed left-0 top-0 z-40
+//           flex flex-col bg-white border-r border-[#c2c9b1]/20 shadow-xl
+//           pt-20 pb-8 px-4
+//           w-72
+//           transition-transform duration-300
+//           ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+//           lg:sticky lg:top-0
+//         `}>
+//           <div className="px-4 mb-8">
+//             <h1 className="text-2xl font-extrabold text-[#446900] leading-none">Admin Panel</h1>
+//             <p className="text-xs font-bold text-[#737a65] uppercase tracking-widest mt-1">Creative Control</p>
+//           </div>
+
+//           <nav className="flex-grow space-y-1">
+//             {sidebarItems.map((item) => (
+//               <Link
+//                 key={item.href}
+//                 href={item.href}
+//                 onClick={() => setIsMobileMenuOpen(false)}
+//                 className={`flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${
+//                   isActive(item.href)
+//                     ? 'bg-[#beff5f] text-[#4c7500]'
+//                     : 'text-[#424937] hover:bg-[#e7e8e9]'
+//                 }`}
+//               >
+//                 <span 
+//                   className="material-symbols-outlined"
+//                   style={isActive(item.href) ? { fontVariationSettings: "'FILL' 1" } : {}}
+//                 >
+//                   {item.icon}
+//                 </span>
+//                 <span>{item.label}</span>
+//               </Link>
+//             ))}
+//           </nav>
+
+//           <div className="mt-auto px-4 mb-8">
+//             <button className="w-full py-4 bg-[#beff5f] text-[#111f00] rounded-xl font-extrabold text-sm uppercase tracking-widest hover:scale-105 transition-transform duration-200 shadow-lg">
+//               Generate Report
+//             </button>
+//           </div>
+
+//           <div className="pt-6 border-t border-[#c2c9b1]/30 space-y-1">
+//             <Link
+//               href="/support"
+//               className="flex items-center gap-3 px-4 py-2 text-[#424937] hover:text-[#446900] transition-all text-sm"
+//             >
+//               <span className="material-symbols-outlined text-xl">help</span>
+//               <span>Help Center</span>
+//             </Link>
+//             <button
+//               onClick={handleLogout}
+//               className="flex items-center gap-3 px-4 py-2 text-[#ba1a1a] hover:text-[#ba1a1a]/80 transition-all text-sm"
+//             >
+//               <span className="material-symbols-outlined text-xl">logout</span>
+//               <span>Logout</span>
+//             </button>
+//           </div>
+//         </aside>
+
+//         {/* Main Content */}
+//         <main className="flex-1 lg:pl-0">
+//           {children}
+//         </main>
+//       </div>
+//     </div>
+//   );
+// }
 
 
 

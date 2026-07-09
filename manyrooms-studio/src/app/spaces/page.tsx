@@ -1,12 +1,20 @@
+// app/spaces/page.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { MagnifyingGlassIcon, HeartIcon } from '@heroicons/react/24/outline';
 import { supabase } from '@/lib/supabase';
 import Chatbot from '@/components/Chatbot';
 import Footer from '@/components/Footer';
+
+// Brand Colors
+const brand = {
+  yellow: '#F1CB81',
+  blue: '#91ADCD',
+  brown: '#DB8B8C',
+  dark: '#3C291C',
+};
 
 interface Studio {
   id: string;
@@ -29,272 +37,161 @@ export default function AllSpacesPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCity, setSelectedCity] = useState('all');
   const [priceRange, setPriceRange] = useState('all');
-  const [showFilters, setShowFilters] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
-  // Get unique cities from studios
   const cities = ['all', ...new Set(studios.map(s => s.city).filter(Boolean))];
 
-  useEffect(() => {
-    fetchApprovedStudios();
-  }, []);
-
-  useEffect(() => {
-    filterStudios();
-  }, [searchTerm, selectedCity, priceRange, studios]);
+  useEffect(() => { fetchApprovedStudios(); }, []);
+  useEffect(() => { filterStudios(); }, [searchTerm, selectedCity, priceRange, studios]);
 
   const fetchApprovedStudios = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('studios')
-        .select('*')
-        .eq('status', 'approved')
-        .order('created_at', { ascending: false });
-
+      const { data, error } = await supabase.from('studios').select('*').eq('status', 'approved').order('created_at', { ascending: false });
       if (error) throw error;
-      setStudios(data || []);
-      setFilteredStudios(data || []);
-    } catch (error) {
-      console.error('Error fetching studios:', error);
-    } finally {
-      setLoading(false);
-    }
+      setStudios(data || []); setFilteredStudios(data || []);
+    } catch (error) { console.error('Error fetching studios:', error); }
+    finally { setLoading(false); }
   };
 
   const filterStudios = () => {
     let filtered = [...studios];
-
-    if (searchTerm) {
-      filtered = filtered.filter(studio =>
-        studio.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        studio.city?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        studio.description?.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
-
-    if (selectedCity !== 'all') {
-      filtered = filtered.filter(studio => studio.city === selectedCity);
-    }
-
-    if (priceRange !== 'all') {
-      if (priceRange === 'under-100') {
-        filtered = filtered.filter(studio => studio.hourly_rate < 100);
-      } else if (priceRange === '100-200') {
-        filtered = filtered.filter(studio => studio.hourly_rate >= 100 && studio.hourly_rate <= 200);
-      } else if (priceRange === '200-300') {
-        filtered = filtered.filter(studio => studio.hourly_rate > 200 && studio.hourly_rate <= 300);
-      } else if (priceRange === 'above-300') {
-        filtered = filtered.filter(studio => studio.hourly_rate > 300);
-      }
-    }
-
+    if (searchTerm) filtered = filtered.filter(s => s.name.toLowerCase().includes(searchTerm.toLowerCase()) || s.city?.toLowerCase().includes(searchTerm.toLowerCase()) || s.description?.toLowerCase().includes(searchTerm.toLowerCase()));
+    if (selectedCity !== 'all') filtered = filtered.filter(s => s.city === selectedCity);
+    if (priceRange === 'under-100') filtered = filtered.filter(s => s.hourly_rate < 100);
+    else if (priceRange === '100-200') filtered = filtered.filter(s => s.hourly_rate >= 100 && s.hourly_rate <= 200);
+    else if (priceRange === '200-300') filtered = filtered.filter(s => s.hourly_rate > 200 && s.hourly_rate <= 300);
+    else if (priceRange === 'above-300') filtered = filtered.filter(s => s.hourly_rate > 300);
     setFilteredStudios(filtered);
   };
 
-  const clearFilters = () => {
-    setSearchTerm('');
-    setSelectedCity('all');
-    setPriceRange('all');
-    setShowFilters(false);
-  };
+  const clearFilters = () => { setSearchTerm(''); setSelectedCity('all'); setPriceRange('all'); };
 
-  const getFirstImage = (images: string[]) => {
-    if (!images || images.length === 0) return null;
-    return images[0];
-  };
+  const getFirstImage = (images: string[]) => (!images || images.length === 0 ? null : images[0]);
+  const formatPrice = (price: number) => `$${price}`;
+  const formatLocation = (city: string, state: string) => city && state ? `${city}, ${state}` : city || 'Location TBD';
 
-  const formatPrice = (price: number) => {
-    return `$${price}`;
-  };
-
-  const formatLocation = (city: string, state: string) => {
-    if (city && state) return `${city}, ${state}`;
-    if (city) return city;
-    return 'Location TBD';
-  };
-
-  const vibeTags = [
-    'Brutalist',
-    'Organic',
-    'Sci-Fi Neon',
-    'Minimalist',
-    'High-Key'
-  ];
+  const vibeTags = ['Brutalist', 'Organic', 'Sci-Fi Neon', 'Minimalist', 'High-Key'];
 
   return (
-    <div className="bg-[#f8f9fa] text-[#191c1d] font-body-md overflow-x-hidden">
+    <div className="bg-[#FFFBF5] text-[#3C291C] overflow-x-hidden">
+      
       {/* Navigation */}
-      <nav className="fixed top-0 w-full z-50 bg-white/70 backdrop-blur-xl border-b border-[#c2c9b1]/30 shadow-sm">
-        <div className="flex justify-between items-center px-6 md:px-16 py-4 w-full max-w-[1440px] mx-auto">
-          <div className="flex items-center gap-8">
-            <Link href="/" className="text-2xl font-display-sm tracking-tighter text-[#446900]">
-              ManyRooms
+      <nav className="fixed top-0 w-full z-50 bg-white/95 backdrop-blur-xl border-b border-[#3C291C]/10 shadow-sm">
+        <div className="flex justify-between items-center px-4 md:px-16 py-3 md:py-4 w-full max-w-[1440px] mx-auto">
+          <div className="flex items-center gap-4 md:gap-8">
+            <Link href="/" className="group flex-shrink-0">
+              <span className="text-xl md:text-2xl font-extrabold tracking-tighter text-[#3C291C]">
+                Many<span className="text-[#F1CB81]">Rooms</span>
+              </span>
             </Link>
-            <div className="hidden md:flex gap-6 items-center">
-              <Link href="/" className="text-[#424937] hover:text-[#446900] transition-colors font-label-bold text-sm">
-                Marketplace
-              </Link>
-              <Link href="/spaces" className="text-[#446900] font-bold border-b-2 border-[#446900] font-label-bold text-sm">
-                Studios
-              </Link>
-              <Link href="/cities" className="text-[#424937] hover:text-[#446900] transition-colors font-label-bold text-sm">
-                Vibes
-              </Link>
-              <Link href="/about" className="text-[#424937] hover:text-[#446900] transition-colors font-label-bold text-sm">
-                Journal
-              </Link>
+            <div className="hidden lg:flex gap-6 items-center">
+              {['Marketplace', 'Studios', 'Spaces', 'Journal', 'Services'].map((item) => (
+                <Link key={item} href={item === 'Marketplace' ? '/' : `/${item.toLowerCase()}`}
+                  className={`py-1 font-bold text-sm transition-colors text-[#3C291C]/70 hover:text-[#3C291C] ${item === 'Studios' ? 'text-[#DB8B8C] border-b-2 border-[#DB8B8C]' : ''}`}>{item}</Link>
+              ))}
             </div>
           </div>
-          <div className="flex items-center gap-4">
-            <button className="hidden lg:flex material-symbols-outlined text-[#424937] hover:scale-105 transition-transform">
-              favorite
-            </button>
-            <button className="material-symbols-outlined text-[#424937] hover:scale-105 transition-transform">
-              account_circle
-            </button>
-            <Link 
-              href="/signup?role=owner"
-              className="bg-[#446900] text-white px-6 py-2 rounded-full font-label-bold text-sm hover:scale-105 transition-transform duration-200 active:scale-95"
-            >
-              List Studio
-            </Link>
+          <div className="flex items-center gap-3 md:gap-4">
+            <span className="material-symbols-outlined text-[#3C291C] cursor-pointer hover:scale-105 transition-transform hidden md:block">favorite</span>
+            <span className="material-symbols-outlined text-[#3C291C] cursor-pointer hover:scale-105 transition-transform">account_circle</span>
+            <Link href="/signup?role=owner" className="bg-[#F1CB81] text-[#3C291C] px-6 py-2 rounded-full font-bold text-sm hover:bg-[#DB8B8C] hover:text-white transition-all">List Your Space</Link>
           </div>
         </div>
       </nav>
 
-      <main className="pt-24 pb-20 px-6 md:px-16 max-w-[1440px] mx-auto">
-        {/* Header & AI Visual Search */}
-        <section className="mb-12 relative">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+      <main className="pt-24 pb-20 px-4 md:px-16 max-w-[1440px] mx-auto">
+        
+        {/* Header */}
+        <section className="mb-10 relative">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
             <div className="max-w-2xl">
-              <h1 className="font-display-lg text-4xl md:text-[84px] text-[#191c1d] leading-tight">
-                Find your next <span className="text-[#446900] italic">Creative Era.</span>
+              <h1 className="text-4xl md:text-6xl font-extrabold text-[#3C291C] leading-tight">
+                Find your next <span className="text-[#DB8B8C] italic">Creative Era.</span>
               </h1>
-              <p className="text-lg text-[#424937] mt-4">
-                Discover production-ready spaces designed for the next generation of digital creators.
-              </p>
+              <p className="text-lg text-[#3C291C]/60 mt-4">Discover production-ready spaces designed for the next generation of digital creators.</p>
             </div>
-            <div className="flex gap-4 items-center">
-              <button 
-                onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
-                className="flex items-center gap-2 bg-[#e7e8e9] px-4 py-2 rounded-full font-label-bold text-sm hover:bg-[#beff5f] transition-colors"
-              >
-                <span className="material-symbols-outlined text-sm">{viewMode === 'grid' ? 'grid_view' : 'list'}</span>
-                {viewMode === 'grid' ? 'Grid View' : 'List View'}
-              </button>
-            </div>
+            <button onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
+              className="flex items-center gap-2 bg-[#3C291C]/5 px-4 py-2 rounded-full font-bold text-sm hover:bg-[#F1CB81]/30 transition-colors text-[#3C291C]">
+              <span className="material-symbols-outlined text-sm">{viewMode === 'grid' ? 'grid_view' : 'list'}</span>
+              {viewMode === 'grid' ? 'Grid View' : 'List View'}
+            </button>
           </div>
 
-          {/* AI Image Search Bar */}
+          {/* Search Bar */}
           <div className="relative group max-w-4xl mx-auto md:mx-0">
-            <div className="flex items-center bg-white shadow-xl rounded-2xl p-2 border border-[#c2c9b1]/30 hover:border-[#beff5f] transition-all duration-300">
-              <span className="material-symbols-outlined px-4 text-[#737a65]">search</span>
-              <input 
-                className="w-full bg-transparent border-none focus:ring-0 text-base py-4 outline-none" 
-                placeholder="Search by vibe, mood, or equipment..." 
-                type="text"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-              <div className="h-8 w-px bg-[#c2c9b1] mx-2"></div>
-              <button className="flex items-center gap-2 bg-[#e4d7fd] text-[#665c7c] px-6 py-3 rounded-xl font-label-bold text-sm hover:bg-[#beff5f] transition-colors shrink-0">
+            <div className="flex items-center bg-white shadow-md rounded-2xl p-2 border border-[#3C291C]/10 hover:border-[#F1CB81] transition-all duration-300">
+              <MagnifyingGlassIcon className="w-5 h-5 ml-4 text-[#3C291C]/40" />
+              <input className="w-full bg-transparent border-none focus:ring-0 text-base py-4 outline-none text-[#3C291C] placeholder:text-[#3C291C]/30" placeholder="Search by vibe, mood, or equipment..." type="text"
+                value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+              <div className="h-8 w-px bg-[#3C291C]/10 mx-2"></div>
+              <button className="flex items-center gap-2 bg-[#91ADCD]/20 text-[#3C291C] px-6 py-3 rounded-xl font-bold text-sm hover:bg-[#F1CB81]/30 transition-colors shrink-0">
                 <span className="material-symbols-outlined">add_a_photo</span>
                 <span className="hidden md:inline">Visual Search</span>
               </button>
             </div>
-
-            {/* Vibe Chips */}
-            <div className="flex flex-wrap gap-2 mt-6">
+            <div className="flex flex-wrap gap-2 mt-5">
               {vibeTags.map((tag) => (
-                <span 
-                  key={tag}
-                  className="px-4 py-1.5 rounded-full bg-[#b5f657] text-[#111f00] font-label-bold text-[10px] tracking-[0.1em] uppercase cursor-pointer hover:scale-105 transition-transform"
-                >
-                  {tag}
-                </span>
+                <span key={tag} onClick={() => setSearchTerm(tag)}
+                  className="px-4 py-1.5 rounded-full bg-[#F1CB81] text-[#3C291C] font-bold text-[10px] tracking-[0.1em] uppercase cursor-pointer hover:scale-105 transition-transform">{tag}</span>
               ))}
             </div>
           </div>
         </section>
 
-        {/* Main Content Area: Filter + Asymmetric Grid */}
+        {/* Main Content */}
         <div className="flex flex-col lg:flex-row gap-6">
+          
           {/* Sidebar Filter */}
-          <aside className="w-full lg:w-72 shrink-0 space-y-10">
+          <aside className="w-full lg:w-72 shrink-0 space-y-8">
             <div className="space-y-6">
-              <h3 className="font-headline-lg text-xl text-[#191c1d]">Filters</h3>
+              <h3 className="text-xl font-extrabold text-[#3C291C]">Filters</h3>
               
-              {/* Availability */}
               <div className="space-y-3">
-                <p className="font-label-bold text-sm text-[#424937] uppercase tracking-widest">Availability</p>
-                <div className="flex items-center gap-3 bg-[#f3f4f5] p-3 rounded-xl border border-[#c2c9b1]/30">
-                  <span className="material-symbols-outlined text-[#446900]">calendar_today</span>
-                  <span className="text-base">Pick a Date</span>
+                <p className="font-bold text-xs text-[#3C291C]/40 uppercase tracking-widest">Availability</p>
+                <div className="flex items-center gap-3 bg-[#3C291C]/5 p-3 rounded-xl border border-[#3C291C]/10">
+                  <span className="material-symbols-outlined text-[#DB8B8C]">calendar_today</span>
+                  <span className="text-base text-[#3C291C]">Pick a Date</span>
                 </div>
               </div>
 
-              {/* Price Range */}
               <div className="space-y-3">
-                <p className="font-label-bold text-sm text-[#424937] uppercase tracking-widest">Price / Hour</p>
+                <p className="font-bold text-xs text-[#3C291C]/40 uppercase tracking-widest">Price / Hour</p>
                 <div className="px-2">
-                  <input 
-                    type="range" 
-                    className="w-full h-1 bg-[#c2c9b1] rounded-lg appearance-none cursor-pointer accent-[#446900]" 
-                    min="20" 
-                    max="500" 
-                    value="200"
-                  />
-                  <div className="flex justify-between mt-2 font-label-bold text-xs text-[#424937]">
-                    <span>$20</span>
-                    <span>$500+</span>
-                  </div>
+                  <input type="range" className="w-full h-1 bg-[#3C291C]/10 rounded-lg appearance-none cursor-pointer accent-[#F1CB81]" min="20" max="500" defaultValue="200" />
+                  <div className="flex justify-between mt-2 font-bold text-xs text-[#3C291C]/40"><span>$20</span><span>$500+</span></div>
                 </div>
               </div>
 
-              {/* Amenities */}
               <div className="space-y-3">
-                <p className="font-label-bold text-sm text-[#424937] uppercase tracking-widest">Equipment</p>
+                <p className="font-bold text-xs text-[#3C291C]/40 uppercase tracking-widest">Equipment</p>
                 <div className="space-y-2">
-                  <label className="flex items-center gap-3 cursor-pointer group">
-                    <input type="checkbox" className="rounded text-[#446900] focus:ring-[#446900] h-5 w-5 border-[#737a65]" />
-                    <span className="text-base group-hover:text-[#446900] transition-colors">Continuous Lighting</span>
-                  </label>
-                  <label className="flex items-center gap-3 cursor-pointer group">
-                    <input type="checkbox" className="rounded text-[#446900] focus:ring-[#446900] h-5 w-5 border-[#737a65]" />
-                    <span className="text-base group-hover:text-[#446900] transition-colors">Green Screen</span>
-                  </label>
-                  <label className="flex items-center gap-3 cursor-pointer group">
-                    <input type="checkbox" className="rounded text-[#446900] focus:ring-[#446900] h-5 w-5 border-[#737a65]" />
-                    <span className="text-base group-hover:text-[#446900] transition-colors">Makeup Station</span>
-                  </label>
+                  {['Continuous Lighting', 'Green Screen', 'Makeup Station'].map((item) => (
+                    <label key={item} className="flex items-center gap-3 cursor-pointer group">
+                      <input type="checkbox" className="rounded text-[#F1CB81] focus:ring-[#F1CB81] h-5 w-5 border-[#3C291C]/20" />
+                      <span className="text-base text-[#3C291C]/70 group-hover:text-[#3C291C] transition-colors">{item}</span>
+                    </label>
+                  ))}
                 </div>
               </div>
 
-              <button 
-                onClick={clearFilters}
-                className="w-full bg-[#191c1d] text-[#f8f9fa] py-4 rounded-xl font-label-bold text-sm hover:scale-[1.02] active:scale-95 transition-all"
-              >
+              <button onClick={clearFilters}
+                className="w-full bg-[#3C291C] text-white py-4 rounded-xl font-bold text-sm hover:bg-[#DB8B8C] transition-all">
                 Apply Filters
               </button>
             </div>
 
-            {/* Featured Highlight */}
-            <div className="relative group rounded-3xl overflow-hidden bg-[#635979] text-white p-6 h-96 flex flex-col justify-end">
+            {/* Spotlight Card */}
+            <div className="relative group rounded-3xl overflow-hidden bg-[#3C291C] text-white p-6 h-80 flex flex-col justify-end">
               <div className="absolute inset-0 z-0">
-                <img 
-                  className="w-full h-full object-cover opacity-60 group-hover:scale-110 transition-transform duration-700" 
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuDPNY0T4vIaki9tKiv9eGEIHCWM1oGvCu6tz6v-f8mneuQX38csFXQhsLxScQrdRjjZGH56wQ3oVY_0QDrzEA_RawlFn29OYQlT0Y9rt4XWjf-SlFKUp1wacLEu7DC_NZlpThkoXn0Doqte1pXDkP4yXLJRJ045vmDV0MHeczfw1A7ubctQc-CuBzIYWXXPwodv2vjmfH7fMnvHHS0_Rdma-f5pd79k2i_wczhmHcsBe0HYMcLBVZ78xubQA2vX09nuIw9iToSV13NA"
-                  alt="The Concrete Vault"
-                />
+                <img className="w-full h-full object-cover opacity-50 group-hover:scale-110 transition-transform duration-700"
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuDPNY0T4vIaki9tKiv9eGEIHCWM1oGvCu6tz6v-f8mneuQX38csFXQhsLxScQrdRjjZGH56wQ3oVY_0QDrzEA_RawlFn29OYQlT0Y9rt4XWjf-SlFKUp1wacLEu7DC_NZlpThkoXn0Doqte1pXDkP4yXLJRJ045vmDV0MHeczfw1A7ubctQc-CuBzIYWXXPwodv2vjmfH7fMnvHHS0_Rdma-f5pd79k2i_wczhmHcsBe0HYMcLBVZ78xubQA2vX09nuIw9iToSV13NA" alt="Spotlight" />
               </div>
               <div className="relative z-10">
-                <span className="bg-[#b5f657] text-[#111f00] px-3 py-1 rounded-full font-label-bold text-[10px] mb-4 inline-block uppercase tracking-tighter">
-                  Spotlight
-                </span>
-                <h4 className="font-headline-lg text-xl leading-tight mb-2">The Concrete Vault</h4>
-                <p className="text-base opacity-80 mb-4">Brutalist aesthetics for high-fashion campaigns.</p>
-                <button className="flex items-center gap-2 font-label-bold text-sm group-hover:gap-4 transition-all">
+                <span className="bg-[#F1CB81] text-[#3C291C] px-3 py-1 rounded-full font-bold text-[10px] mb-4 inline-block uppercase">Spotlight</span>
+                <h4 className="text-xl font-extrabold leading-tight mb-2">The Concrete Vault</h4>
+                <p className="text-sm opacity-80 mb-4">Brutalist aesthetics for high-fashion campaigns.</p>
+                <button className="flex items-center gap-2 font-bold text-sm group-hover:gap-4 transition-all">
                   View Space <span className="material-symbols-outlined">arrow_forward</span>
                 </button>
               </div>
@@ -303,97 +200,68 @@ export default function AllSpacesPage() {
 
           {/* Listing Grid */}
           <div className="flex-1">
-            {/* Results count */}
-            <div className="mb-8 text-sm text-[#424937]">
-              Showing {filteredStudios.length} {filteredStudios.length === 1 ? 'space' : 'spaces'}
-            </div>
+            <div className="mb-6 text-sm text-[#3C291C]/40">Showing {filteredStudios.length} {filteredStudios.length === 1 ? 'space' : 'spaces'}</div>
 
             {loading ? (
               <div className="flex justify-center items-center py-20">
                 <div className="animate-pulse text-center">
-                  <div className="w-16 h-16 bg-[#446900]/20 rounded-full mx-auto mb-4"></div>
-                  <p className="text-[#424937]">Loading spaces...</p>
+                  <div className="w-16 h-16 bg-[#F1CB81]/40 rounded-full mx-auto mb-4"></div>
+                  <p className="text-[#3C291C]/60">Loading spaces...</p>
                 </div>
               </div>
             ) : filteredStudios.length === 0 ? (
               <div className="text-center py-20">
-                <div className="w-20 h-20 mx-auto mb-6 text-[#737a65]">
-                  <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                  </svg>
+                <div className="w-20 h-20 mx-auto mb-6 text-[#3C291C]/20">
+                  <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
                 </div>
-                <h4 className="text-xl font-medium mb-2">No spaces found</h4>
-                <p className="text-[#424937] max-w-md mx-auto">
-                  Try adjusting your filters or search terms to find more spaces.
-                </p>
-                <button onClick={clearFilters} className="mt-6 text-[#446900] hover:underline">
-                  Clear all filters
-                </button>
+                <h4 className="text-xl font-bold text-[#3C291C] mb-2">No spaces found</h4>
+                <p className="text-[#3C291C]/60 max-w-md mx-auto">Try adjusting your filters or search terms.</p>
+                <button onClick={clearFilters} className="mt-6 text-[#DB8B8C] font-bold hover:underline">Clear all filters</button>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 gap-y-12">
                 {filteredStudios.map((studio, index) => {
                   const coverImage = getFirstImage(studio.images);
-                  const isEven = index % 2 === 1;
-                  
                   return (
-                    <div key={studio.id} className={`group relative flex flex-col h-full ${isEven ? 'mt-0 md:mt-12' : ''}`}>
-                      <div className="relative w-full aspect-[4/5] rounded-3xl overflow-hidden shadow-lg mb-0 transition-all duration-500 group-hover:shadow-2xl">
+                    <div key={studio.id} className={`group relative flex flex-col h-full ${index % 2 === 1 ? 'mt-0 md:mt-12' : ''}`}>
+                      <div className="relative w-full aspect-[4/5] rounded-3xl overflow-hidden shadow-md mb-0 transition-all duration-500 group-hover:shadow-lg">
                         {coverImage ? (
-                          <img 
-                            src={coverImage}
-                            alt={studio.name}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                          />
+                          <img src={coverImage} alt={studio.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-gray-100">
-                            <span className="material-symbols-outlined text-6xl text-gray-300">image</span>
+                          <div className="w-full h-full flex items-center justify-center bg-[#3C291C]/5">
+                            <span className="material-symbols-outlined text-6xl text-[#3C291C]/20">image</span>
                           </div>
                         )}
                         <div className="absolute top-6 right-6 z-10">
-                          <button className="bg-white/80 backdrop-blur-md p-3 rounded-full hover:bg-[#beff5f] transition-colors shadow-sm">
-                            <HeartIcon className="w-5 h-5 text-[#191c1d]" />
+                          <button className="bg-white/80 backdrop-blur-md p-3 rounded-full hover:bg-[#F1CB81] transition-colors shadow-sm">
+                            <HeartIcon className="w-5 h-5 text-[#3C291C]" />
                           </button>
                         </div>
                       </div>
 
-                      {/* Glass Card Overlay */}
-                      <div className="bg-white/70 backdrop-blur-[20px] border border-white/40 -mt-8 p-8 mx-4 rounded-3xl shadow-xl relative z-10 transform transition-transform duration-300 group-hover:-translate-y-2">
+                      <div className="bg-white border border-[#3C291C]/10 -mt-8 p-6 md:p-8 mx-4 rounded-3xl shadow-sm relative z-10 transform transition-transform duration-300 group-hover:-translate-y-2">
                         <div className="flex justify-between items-start mb-4">
                           <div>
-                            <h3 className="font-headline-lg text-xl text-[#191c1d] leading-none mb-1">{studio.name}</h3>
-                            <div className="flex items-center gap-1 text-[#424937]">
+                            <h3 className="text-xl font-extrabold text-[#3C291C] leading-none mb-1">{studio.name}</h3>
+                            <div className="flex items-center gap-1 text-[#3C291C]/60">
                               <span className="material-symbols-outlined text-sm">location_on</span>
-                              <span className="font-label-bold text-xs uppercase tracking-wider">
-                                {formatLocation(studio.city, studio.state)}
-                              </span>
+                              <span className="font-bold text-xs uppercase tracking-wider">{formatLocation(studio.city, studio.state)}</span>
                             </div>
                           </div>
                           <div className="text-right">
-                            <div className="font-display-sm text-2xl text-[#446900]">
-                              {formatPrice(studio.hourly_rate)}
-                              <span className="text-sm font-body-md text-[#424937]">/hr</span>
-                            </div>
-                            <div className="flex items-center gap-1 justify-end mt-1 text-[#424937]">
-                              <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                              <span className="font-label-bold text-xs">4.9 (124)</span>
+                            <div className="text-2xl font-extrabold text-[#DB8B8C]">{formatPrice(studio.hourly_rate)}<span className="text-sm font-normal text-[#3C291C]/60">/hr</span></div>
+                            <div className="flex items-center gap-1 justify-end mt-1 text-[#3C291C]/60">
+                              <span className="material-symbols-outlined text-sm text-[#F1CB81]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+                              <span className="font-bold text-xs">4.9 (124)</span>
                             </div>
                           </div>
                         </div>
-
                         <div className="flex gap-2 mb-6">
-                          <span className="bg-[#e4d7fd] text-[#665c7c] px-3 py-1 rounded-full font-label-bold text-[10px] tracking-[0.1em] uppercase">
-                            {studio.category || 'Creative'}
-                          </span>
-                          <span className="bg-[#e7e8e9] text-[#424937] px-3 py-1 rounded-full font-label-bold text-[10px] tracking-[0.1em] uppercase">
-                            {studio.capacity} Cap
-                          </span>
+                          <span className="bg-[#91ADCD]/20 text-[#3C291C] px-3 py-1 rounded-full font-bold text-[10px] uppercase">{studio.category || 'Creative'}</span>
+                          <span className="bg-[#3C291C]/5 text-[#3C291C]/60 px-3 py-1 rounded-full font-bold text-[10px] uppercase">{studio.capacity} Cap</span>
                         </div>
-
-                        <Link 
-                          href={`/spaces/${studio.id}`}
-                          className="w-full bg-[#446900] text-white py-4 rounded-2xl font-label-bold text-sm hover:scale-[1.02] active:scale-95 transition-all block text-center"
-                        >
+                        <Link href={`/spaces/${studio.id}`}
+                          className="w-full bg-[#F1CB81] text-[#3C291C] py-4 rounded-2xl font-bold text-sm hover:bg-[#DB8B8C] hover:text-white transition-all block text-center">
                           Quick Book
                         </Link>
                       </div>
@@ -403,10 +271,9 @@ export default function AllSpacesPage() {
               </div>
             )}
 
-            {/* Load More */}
             {filteredStudios.length > 0 && (
-              <div className="mt-20 flex justify-center">
-                <button className="group flex items-center gap-4 bg-[#e1e3e4] px-12 py-4 rounded-full font-label-bold text-sm hover:bg-[#191c1d] hover:text-[#f8f9fa] transition-all duration-300">
+              <div className="mt-16 flex justify-center">
+                <button className="group flex items-center gap-4 bg-[#3C291C]/5 px-10 py-4 rounded-full font-bold text-sm hover:bg-[#3C291C] hover:text-white transition-all duration-300 text-[#3C291C]">
                   Discover More Spaces
                   <span className="material-symbols-outlined group-hover:rotate-45 transition-transform">add</span>
                 </button>
@@ -416,20 +283,448 @@ export default function AllSpacesPage() {
         </div>
       </main>
 
-      {/* Footer */}
       <Footer />
-
-      {/* Chatbot */}
       <Chatbot />
-
-      <style>{`
-        .material-symbols-outlined {
-          font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-        }
-      `}</style>
     </div>
   );
 }
+
+
+
+
+
+// 'use client';
+
+// import { useState, useEffect } from 'react';
+// import Link from 'next/link';
+// import Image from 'next/image';
+// import { MagnifyingGlassIcon, HeartIcon } from '@heroicons/react/24/outline';
+// import { supabase } from '@/lib/supabase';
+// import Chatbot from '@/components/Chatbot';
+// import Footer from '@/components/Footer';
+
+// interface Studio {
+//   id: string;
+//   name: string;
+//   city: string;
+//   state: string;
+//   country: string;
+//   hourly_rate: number;
+//   images: string[];
+//   status: string;
+//   description: string;
+//   category: string;
+//   capacity: number;
+// }
+
+// export default function AllSpacesPage() {
+//   const [studios, setStudios] = useState<Studio[]>([]);
+//   const [filteredStudios, setFilteredStudios] = useState<Studio[]>([]);
+//   const [loading, setLoading] = useState(true);
+//   const [searchTerm, setSearchTerm] = useState('');
+//   const [selectedCity, setSelectedCity] = useState('all');
+//   const [priceRange, setPriceRange] = useState('all');
+//   const [showFilters, setShowFilters] = useState(false);
+//   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+
+//   // Get unique cities from studios
+//   const cities = ['all', ...new Set(studios.map(s => s.city).filter(Boolean))];
+
+//   useEffect(() => {
+//     fetchApprovedStudios();
+//   }, []);
+
+//   useEffect(() => {
+//     filterStudios();
+//   }, [searchTerm, selectedCity, priceRange, studios]);
+
+//   const fetchApprovedStudios = async () => {
+//     setLoading(true);
+//     try {
+//       const { data, error } = await supabase
+//         .from('studios')
+//         .select('*')
+//         .eq('status', 'approved')
+//         .order('created_at', { ascending: false });
+
+//       if (error) throw error;
+//       setStudios(data || []);
+//       setFilteredStudios(data || []);
+//     } catch (error) {
+//       console.error('Error fetching studios:', error);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   const filterStudios = () => {
+//     let filtered = [...studios];
+
+//     if (searchTerm) {
+//       filtered = filtered.filter(studio =>
+//         studio.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+//         studio.city?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+//         studio.description?.toLowerCase().includes(searchTerm.toLowerCase())
+//       );
+//     }
+
+//     if (selectedCity !== 'all') {
+//       filtered = filtered.filter(studio => studio.city === selectedCity);
+//     }
+
+//     if (priceRange !== 'all') {
+//       if (priceRange === 'under-100') {
+//         filtered = filtered.filter(studio => studio.hourly_rate < 100);
+//       } else if (priceRange === '100-200') {
+//         filtered = filtered.filter(studio => studio.hourly_rate >= 100 && studio.hourly_rate <= 200);
+//       } else if (priceRange === '200-300') {
+//         filtered = filtered.filter(studio => studio.hourly_rate > 200 && studio.hourly_rate <= 300);
+//       } else if (priceRange === 'above-300') {
+//         filtered = filtered.filter(studio => studio.hourly_rate > 300);
+//       }
+//     }
+
+//     setFilteredStudios(filtered);
+//   };
+
+//   const clearFilters = () => {
+//     setSearchTerm('');
+//     setSelectedCity('all');
+//     setPriceRange('all');
+//     setShowFilters(false);
+//   };
+
+//   const getFirstImage = (images: string[]) => {
+//     if (!images || images.length === 0) return null;
+//     return images[0];
+//   };
+
+//   const formatPrice = (price: number) => {
+//     return `$${price}`;
+//   };
+
+//   const formatLocation = (city: string, state: string) => {
+//     if (city && state) return `${city}, ${state}`;
+//     if (city) return city;
+//     return 'Location TBD';
+//   };
+
+//   const vibeTags = [
+//     'Brutalist',
+//     'Organic',
+//     'Sci-Fi Neon',
+//     'Minimalist',
+//     'High-Key'
+//   ];
+
+//   return (
+//     <div className="bg-[#f8f9fa] text-[#191c1d] font-body-md overflow-x-hidden">
+//       {/* Navigation */}
+//       <nav className="fixed top-0 w-full z-50 bg-white/70 backdrop-blur-xl border-b border-[#c2c9b1]/30 shadow-sm">
+//         <div className="flex justify-between items-center px-6 md:px-16 py-4 w-full max-w-[1440px] mx-auto">
+//           <div className="flex items-center gap-8">
+//             <Link href="/" className="text-2xl font-display-sm tracking-tighter text-[#446900]">
+//               ManyRooms
+//             </Link>
+//             <div className="hidden md:flex gap-6 items-center">
+//               <Link href="/" className="text-[#424937] hover:text-[#446900] transition-colors font-label-bold text-sm">
+//                 Marketplace
+//               </Link>
+//               <Link href="/spaces" className="text-[#446900] font-bold border-b-2 border-[#446900] font-label-bold text-sm">
+//                 Studios
+//               </Link>
+//               <Link href="/cities" className="text-[#424937] hover:text-[#446900] transition-colors font-label-bold text-sm">
+//                 Vibes
+//               </Link>
+//               <Link href="/about" className="text-[#424937] hover:text-[#446900] transition-colors font-label-bold text-sm">
+//                 Journal
+//               </Link>
+//             </div>
+//           </div>
+//           <div className="flex items-center gap-4">
+//             <button className="hidden lg:flex material-symbols-outlined text-[#424937] hover:scale-105 transition-transform">
+//               favorite
+//             </button>
+//             <button className="material-symbols-outlined text-[#424937] hover:scale-105 transition-transform">
+//               account_circle
+//             </button>
+//             <Link 
+//               href="/signup?role=owner"
+//               className="bg-[#446900] text-white px-6 py-2 rounded-full font-label-bold text-sm hover:scale-105 transition-transform duration-200 active:scale-95"
+//             >
+//               List Studio
+//             </Link>
+//           </div>
+//         </div>
+//       </nav>
+
+//       <main className="pt-24 pb-20 px-6 md:px-16 max-w-[1440px] mx-auto">
+//         {/* Header & AI Visual Search */}
+//         <section className="mb-12 relative">
+//           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+//             <div className="max-w-2xl">
+//               <h1 className="font-display-lg text-4xl md:text-[84px] text-[#191c1d] leading-tight">
+//                 Find your next <span className="text-[#446900] italic">Creative Era.</span>
+//               </h1>
+//               <p className="text-lg text-[#424937] mt-4">
+//                 Discover production-ready spaces designed for the next generation of digital creators.
+//               </p>
+//             </div>
+//             <div className="flex gap-4 items-center">
+//               <button 
+//                 onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
+//                 className="flex items-center gap-2 bg-[#e7e8e9] px-4 py-2 rounded-full font-label-bold text-sm hover:bg-[#beff5f] transition-colors"
+//               >
+//                 <span className="material-symbols-outlined text-sm">{viewMode === 'grid' ? 'grid_view' : 'list'}</span>
+//                 {viewMode === 'grid' ? 'Grid View' : 'List View'}
+//               </button>
+//             </div>
+//           </div>
+
+//           {/* AI Image Search Bar */}
+//           <div className="relative group max-w-4xl mx-auto md:mx-0">
+//             <div className="flex items-center bg-white shadow-xl rounded-2xl p-2 border border-[#c2c9b1]/30 hover:border-[#beff5f] transition-all duration-300">
+//               <span className="material-symbols-outlined px-4 text-[#737a65]">search</span>
+//               <input 
+//                 className="w-full bg-transparent border-none focus:ring-0 text-base py-4 outline-none" 
+//                 placeholder="Search by vibe, mood, or equipment..." 
+//                 type="text"
+//                 value={searchTerm}
+//                 onChange={(e) => setSearchTerm(e.target.value)}
+//               />
+//               <div className="h-8 w-px bg-[#c2c9b1] mx-2"></div>
+//               <button className="flex items-center gap-2 bg-[#e4d7fd] text-[#665c7c] px-6 py-3 rounded-xl font-label-bold text-sm hover:bg-[#beff5f] transition-colors shrink-0">
+//                 <span className="material-symbols-outlined">add_a_photo</span>
+//                 <span className="hidden md:inline">Visual Search</span>
+//               </button>
+//             </div>
+
+//             {/* Vibe Chips */}
+//             <div className="flex flex-wrap gap-2 mt-6">
+//               {vibeTags.map((tag) => (
+//                 <span 
+//                   key={tag}
+//                   className="px-4 py-1.5 rounded-full bg-[#b5f657] text-[#111f00] font-label-bold text-[10px] tracking-[0.1em] uppercase cursor-pointer hover:scale-105 transition-transform"
+//                 >
+//                   {tag}
+//                 </span>
+//               ))}
+//             </div>
+//           </div>
+//         </section>
+
+//         {/* Main Content Area: Filter + Asymmetric Grid */}
+//         <div className="flex flex-col lg:flex-row gap-6">
+//           {/* Sidebar Filter */}
+//           <aside className="w-full lg:w-72 shrink-0 space-y-10">
+//             <div className="space-y-6">
+//               <h3 className="font-headline-lg text-xl text-[#191c1d]">Filters</h3>
+              
+//               {/* Availability */}
+//               <div className="space-y-3">
+//                 <p className="font-label-bold text-sm text-[#424937] uppercase tracking-widest">Availability</p>
+//                 <div className="flex items-center gap-3 bg-[#f3f4f5] p-3 rounded-xl border border-[#c2c9b1]/30">
+//                   <span className="material-symbols-outlined text-[#446900]">calendar_today</span>
+//                   <span className="text-base">Pick a Date</span>
+//                 </div>
+//               </div>
+
+//               {/* Price Range */}
+//               <div className="space-y-3">
+//                 <p className="font-label-bold text-sm text-[#424937] uppercase tracking-widest">Price / Hour</p>
+//                 <div className="px-2">
+//                   <input 
+//                     type="range" 
+//                     className="w-full h-1 bg-[#c2c9b1] rounded-lg appearance-none cursor-pointer accent-[#446900]" 
+//                     min="20" 
+//                     max="500" 
+//                     value="200"
+//                   />
+//                   <div className="flex justify-between mt-2 font-label-bold text-xs text-[#424937]">
+//                     <span>$20</span>
+//                     <span>$500+</span>
+//                   </div>
+//                 </div>
+//               </div>
+
+//               {/* Amenities */}
+//               <div className="space-y-3">
+//                 <p className="font-label-bold text-sm text-[#424937] uppercase tracking-widest">Equipment</p>
+//                 <div className="space-y-2">
+//                   <label className="flex items-center gap-3 cursor-pointer group">
+//                     <input type="checkbox" className="rounded text-[#446900] focus:ring-[#446900] h-5 w-5 border-[#737a65]" />
+//                     <span className="text-base group-hover:text-[#446900] transition-colors">Continuous Lighting</span>
+//                   </label>
+//                   <label className="flex items-center gap-3 cursor-pointer group">
+//                     <input type="checkbox" className="rounded text-[#446900] focus:ring-[#446900] h-5 w-5 border-[#737a65]" />
+//                     <span className="text-base group-hover:text-[#446900] transition-colors">Green Screen</span>
+//                   </label>
+//                   <label className="flex items-center gap-3 cursor-pointer group">
+//                     <input type="checkbox" className="rounded text-[#446900] focus:ring-[#446900] h-5 w-5 border-[#737a65]" />
+//                     <span className="text-base group-hover:text-[#446900] transition-colors">Makeup Station</span>
+//                   </label>
+//                 </div>
+//               </div>
+
+//               <button 
+//                 onClick={clearFilters}
+//                 className="w-full bg-[#191c1d] text-[#f8f9fa] py-4 rounded-xl font-label-bold text-sm hover:scale-[1.02] active:scale-95 transition-all"
+//               >
+//                 Apply Filters
+//               </button>
+//             </div>
+
+//             {/* Featured Highlight */}
+//             <div className="relative group rounded-3xl overflow-hidden bg-[#635979] text-white p-6 h-96 flex flex-col justify-end">
+//               <div className="absolute inset-0 z-0">
+//                 <img 
+//                   className="w-full h-full object-cover opacity-60 group-hover:scale-110 transition-transform duration-700" 
+//                   src="https://lh3.googleusercontent.com/aida-public/AB6AXuDPNY0T4vIaki9tKiv9eGEIHCWM1oGvCu6tz6v-f8mneuQX38csFXQhsLxScQrdRjjZGH56wQ3oVY_0QDrzEA_RawlFn29OYQlT0Y9rt4XWjf-SlFKUp1wacLEu7DC_NZlpThkoXn0Doqte1pXDkP4yXLJRJ045vmDV0MHeczfw1A7ubctQc-CuBzIYWXXPwodv2vjmfH7fMnvHHS0_Rdma-f5pd79k2i_wczhmHcsBe0HYMcLBVZ78xubQA2vX09nuIw9iToSV13NA"
+//                   alt="The Concrete Vault"
+//                 />
+//               </div>
+//               <div className="relative z-10">
+//                 <span className="bg-[#b5f657] text-[#111f00] px-3 py-1 rounded-full font-label-bold text-[10px] mb-4 inline-block uppercase tracking-tighter">
+//                   Spotlight
+//                 </span>
+//                 <h4 className="font-headline-lg text-xl leading-tight mb-2">The Concrete Vault</h4>
+//                 <p className="text-base opacity-80 mb-4">Brutalist aesthetics for high-fashion campaigns.</p>
+//                 <button className="flex items-center gap-2 font-label-bold text-sm group-hover:gap-4 transition-all">
+//                   View Space <span className="material-symbols-outlined">arrow_forward</span>
+//                 </button>
+//               </div>
+//             </div>
+//           </aside>
+
+//           {/* Listing Grid */}
+//           <div className="flex-1">
+//             {/* Results count */}
+//             <div className="mb-8 text-sm text-[#424937]">
+//               Showing {filteredStudios.length} {filteredStudios.length === 1 ? 'space' : 'spaces'}
+//             </div>
+
+//             {loading ? (
+//               <div className="flex justify-center items-center py-20">
+//                 <div className="animate-pulse text-center">
+//                   <div className="w-16 h-16 bg-[#446900]/20 rounded-full mx-auto mb-4"></div>
+//                   <p className="text-[#424937]">Loading spaces...</p>
+//                 </div>
+//               </div>
+//             ) : filteredStudios.length === 0 ? (
+//               <div className="text-center py-20">
+//                 <div className="w-20 h-20 mx-auto mb-6 text-[#737a65]">
+//                   <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+//                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+//                   </svg>
+//                 </div>
+//                 <h4 className="text-xl font-medium mb-2">No spaces found</h4>
+//                 <p className="text-[#424937] max-w-md mx-auto">
+//                   Try adjusting your filters or search terms to find more spaces.
+//                 </p>
+//                 <button onClick={clearFilters} className="mt-6 text-[#446900] hover:underline">
+//                   Clear all filters
+//                 </button>
+//               </div>
+//             ) : (
+//               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 gap-y-12">
+//                 {filteredStudios.map((studio, index) => {
+//                   const coverImage = getFirstImage(studio.images);
+//                   const isEven = index % 2 === 1;
+                  
+//                   return (
+//                     <div key={studio.id} className={`group relative flex flex-col h-full ${isEven ? 'mt-0 md:mt-12' : ''}`}>
+//                       <div className="relative w-full aspect-[4/5] rounded-3xl overflow-hidden shadow-lg mb-0 transition-all duration-500 group-hover:shadow-2xl">
+//                         {coverImage ? (
+//                           <img 
+//                             src={coverImage}
+//                             alt={studio.name}
+//                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+//                           />
+//                         ) : (
+//                           <div className="w-full h-full flex items-center justify-center bg-gray-100">
+//                             <span className="material-symbols-outlined text-6xl text-gray-300">image</span>
+//                           </div>
+//                         )}
+//                         <div className="absolute top-6 right-6 z-10">
+//                           <button className="bg-white/80 backdrop-blur-md p-3 rounded-full hover:bg-[#beff5f] transition-colors shadow-sm">
+//                             <HeartIcon className="w-5 h-5 text-[#191c1d]" />
+//                           </button>
+//                         </div>
+//                       </div>
+
+//                       {/* Glass Card Overlay */}
+//                       <div className="bg-white/70 backdrop-blur-[20px] border border-white/40 -mt-8 p-8 mx-4 rounded-3xl shadow-xl relative z-10 transform transition-transform duration-300 group-hover:-translate-y-2">
+//                         <div className="flex justify-between items-start mb-4">
+//                           <div>
+//                             <h3 className="font-headline-lg text-xl text-[#191c1d] leading-none mb-1">{studio.name}</h3>
+//                             <div className="flex items-center gap-1 text-[#424937]">
+//                               <span className="material-symbols-outlined text-sm">location_on</span>
+//                               <span className="font-label-bold text-xs uppercase tracking-wider">
+//                                 {formatLocation(studio.city, studio.state)}
+//                               </span>
+//                             </div>
+//                           </div>
+//                           <div className="text-right">
+//                             <div className="font-display-sm text-2xl text-[#446900]">
+//                               {formatPrice(studio.hourly_rate)}
+//                               <span className="text-sm font-body-md text-[#424937]">/hr</span>
+//                             </div>
+//                             <div className="flex items-center gap-1 justify-end mt-1 text-[#424937]">
+//                               <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
+//                               <span className="font-label-bold text-xs">4.9 (124)</span>
+//                             </div>
+//                           </div>
+//                         </div>
+
+//                         <div className="flex gap-2 mb-6">
+//                           <span className="bg-[#e4d7fd] text-[#665c7c] px-3 py-1 rounded-full font-label-bold text-[10px] tracking-[0.1em] uppercase">
+//                             {studio.category || 'Creative'}
+//                           </span>
+//                           <span className="bg-[#e7e8e9] text-[#424937] px-3 py-1 rounded-full font-label-bold text-[10px] tracking-[0.1em] uppercase">
+//                             {studio.capacity} Cap
+//                           </span>
+//                         </div>
+
+//                         <Link 
+//                           href={`/spaces/${studio.id}`}
+//                           className="w-full bg-[#446900] text-white py-4 rounded-2xl font-label-bold text-sm hover:scale-[1.02] active:scale-95 transition-all block text-center"
+//                         >
+//                           Quick Book
+//                         </Link>
+//                       </div>
+//                     </div>
+//                   );
+//                 })}
+//               </div>
+//             )}
+
+//             {/* Load More */}
+//             {filteredStudios.length > 0 && (
+//               <div className="mt-20 flex justify-center">
+//                 <button className="group flex items-center gap-4 bg-[#e1e3e4] px-12 py-4 rounded-full font-label-bold text-sm hover:bg-[#191c1d] hover:text-[#f8f9fa] transition-all duration-300">
+//                   Discover More Spaces
+//                   <span className="material-symbols-outlined group-hover:rotate-45 transition-transform">add</span>
+//                 </button>
+//               </div>
+//             )}
+//           </div>
+//         </div>
+//       </main>
+
+//       {/* Footer */}
+//       <Footer />
+
+//       {/* Chatbot */}
+//       <Chatbot />
+
+//       <style>{`
+//         .material-symbols-outlined {
+//           font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+//         }
+//       `}</style>
+//     </div>
+//   );
+// }
 
 
 

@@ -1,15 +1,19 @@
-// ..app/admin/page.tsx
+
+// app/admin/page.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
-import { 
-  CheckCircleIcon, 
-  XCircleIcon, 
-  EyeIcon,
-  ArrowRightIcon 
-} from '@heroicons/react/24/outline';
+import { CheckCircleIcon, XCircleIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
+
+// Brand Colors
+const brand = {
+  yellow: '#F1CB81',
+  blue: '#91ADCD',
+  brown: '#DB8B8C',
+  dark: '#3C291C',
+};
 
 const MaterialIcon = ({ icon, className = '' }: { icon: string; className?: string }) => (
   <span className={`material-symbols-outlined ${className}`}>{icon}</span>
@@ -17,32 +21,17 @@ const MaterialIcon = ({ icon, className = '' }: { icon: string; className?: stri
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({
-    totalRevenue: 0,
-    revenueGrowth: 12.5,
-    totalCommission: 0,
-    commissionGrowth: 8.2,
-    activeUsers: 0,
-    userGrowth: 5.4,
-    pendingApplications: 0,
-    applicationsChange: -2.1,
-    systemHealth: 99.9,
+    totalRevenue: 0, revenueGrowth: 12.5, totalCommission: 0, commissionGrowth: 8.2,
+    activeUsers: 0, userGrowth: 5.4, pendingApplications: 0, applicationsChange: -2.1, systemHealth: 99.9,
   });
-  
   const [recentApplications, setRecentApplications] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchDashboardData();
-  }, []);
+  useEffect(() => { fetchDashboardData(); }, []);
 
-  // Simulate system health
   useEffect(() => {
     const interval = setInterval(() => {
-      const healthValues = [99.8, 99.9, 100.0, 99.7];
-      setStats(prev => ({
-        ...prev,
-        systemHealth: healthValues[Math.floor(Math.random() * healthValues.length)],
-      }));
+      setStats(prev => ({ ...prev, systemHealth: [99.8, 99.9, 100.0, 99.7][Math.floor(Math.random() * 4)] }));
     }, 5000);
     return () => clearInterval(interval);
   }, []);
@@ -50,66 +39,27 @@ export default function AdminDashboard() {
   const fetchDashboardData = async () => {
     setLoading(true);
     try {
-      const { data: studios, error: studiosError } = await supabase
-        .from('studios')
-        .select('*');
-
+      const { data: studios, error: studiosError } = await supabase.from('studios').select('*');
       if (studiosError) throw studiosError;
-
-      const { data: users, error: usersError } = await supabase
-        .from('users')
-        .select('*');
-
+      const { data: users, error: usersError } = await supabase.from('users').select('*');
       if (usersError) throw usersError;
 
-      const totalRevenue = studios?.reduce((sum, studio) => sum + (studio.hourly_rate || 0) * 50, 0) || 0;
+      const totalRevenue = studios?.reduce((sum, s) => sum + (s.hourly_rate || 0) * 50, 0) || 0;
       const totalCommission = totalRevenue * 0.17;
       const activeUsers = users?.length || 0;
       const pendingApplications = studios?.filter(s => s.status === 'pending').length || 0;
 
-      const recentPending = studios
-        ?.filter(s => s.status === 'pending')
-        .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-        .slice(0, 5) || [];
-
-      const recentWithOwners = await Promise.all(
-        recentPending.map(async (studio) => {
-          let ownerName = 'Unknown';
-          if (studio.owner_id) {
-            const { data: owner } = await supabase
-              .from('users')
-              .select('name')
-              .eq('id', studio.owner_id)
-              .single();
-            if (owner) ownerName = owner.name || ownerName;
-          }
-          return {
-            id: studio.id,
-            name: studio.name,
-            category: studio.category || 'Other',
-            location: `${studio.city || ''}, ${studio.state || ''}`.replace(/^, /, ''),
-            price: studio.hourly_rate || 0,
-            ownerName,
-            image: studio.images?.[0] || null,
-            created_at: studio.created_at,
-          };
-        })
-      );
-
-      setStats(prev => ({
-        ...prev,
-        totalRevenue,
-        totalCommission,
-        activeUsers,
-        pendingApplications,
+      const recentPending = studios?.filter(s => s.status === 'pending').sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 5) || [];
+      const recentWithOwners = await Promise.all(recentPending.map(async (studio) => {
+        let ownerName = 'Unknown';
+        if (studio.owner_id) { const { data: owner } = await supabase.from('users').select('name').eq('id', studio.owner_id).single(); if (owner) ownerName = owner.name || ownerName; }
+        return { id: studio.id, name: studio.name, category: studio.category || 'Other', location: `${studio.city || ''}, ${studio.state || ''}`.replace(/^, /, ''), price: studio.hourly_rate || 0, ownerName, image: studio.images?.[0] || null, created_at: studio.created_at };
       }));
 
+      setStats(prev => ({ ...prev, totalRevenue, totalCommission, activeUsers, pendingApplications }));
       setRecentApplications(recentWithOwners);
-    } catch (error) {
-      console.error('Error fetching dashboard data:', error);
-    } finally {
-      setLoading(false);
-    }
+    } catch (error) { console.error('Error fetching dashboard data:', error); }
+    finally { setLoading(false); }
   };
 
   const handleApproveStudio = async (id: string) => {
@@ -117,7 +67,6 @@ export default function AdminDashboard() {
     setRecentApplications(prev => prev.filter(s => s.id !== id));
     setStats(prev => ({ ...prev, pendingApplications: prev.pendingApplications - 1 }));
   };
-
   const handleRejectStudio = async (id: string) => {
     await supabase.from('studios').update({ status: 'rejected' }).eq('id', id);
     setRecentApplications(prev => prev.filter(s => s.id !== id));
@@ -126,252 +75,155 @@ export default function AdminDashboard() {
 
   if (loading) {
     return (
-      <div className="p-8 flex justify-center items-center min-h-[400px] bg-[#f8f9fa]">
+      <div className="min-h-screen bg-[#FFFBF5] flex items-center justify-center p-8">
         <div className="animate-pulse text-center">
-          <div className="w-16 h-16 bg-[#446900]/20 rounded-full mx-auto mb-4"></div>
-          <p className="text-[#424937] font-bold">Loading dashboard...</p>
+          <div className="w-16 h-16 bg-[#F1CB81]/40 rounded-full mx-auto mb-4"></div>
+          <p className="text-[#3C291C] font-bold">Loading dashboard...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#f8f9fa]">
+    <div className="min-h-screen bg-[#FFFBF5]">
       <div className="max-w-[1440px] mx-auto px-4 md:px-8 py-8 space-y-8">
         
         {/* Header */}
         <div>
-          <h2 className="text-3xl md:text-4xl font-extrabold text-[#191c1d] tracking-tight">
-            Platform <span className="text-[#446900] italic">Pulse</span>
+          <h2 className="text-3xl md:text-4xl font-extrabold text-[#3C291C] tracking-tight">
+            Platform <span className="text-[#DB8B8C] italic">Pulse</span>
           </h2>
-          <p className="text-[#424937] text-sm mt-1">
-            Real-time overview of your studio ecosystem. Every room, every interaction, monitored with precision.
-          </p>
+          <p className="text-[#3C291C]/60 text-sm mt-1">Real-time overview of your studio ecosystem. Monitored with precision.</p>
         </div>
 
         {/* KPIs */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Total Revenue */}
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-[#c2c9b1]/20 hover:scale-[1.01] transition-transform">
-            <div className="flex justify-between items-start mb-4">
-              <div className="p-2.5 bg-[#beff5f]/30 text-[#446900] rounded-xl">
-                <MaterialIcon icon="payments" className="text-2xl" />
+          {[
+            { icon: 'payments', label: 'Total Revenue', value: `$${stats.totalRevenue.toLocaleString()}`, growth: `+${stats.revenueGrowth}%`, iconBg: 'bg-[#F1CB81]/30', growthColor: 'text-[#3C291C]' },
+            { icon: 'account_balance_wallet', label: 'Net Commission', value: `$${stats.totalCommission.toLocaleString()}`, growth: `+${stats.commissionGrowth}%`, iconBg: 'bg-[#91ADCD]/30', growthColor: 'text-[#3C291C]' },
+            { icon: 'group', label: 'Active Users', value: stats.activeUsers.toLocaleString(), growth: `+${stats.userGrowth}%`, iconBg: 'bg-[#DB8B8C]/20', growthColor: 'text-[#3C291C]' },
+            { icon: 'assignment_late', label: 'Pending Applications', value: stats.pendingApplications, growth: `${stats.applicationsChange}%`, iconBg: 'bg-red-50', growthColor: 'text-red-500' },
+          ].map((kpi, i) => (
+            <div key={i} className="bg-white rounded-2xl p-6 shadow-sm border border-[#3C291C]/10 hover:scale-[1.01] transition-transform">
+              <div className="flex justify-between items-start mb-4">
+                <div className={`p-2.5 ${kpi.iconBg} text-[#3C291C] rounded-xl`}><MaterialIcon icon={kpi.icon} className="text-2xl" /></div>
+                <span className={`text-xs font-bold ${kpi.growthColor} bg-[#F1CB81]/20 px-2 py-1 rounded-full`}>{kpi.growth}</span>
               </div>
-              <span className="text-xs font-bold text-[#446900] bg-[#beff5f]/20 px-2 py-1 rounded-full">
-                +{stats.revenueGrowth}%
-              </span>
+              <p className="text-xs font-bold text-[#3C291C]/40 uppercase tracking-widest mb-1">{kpi.label}</p>
+              <h3 className="text-3xl font-extrabold text-[#3C291C]">{kpi.value}</h3>
             </div>
-            <p className="text-xs font-bold text-[#737a65] uppercase tracking-widest mb-1">Total Revenue</p>
-            <h3 className="text-3xl font-extrabold text-[#191c1d]">${stats.totalRevenue.toLocaleString()}</h3>
-          </div>
-
-          {/* Net Commission */}
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-[#c2c9b1]/20 hover:scale-[1.01] transition-transform">
-            <div className="flex justify-between items-start mb-4">
-              <div className="p-2.5 bg-[#e4d7fd]/50 text-[#665c7c] rounded-xl">
-                <MaterialIcon icon="account_balance_wallet" className="text-2xl" />
-              </div>
-              <span className="text-xs font-bold text-[#446900] bg-[#beff5f]/20 px-2 py-1 rounded-full">
-                +{stats.commissionGrowth}%
-              </span>
-            </div>
-            <p className="text-xs font-bold text-[#737a65] uppercase tracking-widest mb-1">Net Commission</p>
-            <h3 className="text-3xl font-extrabold text-[#191c1d]">${stats.totalCommission.toLocaleString()}</h3>
-          </div>
-
-          {/* Active Users */}
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-[#c2c9b1]/20 hover:scale-[1.01] transition-transform">
-            <div className="flex justify-between items-start mb-4">
-              <div className="p-2.5 bg-[#ffe6de]/50 text-[#a43c12] rounded-xl">
-                <MaterialIcon icon="group" className="text-2xl" />
-              </div>
-              <span className="text-xs font-bold text-[#446900] bg-[#beff5f]/20 px-2 py-1 rounded-full">
-                +{stats.userGrowth}%
-              </span>
-            </div>
-            <p className="text-xs font-bold text-[#737a65] uppercase tracking-widest mb-1">Active Users</p>
-            <h3 className="text-3xl font-extrabold text-[#191c1d]">{stats.activeUsers.toLocaleString()}</h3>
-          </div>
-
-          {/* Pending Applications */}
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-[#c2c9b1]/20 hover:scale-[1.01] transition-transform">
-            <div className="flex justify-between items-start mb-4">
-              <div className="p-2.5 bg-red-50 text-[#ba1a1a] rounded-xl">
-                <MaterialIcon icon="assignment_late" className="text-2xl" />
-              </div>
-              <span className="text-xs font-bold text-[#ba1a1a] bg-red-50 px-2 py-1 rounded-full">
-                {stats.applicationsChange}%
-              </span>
-            </div>
-            <p className="text-xs font-bold text-[#737a65] uppercase tracking-widest mb-1">Pending Applications</p>
-            <h3 className="text-3xl font-extrabold text-[#191c1d]">{stats.pendingApplications}</h3>
-          </div>
+          ))}
         </div>
 
-        {/* System Health & Insights Row */}
+        {/* Insights Row */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           
           {/* AI Market Insights */}
-          <div className="lg:col-span-2 bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-[#c2c9b1]/20 relative overflow-hidden">
-            <div className="absolute -top-24 -right-24 w-64 h-64 bg-[#beff5f]/5 rounded-full blur-3xl pointer-events-none"></div>
-            
+          <div className="lg:col-span-2 bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-[#3C291C]/10 relative overflow-hidden">
+            <div className="absolute -top-24 -right-24 w-64 h-64 bg-[#F1CB81]/5 rounded-full blur-3xl pointer-events-none"></div>
             <div className="relative z-10 flex flex-col h-full">
               <div className="flex items-center gap-3 mb-6">
-                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-tr from-[#446900] to-[#9bd93c] text-white">
-                  <MaterialIcon icon="psychology" className="text-xl" />
-                </div>
+                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-[#3C291C] text-white"><MaterialIcon icon="psychology" className="text-xl" /></div>
                 <div>
-                  <h2 className="text-lg font-extrabold text-[#191c1d]">AI-Powered Market Insights</h2>
-                  <p className="text-xs text-[#737a65]">Real-time predictive analysis based on global studio performance.</p>
+                  <h2 className="text-lg font-extrabold text-[#3C291C]">AI-Powered Market Insights</h2>
+                  <p className="text-xs text-[#3C291C]/40">Real-time predictive analysis based on global studio performance.</p>
                 </div>
               </div>
-
               <div className="flex-1 space-y-4">
-                <div className="p-4 bg-[#f3f4f5] rounded-xl border-l-4 border-[#446900]">
-                  <h4 className="font-bold text-[#191c1d] mb-1">Recommended Studio Expansion: Photography</h4>
-                  <p className="text-sm text-[#424937] leading-relaxed">
-                    Based on current demand trends, photography studios are seeing a 32% increase in bookings. 
-                    Consider promoting this category to attract more listings.
-                  </p>
+                <div className="p-4 bg-[#3C291C]/5 rounded-xl border-l-4 border-[#F1CB81]">
+                  <h4 className="font-bold text-[#3C291C] mb-1">Recommended: Photography Studios</h4>
+                  <p className="text-sm text-[#3C291C]/60 leading-relaxed">Photography studios are seeing a 32% increase in bookings. Promote this category to attract more listings.</p>
                 </div>
-
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="p-4 bg-[#f3f4f5] rounded-xl">
-                    <p className="text-[10px] text-[#737a65] font-bold uppercase mb-1">Revenue Confidence</p>
-                    <p className="text-2xl font-extrabold text-[#191c1d]">92.4%</p>
+                  <div className="p-4 bg-[#3C291C]/5 rounded-xl">
+                    <p className="text-[10px] text-[#3C291C]/40 font-bold uppercase mb-1">Revenue Confidence</p>
+                    <p className="text-2xl font-extrabold text-[#3C291C]">92.4%</p>
                   </div>
-                  <div className="p-4 bg-[#f3f4f5] rounded-xl">
-                    <p className="text-[10px] text-[#737a65] font-bold uppercase mb-1">Risk Assessment</p>
-                    <p className="text-2xl font-extrabold text-[#446900]">LOW</p>
+                  <div className="p-4 bg-[#3C291C]/5 rounded-xl">
+                    <p className="text-[10px] text-[#3C291C]/40 font-bold uppercase mb-1">Risk Assessment</p>
+                    <p className="text-2xl font-extrabold text-[#DB8B8C]">LOW</p>
                   </div>
                 </div>
               </div>
-
-              <button className="mt-6 w-full py-3 bg-[#beff5f]/20 hover:bg-[#beff5f]/30 text-[#111f00] font-bold text-sm rounded-xl transition-all flex items-center justify-center gap-2">
-                View Full Market Forecast
-                <ArrowRightIcon className="w-4 h-4" />
+              <button className="mt-6 w-full py-3 bg-[#F1CB81]/20 hover:bg-[#F1CB81]/30 text-[#3C291C] font-bold text-sm rounded-xl transition-all flex items-center justify-center gap-2">
+                View Full Market Forecast <ArrowRightIcon className="w-4 h-4" />
               </button>
             </div>
           </div>
 
-          {/* System Health & Optimization */}
-          <div className="bg-[#2e3132] rounded-2xl p-6 md:p-8 text-white shadow-lg relative overflow-hidden">
+          {/* System Health */}
+          <div className="bg-[#3C291C] rounded-2xl p-6 md:p-8 text-white shadow-lg relative overflow-hidden">
             <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'radial-gradient(#fff 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
-            
             <div className="relative z-10">
-              {/* System Health */}
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <p className="text-xs font-bold text-[#c2c9b1] uppercase tracking-widest">System Health</p>
-                  <h3 className="text-4xl font-extrabold text-[#beff5f]">{stats.systemHealth}%</h3>
+                  <p className="text-xs font-bold text-[#91ADCD] uppercase tracking-widest">System Health</p>
+                  <h3 className="text-4xl font-extrabold text-[#F1CB81]">{stats.systemHealth}%</h3>
                 </div>
-                <div className="w-14 h-14 rounded-2xl bg-[#beff5f]/20 flex items-center justify-center">
-                  <MaterialIcon icon="health_and_safety" className="text-3xl text-[#beff5f]" />
-                </div>
+                <div className="w-14 h-14 rounded-2xl bg-[#F1CB81]/20 flex items-center justify-center"><MaterialIcon icon="health_and_safety" className="text-3xl text-[#F1CB81]" /></div>
               </div>
-
               <div className="flex items-center gap-2 mb-6">
-                <div className="w-2 h-2 rounded-full bg-[#beff5f] animate-pulse shadow-[0_0_10px_rgba(190,255,95,0.4)]"></div>
-                <span className="text-xs font-bold text-[#c2c9b1] uppercase tracking-widest">All Systems Operational</span>
+                <div className="w-2 h-2 rounded-full bg-[#F1CB81] animate-pulse shadow-[0_0_10px_rgba(241,203,129,0.4)]"></div>
+                <span className="text-xs font-bold text-[#91ADCD] uppercase tracking-widest">All Systems Operational</span>
               </div>
-
               <h4 className="font-bold text-sm mb-4">Optimization Suggestions</h4>
-              
               <ul className="space-y-3">
-                <li className="flex gap-2">
-                  <CheckCircleIcon className="w-4 h-4 text-[#beff5f] mt-0.5 flex-shrink-0" />
-                  <p className="text-sm text-[#c2c9b1]">Lower platform fee for studios with &gt;95% positive reviews.</p>
-                </li>
-                <li className="flex gap-2">
-                  <CheckCircleIcon className="w-4 h-4 text-[#beff5f] mt-0.5 flex-shrink-0" />
-                  <p className="text-sm text-[#c2c9b1]">Promote new studio listings in high-demand cities.</p>
-                </li>
-                <li className="flex gap-2">
-                  <MaterialIcon icon="trending_up" className="text-[#beff5f] text-sm mt-0.5" />
-                  <p className="text-sm text-[#c2c9b1]">Adjust pricing recommendations based on local market rates.</p>
-                </li>
+                {['Lower platform fee for studios with >95% positive reviews.', 'Promote new studio listings in high-demand cities.', 'Adjust pricing recommendations based on local market rates.'].map((text, i) => (
+                  <li key={i} className="flex gap-2">
+                    <CheckCircleIcon className="w-4 h-4 text-[#F1CB81] mt-0.5 flex-shrink-0" />
+                    <p className="text-sm text-[#91ADCD]">{text}</p>
+                  </li>
+                ))}
               </ul>
-
               <div className="mt-8 pt-6 border-t border-white/10">
-                <p className="text-[10px] text-[#c2c9b1] uppercase font-bold mb-2">Algorithm Efficiency</p>
+                <p className="text-[10px] text-[#91ADCD] uppercase font-bold mb-2">Algorithm Efficiency</p>
                 <div className="w-full bg-white/10 rounded-full h-1.5">
-                  <div className="bg-[#beff5f] h-full rounded-full w-[88%] shadow-[0_0_10px_rgba(190,255,95,0.4)]"></div>
+                  <div className="bg-[#F1CB81] h-full rounded-full w-[88%] shadow-[0_0_10px_rgba(241,203,129,0.4)]"></div>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Pending Studio Moderation */}
-        <section className="bg-white rounded-2xl shadow-sm border border-[#c2c9b1]/20 overflow-hidden">
-          <div className="px-6 py-5 border-b border-[#c2c9b1]/20 flex justify-between items-center">
-            <h2 className="text-xl font-extrabold text-[#191c1d]">Pending Studio Moderation</h2>
-            <Link href="/admin/moderation" className="text-[#446900] font-bold text-sm hover:underline">
-              View All Queue
-            </Link>
+        {/* Pending Moderation */}
+        <section className="bg-white rounded-2xl shadow-sm border border-[#3C291C]/10 overflow-hidden">
+          <div className="px-6 py-5 border-b border-[#3C291C]/10 flex justify-between items-center">
+            <h2 className="text-xl font-extrabold text-[#3C291C]">Pending Studio Moderation</h2>
+            <Link href="/admin/moderation" className="text-[#DB8B8C] font-bold text-sm hover:underline">View All Queue</Link>
           </div>
 
           {recentApplications.length === 0 ? (
             <div className="p-12 text-center">
-              <CheckCircleIcon className="w-14 h-14 text-[#c2c9b1] mx-auto mb-4" />
-              <p className="text-[#424937] font-bold text-lg">All caught up!</p>
-              <p className="text-sm text-[#737a65] mt-1">No pending studio applications to review.</p>
+              <CheckCircleIcon className="w-14 h-14 text-[#3C291C]/20 mx-auto mb-4" />
+              <p className="text-[#3C291C]/60 font-bold text-lg">All caught up!</p>
+              <p className="text-sm text-[#3C291C]/40 mt-1">No pending studio applications to review.</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left">
                 <thead>
-                  <tr className="text-xs text-[#737a65] uppercase font-bold tracking-wider border-b border-[#c2c9b1]/20 bg-[#f3f4f5]">
-                    <th className="px-6 py-4">Studio Name</th>
-                    <th className="px-6 py-4">Category</th>
-                    <th className="px-6 py-4">Location</th>
-                    <th className="px-6 py-4">Price</th>
-                    <th className="px-6 py-4 text-right">Actions</th>
+                  <tr className="text-xs text-[#3C291C]/40 uppercase font-bold tracking-wider border-b border-[#3C291C]/10 bg-[#3C291C]/5">
+                    <th className="px-6 py-4">Studio Name</th><th className="px-6 py-4">Category</th><th className="px-6 py-4">Location</th><th className="px-6 py-4">Price</th><th className="px-6 py-4 text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#c2c9b1]/10">
+                <tbody className="divide-y divide-[#3C291C]/5">
                   {recentApplications.map((app) => (
-                    <tr key={app.id} className="hover:bg-[#f3f4f5] transition-colors group">
+                    <tr key={app.id} className="hover:bg-[#3C291C]/[0.02] transition-colors group">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-xl overflow-hidden bg-[#edeeef] flex-shrink-0">
-                            {app.image ? (
-                              <img src={app.image} alt={app.name} className="w-full h-full object-cover" />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center text-sm font-bold text-[#424937]">
-                                {app.name.charAt(0)}
-                              </div>
-                            )}
+                          <div className="w-10 h-10 rounded-xl overflow-hidden bg-[#3C291C]/5 flex-shrink-0">
+                            {app.image ? <img src={app.image} alt={app.name} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-sm font-bold text-[#3C291C]">{app.name.charAt(0)}</div>}
                           </div>
-                          <div>
-                            <p className="text-sm font-bold text-[#191c1d]">{app.name}</p>
-                            <p className="text-[11px] text-[#737a65]">Owner: {app.ownerName}</p>
-                          </div>
+                          <div><p className="text-sm font-bold text-[#3C291C]">{app.name}</p><p className="text-[11px] text-[#3C291C]/40">Owner: {app.ownerName}</p></div>
                         </div>
                       </td>
-                      <td className="px-6 py-4">
-                        <span className="px-2 py-0.5 bg-[#e4d7fd] text-[#665c7c] rounded text-[10px] font-bold uppercase">
-                          {app.category}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-sm text-[#424937]">{app.location || 'N/A'}</td>
-                      <td className="px-6 py-4 text-sm font-bold text-[#191c1d]">${app.price}/hr</td>
+                      <td className="px-6 py-4"><span className="px-2 py-0.5 bg-[#91ADCD]/20 text-[#3C291C] rounded text-[10px] font-bold uppercase">{app.category}</span></td>
+                      <td className="px-6 py-4 text-sm text-[#3C291C]/60">{app.location || 'N/A'}</td>
+                      <td className="px-6 py-4 text-sm font-bold text-[#3C291C]">${app.price}/hr</td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex justify-end gap-2">
-                          <button
-                            onClick={() => handleRejectStudio(app.id)}
-                            className="w-9 h-9 rounded-full border border-[#c2c9b1] flex items-center justify-center hover:bg-red-50 hover:text-[#ba1a1a] hover:border-red-200 transition-colors"
-                            title="Reject"
-                          >
-                            <XCircleIcon className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => handleApproveStudio(app.id)}
-                            className="w-9 h-9 rounded-full bg-[#beff5f] text-[#111f00] flex items-center justify-center hover:scale-110 transition-transform"
-                            title="Approve"
-                          >
-                            <CheckCircleIcon className="w-4 h-4" />
-                          </button>
+                          <button onClick={() => handleRejectStudio(app.id)} className="w-9 h-9 rounded-full border border-[#3C291C]/10 flex items-center justify-center hover:bg-red-50 hover:text-red-500 hover:border-red-200 transition-colors" title="Reject"><XCircleIcon className="w-4 h-4" /></button>
+                          <button onClick={() => handleApproveStudio(app.id)} className="w-9 h-9 rounded-full bg-[#F1CB81] text-[#3C291C] flex items-center justify-center hover:scale-110 transition-transform" title="Approve"><CheckCircleIcon className="w-4 h-4" /></button>
                         </div>
                       </td>
                     </tr>
@@ -385,6 +237,395 @@ export default function AdminDashboard() {
     </div>
   );
 }
+
+
+// // ..app/admin/page.tsx
+// 'use client';
+
+// import { useState, useEffect } from 'react';
+// import Link from 'next/link';
+// import { supabase } from '@/lib/supabase';
+// import { 
+//   CheckCircleIcon, 
+//   XCircleIcon, 
+//   EyeIcon,
+//   ArrowRightIcon 
+// } from '@heroicons/react/24/outline';
+
+// const MaterialIcon = ({ icon, className = '' }: { icon: string; className?: string }) => (
+//   <span className={`material-symbols-outlined ${className}`}>{icon}</span>
+// );
+
+// export default function AdminDashboard() {
+//   const [stats, setStats] = useState({
+//     totalRevenue: 0,
+//     revenueGrowth: 12.5,
+//     totalCommission: 0,
+//     commissionGrowth: 8.2,
+//     activeUsers: 0,
+//     userGrowth: 5.4,
+//     pendingApplications: 0,
+//     applicationsChange: -2.1,
+//     systemHealth: 99.9,
+//   });
+  
+//   const [recentApplications, setRecentApplications] = useState<any[]>([]);
+//   const [loading, setLoading] = useState(true);
+
+//   useEffect(() => {
+//     fetchDashboardData();
+//   }, []);
+
+//   // Simulate system health
+//   useEffect(() => {
+//     const interval = setInterval(() => {
+//       const healthValues = [99.8, 99.9, 100.0, 99.7];
+//       setStats(prev => ({
+//         ...prev,
+//         systemHealth: healthValues[Math.floor(Math.random() * healthValues.length)],
+//       }));
+//     }, 5000);
+//     return () => clearInterval(interval);
+//   }, []);
+
+//   const fetchDashboardData = async () => {
+//     setLoading(true);
+//     try {
+//       const { data: studios, error: studiosError } = await supabase
+//         .from('studios')
+//         .select('*');
+
+//       if (studiosError) throw studiosError;
+
+//       const { data: users, error: usersError } = await supabase
+//         .from('users')
+//         .select('*');
+
+//       if (usersError) throw usersError;
+
+//       const totalRevenue = studios?.reduce((sum, studio) => sum + (studio.hourly_rate || 0) * 50, 0) || 0;
+//       const totalCommission = totalRevenue * 0.17;
+//       const activeUsers = users?.length || 0;
+//       const pendingApplications = studios?.filter(s => s.status === 'pending').length || 0;
+
+//       const recentPending = studios
+//         ?.filter(s => s.status === 'pending')
+//         .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+//         .slice(0, 5) || [];
+
+//       const recentWithOwners = await Promise.all(
+//         recentPending.map(async (studio) => {
+//           let ownerName = 'Unknown';
+//           if (studio.owner_id) {
+//             const { data: owner } = await supabase
+//               .from('users')
+//               .select('name')
+//               .eq('id', studio.owner_id)
+//               .single();
+//             if (owner) ownerName = owner.name || ownerName;
+//           }
+//           return {
+//             id: studio.id,
+//             name: studio.name,
+//             category: studio.category || 'Other',
+//             location: `${studio.city || ''}, ${studio.state || ''}`.replace(/^, /, ''),
+//             price: studio.hourly_rate || 0,
+//             ownerName,
+//             image: studio.images?.[0] || null,
+//             created_at: studio.created_at,
+//           };
+//         })
+//       );
+
+//       setStats(prev => ({
+//         ...prev,
+//         totalRevenue,
+//         totalCommission,
+//         activeUsers,
+//         pendingApplications,
+//       }));
+
+//       setRecentApplications(recentWithOwners);
+//     } catch (error) {
+//       console.error('Error fetching dashboard data:', error);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   const handleApproveStudio = async (id: string) => {
+//     await supabase.from('studios').update({ status: 'approved' }).eq('id', id);
+//     setRecentApplications(prev => prev.filter(s => s.id !== id));
+//     setStats(prev => ({ ...prev, pendingApplications: prev.pendingApplications - 1 }));
+//   };
+
+//   const handleRejectStudio = async (id: string) => {
+//     await supabase.from('studios').update({ status: 'rejected' }).eq('id', id);
+//     setRecentApplications(prev => prev.filter(s => s.id !== id));
+//     setStats(prev => ({ ...prev, pendingApplications: prev.pendingApplications - 1 }));
+//   };
+
+//   if (loading) {
+//     return (
+//       <div className="p-8 flex justify-center items-center min-h-[400px] bg-[#f8f9fa]">
+//         <div className="animate-pulse text-center">
+//           <div className="w-16 h-16 bg-[#446900]/20 rounded-full mx-auto mb-4"></div>
+//           <p className="text-[#424937] font-bold">Loading dashboard...</p>
+//         </div>
+//       </div>
+//     );
+//   }
+
+//   return (
+//     <div className="min-h-screen bg-[#f8f9fa]">
+//       <div className="max-w-[1440px] mx-auto px-4 md:px-8 py-8 space-y-8">
+        
+//         {/* Header */}
+//         <div>
+//           <h2 className="text-3xl md:text-4xl font-extrabold text-[#191c1d] tracking-tight">
+//             Platform <span className="text-[#446900] italic">Pulse</span>
+//           </h2>
+//           <p className="text-[#424937] text-sm mt-1">
+//             Real-time overview of your studio ecosystem. Every room, every interaction, monitored with precision.
+//           </p>
+//         </div>
+
+//         {/* KPIs */}
+//         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+//           {/* Total Revenue */}
+//           <div className="bg-white rounded-2xl p-6 shadow-sm border border-[#c2c9b1]/20 hover:scale-[1.01] transition-transform">
+//             <div className="flex justify-between items-start mb-4">
+//               <div className="p-2.5 bg-[#beff5f]/30 text-[#446900] rounded-xl">
+//                 <MaterialIcon icon="payments" className="text-2xl" />
+//               </div>
+//               <span className="text-xs font-bold text-[#446900] bg-[#beff5f]/20 px-2 py-1 rounded-full">
+//                 +{stats.revenueGrowth}%
+//               </span>
+//             </div>
+//             <p className="text-xs font-bold text-[#737a65] uppercase tracking-widest mb-1">Total Revenue</p>
+//             <h3 className="text-3xl font-extrabold text-[#191c1d]">${stats.totalRevenue.toLocaleString()}</h3>
+//           </div>
+
+//           {/* Net Commission */}
+//           <div className="bg-white rounded-2xl p-6 shadow-sm border border-[#c2c9b1]/20 hover:scale-[1.01] transition-transform">
+//             <div className="flex justify-between items-start mb-4">
+//               <div className="p-2.5 bg-[#e4d7fd]/50 text-[#665c7c] rounded-xl">
+//                 <MaterialIcon icon="account_balance_wallet" className="text-2xl" />
+//               </div>
+//               <span className="text-xs font-bold text-[#446900] bg-[#beff5f]/20 px-2 py-1 rounded-full">
+//                 +{stats.commissionGrowth}%
+//               </span>
+//             </div>
+//             <p className="text-xs font-bold text-[#737a65] uppercase tracking-widest mb-1">Net Commission</p>
+//             <h3 className="text-3xl font-extrabold text-[#191c1d]">${stats.totalCommission.toLocaleString()}</h3>
+//           </div>
+
+//           {/* Active Users */}
+//           <div className="bg-white rounded-2xl p-6 shadow-sm border border-[#c2c9b1]/20 hover:scale-[1.01] transition-transform">
+//             <div className="flex justify-between items-start mb-4">
+//               <div className="p-2.5 bg-[#ffe6de]/50 text-[#a43c12] rounded-xl">
+//                 <MaterialIcon icon="group" className="text-2xl" />
+//               </div>
+//               <span className="text-xs font-bold text-[#446900] bg-[#beff5f]/20 px-2 py-1 rounded-full">
+//                 +{stats.userGrowth}%
+//               </span>
+//             </div>
+//             <p className="text-xs font-bold text-[#737a65] uppercase tracking-widest mb-1">Active Users</p>
+//             <h3 className="text-3xl font-extrabold text-[#191c1d]">{stats.activeUsers.toLocaleString()}</h3>
+//           </div>
+
+//           {/* Pending Applications */}
+//           <div className="bg-white rounded-2xl p-6 shadow-sm border border-[#c2c9b1]/20 hover:scale-[1.01] transition-transform">
+//             <div className="flex justify-between items-start mb-4">
+//               <div className="p-2.5 bg-red-50 text-[#ba1a1a] rounded-xl">
+//                 <MaterialIcon icon="assignment_late" className="text-2xl" />
+//               </div>
+//               <span className="text-xs font-bold text-[#ba1a1a] bg-red-50 px-2 py-1 rounded-full">
+//                 {stats.applicationsChange}%
+//               </span>
+//             </div>
+//             <p className="text-xs font-bold text-[#737a65] uppercase tracking-widest mb-1">Pending Applications</p>
+//             <h3 className="text-3xl font-extrabold text-[#191c1d]">{stats.pendingApplications}</h3>
+//           </div>
+//         </div>
+
+//         {/* System Health & Insights Row */}
+//         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          
+//           {/* AI Market Insights */}
+//           <div className="lg:col-span-2 bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-[#c2c9b1]/20 relative overflow-hidden">
+//             <div className="absolute -top-24 -right-24 w-64 h-64 bg-[#beff5f]/5 rounded-full blur-3xl pointer-events-none"></div>
+            
+//             <div className="relative z-10 flex flex-col h-full">
+//               <div className="flex items-center gap-3 mb-6">
+//                 <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-tr from-[#446900] to-[#9bd93c] text-white">
+//                   <MaterialIcon icon="psychology" className="text-xl" />
+//                 </div>
+//                 <div>
+//                   <h2 className="text-lg font-extrabold text-[#191c1d]">AI-Powered Market Insights</h2>
+//                   <p className="text-xs text-[#737a65]">Real-time predictive analysis based on global studio performance.</p>
+//                 </div>
+//               </div>
+
+//               <div className="flex-1 space-y-4">
+//                 <div className="p-4 bg-[#f3f4f5] rounded-xl border-l-4 border-[#446900]">
+//                   <h4 className="font-bold text-[#191c1d] mb-1">Recommended Studio Expansion: Photography</h4>
+//                   <p className="text-sm text-[#424937] leading-relaxed">
+//                     Based on current demand trends, photography studios are seeing a 32% increase in bookings. 
+//                     Consider promoting this category to attract more listings.
+//                   </p>
+//                 </div>
+
+//                 <div className="grid grid-cols-2 gap-4">
+//                   <div className="p-4 bg-[#f3f4f5] rounded-xl">
+//                     <p className="text-[10px] text-[#737a65] font-bold uppercase mb-1">Revenue Confidence</p>
+//                     <p className="text-2xl font-extrabold text-[#191c1d]">92.4%</p>
+//                   </div>
+//                   <div className="p-4 bg-[#f3f4f5] rounded-xl">
+//                     <p className="text-[10px] text-[#737a65] font-bold uppercase mb-1">Risk Assessment</p>
+//                     <p className="text-2xl font-extrabold text-[#446900]">LOW</p>
+//                   </div>
+//                 </div>
+//               </div>
+
+//               <button className="mt-6 w-full py-3 bg-[#beff5f]/20 hover:bg-[#beff5f]/30 text-[#111f00] font-bold text-sm rounded-xl transition-all flex items-center justify-center gap-2">
+//                 View Full Market Forecast
+//                 <ArrowRightIcon className="w-4 h-4" />
+//               </button>
+//             </div>
+//           </div>
+
+//           {/* System Health & Optimization */}
+//           <div className="bg-[#2e3132] rounded-2xl p-6 md:p-8 text-white shadow-lg relative overflow-hidden">
+//             <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'radial-gradient(#fff 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
+            
+//             <div className="relative z-10">
+//               {/* System Health */}
+//               <div className="flex items-center justify-between mb-6">
+//                 <div>
+//                   <p className="text-xs font-bold text-[#c2c9b1] uppercase tracking-widest">System Health</p>
+//                   <h3 className="text-4xl font-extrabold text-[#beff5f]">{stats.systemHealth}%</h3>
+//                 </div>
+//                 <div className="w-14 h-14 rounded-2xl bg-[#beff5f]/20 flex items-center justify-center">
+//                   <MaterialIcon icon="health_and_safety" className="text-3xl text-[#beff5f]" />
+//                 </div>
+//               </div>
+
+//               <div className="flex items-center gap-2 mb-6">
+//                 <div className="w-2 h-2 rounded-full bg-[#beff5f] animate-pulse shadow-[0_0_10px_rgba(190,255,95,0.4)]"></div>
+//                 <span className="text-xs font-bold text-[#c2c9b1] uppercase tracking-widest">All Systems Operational</span>
+//               </div>
+
+//               <h4 className="font-bold text-sm mb-4">Optimization Suggestions</h4>
+              
+//               <ul className="space-y-3">
+//                 <li className="flex gap-2">
+//                   <CheckCircleIcon className="w-4 h-4 text-[#beff5f] mt-0.5 flex-shrink-0" />
+//                   <p className="text-sm text-[#c2c9b1]">Lower platform fee for studios with &gt;95% positive reviews.</p>
+//                 </li>
+//                 <li className="flex gap-2">
+//                   <CheckCircleIcon className="w-4 h-4 text-[#beff5f] mt-0.5 flex-shrink-0" />
+//                   <p className="text-sm text-[#c2c9b1]">Promote new studio listings in high-demand cities.</p>
+//                 </li>
+//                 <li className="flex gap-2">
+//                   <MaterialIcon icon="trending_up" className="text-[#beff5f] text-sm mt-0.5" />
+//                   <p className="text-sm text-[#c2c9b1]">Adjust pricing recommendations based on local market rates.</p>
+//                 </li>
+//               </ul>
+
+//               <div className="mt-8 pt-6 border-t border-white/10">
+//                 <p className="text-[10px] text-[#c2c9b1] uppercase font-bold mb-2">Algorithm Efficiency</p>
+//                 <div className="w-full bg-white/10 rounded-full h-1.5">
+//                   <div className="bg-[#beff5f] h-full rounded-full w-[88%] shadow-[0_0_10px_rgba(190,255,95,0.4)]"></div>
+//                 </div>
+//               </div>
+//             </div>
+//           </div>
+//         </div>
+
+//         {/* Pending Studio Moderation */}
+//         <section className="bg-white rounded-2xl shadow-sm border border-[#c2c9b1]/20 overflow-hidden">
+//           <div className="px-6 py-5 border-b border-[#c2c9b1]/20 flex justify-between items-center">
+//             <h2 className="text-xl font-extrabold text-[#191c1d]">Pending Studio Moderation</h2>
+//             <Link href="/admin/moderation" className="text-[#446900] font-bold text-sm hover:underline">
+//               View All Queue
+//             </Link>
+//           </div>
+
+//           {recentApplications.length === 0 ? (
+//             <div className="p-12 text-center">
+//               <CheckCircleIcon className="w-14 h-14 text-[#c2c9b1] mx-auto mb-4" />
+//               <p className="text-[#424937] font-bold text-lg">All caught up!</p>
+//               <p className="text-sm text-[#737a65] mt-1">No pending studio applications to review.</p>
+//             </div>
+//           ) : (
+//             <div className="overflow-x-auto">
+//               <table className="w-full text-left">
+//                 <thead>
+//                   <tr className="text-xs text-[#737a65] uppercase font-bold tracking-wider border-b border-[#c2c9b1]/20 bg-[#f3f4f5]">
+//                     <th className="px-6 py-4">Studio Name</th>
+//                     <th className="px-6 py-4">Category</th>
+//                     <th className="px-6 py-4">Location</th>
+//                     <th className="px-6 py-4">Price</th>
+//                     <th className="px-6 py-4 text-right">Actions</th>
+//                   </tr>
+//                 </thead>
+//                 <tbody className="divide-y divide-[#c2c9b1]/10">
+//                   {recentApplications.map((app) => (
+//                     <tr key={app.id} className="hover:bg-[#f3f4f5] transition-colors group">
+//                       <td className="px-6 py-4">
+//                         <div className="flex items-center gap-3">
+//                           <div className="w-10 h-10 rounded-xl overflow-hidden bg-[#edeeef] flex-shrink-0">
+//                             {app.image ? (
+//                               <img src={app.image} alt={app.name} className="w-full h-full object-cover" />
+//                             ) : (
+//                               <div className="w-full h-full flex items-center justify-center text-sm font-bold text-[#424937]">
+//                                 {app.name.charAt(0)}
+//                               </div>
+//                             )}
+//                           </div>
+//                           <div>
+//                             <p className="text-sm font-bold text-[#191c1d]">{app.name}</p>
+//                             <p className="text-[11px] text-[#737a65]">Owner: {app.ownerName}</p>
+//                           </div>
+//                         </div>
+//                       </td>
+//                       <td className="px-6 py-4">
+//                         <span className="px-2 py-0.5 bg-[#e4d7fd] text-[#665c7c] rounded text-[10px] font-bold uppercase">
+//                           {app.category}
+//                         </span>
+//                       </td>
+//                       <td className="px-6 py-4 text-sm text-[#424937]">{app.location || 'N/A'}</td>
+//                       <td className="px-6 py-4 text-sm font-bold text-[#191c1d]">${app.price}/hr</td>
+//                       <td className="px-6 py-4 text-right">
+//                         <div className="flex justify-end gap-2">
+//                           <button
+//                             onClick={() => handleRejectStudio(app.id)}
+//                             className="w-9 h-9 rounded-full border border-[#c2c9b1] flex items-center justify-center hover:bg-red-50 hover:text-[#ba1a1a] hover:border-red-200 transition-colors"
+//                             title="Reject"
+//                           >
+//                             <XCircleIcon className="w-4 h-4" />
+//                           </button>
+//                           <button
+//                             onClick={() => handleApproveStudio(app.id)}
+//                             className="w-9 h-9 rounded-full bg-[#beff5f] text-[#111f00] flex items-center justify-center hover:scale-110 transition-transform"
+//                             title="Approve"
+//                           >
+//                             <CheckCircleIcon className="w-4 h-4" />
+//                           </button>
+//                         </div>
+//                       </td>
+//                     </tr>
+//                   ))}
+//                 </tbody>
+//               </table>
+//             </div>
+//           )}
+//         </section>
+//       </div>
+//     </div>
+//   );
+// }
 
 
 

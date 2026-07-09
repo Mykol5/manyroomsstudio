@@ -6,6 +6,14 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 
+// Brand Colors
+const brand = {
+  yellow: '#F1CB81',
+  blue: '#91ADCD',
+  brown: '#DB8B8C',
+  dark: '#3C291C',
+};
+
 const MaterialIcon = ({ icon, className = '' }: { icon: string; className?: string }) => (
   <span className={`material-symbols-outlined ${className}`}>{icon}</span>
 );
@@ -16,12 +24,19 @@ export default function OwnerLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [notifications] = useState(3);
+  const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
       router.push('/login');
     }
   }, [user, loading, router]);
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 50);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const sidebarItems = [
     { href: '/owner/dashboard', icon: 'home', label: 'Home' },
@@ -45,55 +60,55 @@ export default function OwnerLayout({ children }: { children: React.ReactNode })
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#f8f9fa] flex items-center justify-center">
+      <div className="min-h-screen bg-[#FFFBF5] flex items-center justify-center">
         <div className="animate-pulse space-y-4 text-center">
-          <div className="w-16 h-16 bg-[#446900]/20 rounded-full mx-auto"></div>
-          <p className="text-[#446900] font-bold">Loading Dashboard...</p>
+          <div className="w-16 h-16 bg-[#F1CB81]/40 rounded-full mx-auto"></div>
+          <p className="text-[#3C291C] font-bold">Loading Dashboard...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#f8f9fa]">
-      {/* Top Navigation */}
-      <nav className="fixed top-0 w-full z-50 bg-white/70 backdrop-blur-xl border-b border-[#c2c9b1]/30 shadow-sm">
+    <div className="min-h-screen bg-[#FFFBF5]">
+      {/* Top Navigation - Brand Style */}
+      <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${
+        scrolled ? 'bg-white/95 backdrop-blur-xl border-b border-[#3C291C]/10 shadow-sm' : 'bg-white/95 backdrop-blur-xl border-b border-[#3C291C]/10'
+      }`}>
         <div className="flex justify-between items-center px-4 md:px-8 py-3 w-full max-w-[1440px] mx-auto">
           <div className="flex items-center gap-4 md:gap-8">
-            <Link href="/">
-              <img 
-                alt="ManyRooms Logo" 
-                className="h-8 md:h-10 w-auto hover:scale-105 transition-transform" 
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuB9DZnYRdMuRfh66s2y0aufTN6zhyFmIsA5aK66cuCBeLINs4QoP8IyjpBAQjHuPpHixsYPB1HMPOBhT7mUKu2qy7il9h__oTnAUvQ8EU5qv270iXUsGRbz-PlJjGMU5ixs4CUyHd9GoHjR9KulnOy4sz-3QN2VkRzW39ONL6ynO2nSLAUh3VRvj_U51r7i6CxOGm9pnjSOVDUTZd2P3m_LTCAchKE5VwHb0k6YYjDoduMHQU4iyejUYtTsGr0VhJR4tasKZ-e6qrWQ"
-              />
+            <Link href="/" className="group flex-shrink-0">
+              <span className="text-xl md:text-2xl font-extrabold tracking-tighter text-[#3C291C]">
+                Many<span className="text-[#F1CB81]">Rooms</span>
+              </span>
             </Link>
             <div className="hidden md:flex items-center gap-6">
-              <Link href="/" className="text-[#424937] hover:text-[#446900] transition-colors font-bold text-sm">Marketplace</Link>
-              <Link href="/spaces" className="text-[#424937] hover:text-[#446900] transition-colors font-bold text-sm">Studios</Link>
-              <Link href="/cities" className="text-[#424937] hover:text-[#446900] transition-colors font-bold text-sm">Vibes</Link>
-              <Link href="/about" className="text-[#424937] hover:text-[#446900] transition-colors font-bold text-sm">Journal</Link>
+              {['Marketplace', 'Studios', 'Spaces', 'Journal', 'Services'].map((item) => (
+                <Link key={item} href={item === 'Marketplace' ? '/' : `/${item.toLowerCase()}`} 
+                  className="py-1 font-bold text-sm text-[#3C291C]/70 hover:text-[#3C291C] transition-colors"
+                >{item}</Link>
+              ))}
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Link href="/owner/messages" className="relative p-2 hover:bg-[#edeeef] rounded-full hidden md:block">
-              <span className="material-symbols-outlined text-[#191c1d]">chat_bubble</span>
+            <Link href="/owner/messages" className="relative p-2 hover:bg-[#3C291C]/5 rounded-full hidden md:block">
+              <span className="material-symbols-outlined text-[#3C291C]">chat_bubble</span>
               {notifications > 0 && (
-                <span className="absolute top-1 right-1 w-2 h-2 bg-[#ba1a1a] rounded-full"></span>
+                <span className="absolute top-1 right-1 w-2 h-2 bg-[#DB8B8C] rounded-full"></span>
               )}
             </Link>
-            <span className="material-symbols-outlined text-[#191c1d] cursor-pointer p-2 hover:bg-[#edeeef] rounded-full hidden md:block">notifications</span>
+            <span className="material-symbols-outlined text-[#3C291C] cursor-pointer p-2 hover:bg-[#3C291C]/5 rounded-full hidden md:block">notifications</span>
             <Link 
               href="/owner/list-new"
-              className="hidden md:block bg-[#beff5f] text-[#111f00] px-6 py-2 rounded-full font-bold text-sm hover:scale-105 transition-transform"
+              className="hidden md:block bg-[#F1CB81] text-[#3C291C] px-6 py-2 rounded-full font-bold text-sm hover:bg-[#DB8B8C] hover:text-white transition-all"
             >
-              List Studio
+              List Your Space
             </Link>
-            {/* Mobile menu button */}
             <button 
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="lg:hidden p-2 hover:bg-[#edeeef] rounded-full"
+              className="lg:hidden p-2 hover:bg-[#3C291C]/5 rounded-full"
             >
-              <span className="material-symbols-outlined">{isMobileMenuOpen ? 'close' : 'menu'}</span>
+              <span className="material-symbols-outlined text-[#3C291C]">{isMobileMenuOpen ? 'close' : 'menu'}</span>
             </button>
           </div>
         </div>
@@ -101,17 +116,14 @@ export default function OwnerLayout({ children }: { children: React.ReactNode })
 
       {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
-        <div 
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
-          onClick={() => setIsMobileMenuOpen(false)}
-        />
+        <div className="fixed inset-0 bg-[#3C291C]/50 z-40 lg:hidden" onClick={() => setIsMobileMenuOpen(false)} />
       )}
 
       <div className="flex pt-16">
         {/* Sidebar */}
         <aside className={`
           h-screen fixed left-0 top-0 z-40
-          flex flex-col bg-white border-r border-[#c2c9b1]/20 shadow-xl
+          flex flex-col bg-white border-r border-[#3C291C]/10 shadow-xl
           pt-20 pb-8 px-4
           w-72
           transition-transform duration-300
@@ -120,12 +132,12 @@ export default function OwnerLayout({ children }: { children: React.ReactNode })
         `}>
           {/* Profile Section */}
           <div className="flex items-center gap-3 px-4 mb-8">
-            <div className="w-12 h-12 rounded-full overflow-hidden bg-[#e7e8e9] border-2 border-[#beff5f] flex items-center justify-center">
-              <span className="material-symbols-outlined text-[#446900] text-2xl">person</span>
+            <div className="w-12 h-12 rounded-full overflow-hidden bg-[#F1CB81] border-2 border-[#3C291C]/10 flex items-center justify-center">
+              <span className="material-symbols-outlined text-[#3C291C] text-2xl">person</span>
             </div>
             <div>
-              <p className="font-bold text-[#191c1d] text-sm leading-none">Studio Admin</p>
-              <p className="text-[#424937] text-xs">
+              <p className="font-bold text-[#3C291C] text-sm leading-none">Studio Admin</p>
+              <p className="text-[#3C291C]/60 text-xs">
                 {user?.user_metadata?.role === 'franchisee' ? 'Franchisee' : 'Creative Director'}
               </p>
             </div>
@@ -133,7 +145,7 @@ export default function OwnerLayout({ children }: { children: React.ReactNode })
 
           <div className="flex flex-col gap-1 mb-8">
             <div className="px-4 py-2">
-              <h3 className="text-xs font-bold text-[#737a65] uppercase tracking-widest">Dashboard</h3>
+              <h3 className="text-xs font-bold text-[#3C291C]/40 uppercase tracking-widest">Dashboard</h3>
             </div>
             {sidebarItems.map((item) => (
               <Link
@@ -142,8 +154,8 @@ export default function OwnerLayout({ children }: { children: React.ReactNode })
                 onClick={() => setIsMobileMenuOpen(false)}
                 className={`flex items-center gap-3 py-3 px-4 rounded-xl font-bold transition-all ${
                   isActive(item.href)
-                    ? 'bg-[#beff5f] text-[#4c7500]'
-                    : 'text-[#424937] hover:bg-[#e7e8e9]'
+                    ? 'bg-[#F1CB81] text-[#3C291C]'
+                    : 'text-[#3C291C]/60 hover:bg-[#3C291C]/5 hover:text-[#3C291C]'
                 }`}
               >
                 <span 
@@ -154,29 +166,29 @@ export default function OwnerLayout({ children }: { children: React.ReactNode })
                 </span>
                 <span>{item.label}</span>
                 {item.label === 'Messages' && (
-                  <span className="ml-auto bg-[#ba1a1a] text-white text-[10px] font-bold px-2 py-0.5 rounded-full">3</span>
+                  <span className="ml-auto bg-[#DB8B8C] text-white text-[10px] font-bold px-2 py-0.5 rounded-full">3</span>
                 )}
               </Link>
             ))}
           </div>
 
           {/* Upgrade Card */}
-          <div className="mt-auto p-4 bg-[#e4d7fd] rounded-2xl flex flex-col gap-3">
-            <p className="font-bold text-[#665c7c]">Upgrade to Pro</p>
-            <p className="text-xs text-[#665c7c]/80">Get unlimited access to premium vibes and priority booking.</p>
+          <div className="mt-auto p-4 bg-[#91ADCD]/20 rounded-2xl flex flex-col gap-3">
+            <p className="font-bold text-[#3C291C]">Upgrade to Pro</p>
+            <p className="text-xs text-[#3C291C]/60">Get unlimited access to premium features and priority booking.</p>
             <Link
               href="/dashboard/upgrade"
-              className="w-full py-2 bg-[#665c7c] text-white rounded-lg font-bold text-xs text-center hover:opacity-90 transition-opacity"
+              className="w-full py-2 bg-[#3C291C] text-white rounded-lg font-bold text-xs text-center hover:bg-[#DB8B8C] transition-all"
             >
               Unlock Now
             </Link>
           </div>
 
           {/* Bottom Links */}
-          <div className="mt-6 flex flex-col gap-1 border-t border-[#c2c9b1]/30 pt-6">
+          <div className="mt-6 flex flex-col gap-1 border-t border-[#3C291C]/10 pt-6">
             <Link
               href="/support"
-              className="flex items-center gap-3 py-2 px-4 text-[#424937] hover:text-[#446900] transition-all"
+              className="flex items-center gap-3 py-2 px-4 text-[#3C291C]/60 hover:text-[#3C291C] transition-all"
             >
               <span className="material-symbols-outlined text-lg">help</span>
               <span className="text-sm">Help Center</span>
@@ -186,7 +198,7 @@ export default function OwnerLayout({ children }: { children: React.ReactNode })
                 logout();
                 router.push('/');
               }}
-              className="flex items-center gap-3 py-2 px-4 text-[#ba1a1a] hover:text-[#ba1a1a]/80 transition-all"
+              className="flex items-center gap-3 py-2 px-4 text-[#DB8B8C] hover:text-[#DB8B8C]/80 transition-all"
             >
               <span className="material-symbols-outlined text-lg">logout</span>
               <span className="text-sm">Logout</span>
@@ -201,12 +213,12 @@ export default function OwnerLayout({ children }: { children: React.ReactNode })
       </div>
 
       {/* Mobile Bottom Navigation */}
-      <nav className="md:hidden fixed bottom-0 left-0 w-full bg-white/90 backdrop-blur-xl border-t border-[#c2c9b1]/30 flex justify-around py-3 z-50">
+      <nav className="md:hidden fixed bottom-0 left-0 w-full bg-white/95 backdrop-blur-xl border-t border-[#3C291C]/10 flex justify-around py-3 z-50">
         {sidebarItems.slice(0, 5).map((item) => (
           <Link
             key={item.href}
             href={item.href}
-            className={`flex flex-col items-center gap-1 ${isActive(item.href) ? 'text-[#446900]' : 'text-[#424937]'}`}
+            className={`flex flex-col items-center gap-1 ${isActive(item.href) ? 'text-[#3C291C]' : 'text-[#3C291C]/40'}`}
           >
             <span 
               className="material-symbols-outlined text-xl"
@@ -221,6 +233,231 @@ export default function OwnerLayout({ children }: { children: React.ReactNode })
     </div>
   );
 }
+
+
+// // app/owner/layout.tsx
+// 'use client';
+
+// import { useState, useEffect } from 'react';
+// import Link from 'next/link';
+// import { usePathname, useRouter } from 'next/navigation';
+// import { useAuth } from '@/context/AuthContext';
+
+// const MaterialIcon = ({ icon, className = '' }: { icon: string; className?: string }) => (
+//   <span className={`material-symbols-outlined ${className}`}>{icon}</span>
+// );
+
+// export default function OwnerLayout({ children }: { children: React.ReactNode }) {
+//   const { user, loading, logout } = useAuth();
+//   const router = useRouter();
+//   const pathname = usePathname();
+//   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+//   const [notifications] = useState(3);
+
+//   useEffect(() => {
+//     if (!loading && !user) {
+//       router.push('/login');
+//     }
+//   }, [user, loading, router]);
+
+//   const sidebarItems = [
+//     { href: '/owner/dashboard', icon: 'home', label: 'Home' },
+//     { href: '/owner/explore', icon: 'document_scanner', label: 'Explore AI' },
+//     { href: '/owner/studios', icon: 'meeting_room', label: 'My Studios' },
+//     { href: '/owner/bookings', icon: 'event_available', label: 'Bookings' },
+//     { href: '/owner/messages', icon: 'chat_bubble', label: 'Messages' },
+//     { href: '/owner/earnings', icon: 'payments', label: 'Earnings' },
+//     { href: '/owner/settings', icon: 'settings', label: 'Settings' },
+//   ];
+
+//   const isActive = (href: string) => {
+//     if (href === '/owner/dashboard') return pathname === '/owner/dashboard';
+//     return pathname.startsWith(href);
+//   };
+
+//   const handleLogout = async () => {
+//     await logout();
+//     router.push('/');
+//   };
+
+//   if (loading) {
+//     return (
+//       <div className="min-h-screen bg-[#f8f9fa] flex items-center justify-center">
+//         <div className="animate-pulse space-y-4 text-center">
+//           <div className="w-16 h-16 bg-[#446900]/20 rounded-full mx-auto"></div>
+//           <p className="text-[#446900] font-bold">Loading Dashboard...</p>
+//         </div>
+//       </div>
+//     );
+//   }
+
+//   return (
+//     <div className="min-h-screen bg-[#f8f9fa]">
+//       {/* Top Navigation */}
+//       <nav className="fixed top-0 w-full z-50 bg-white/70 backdrop-blur-xl border-b border-[#c2c9b1]/30 shadow-sm">
+//         <div className="flex justify-between items-center px-4 md:px-8 py-3 w-full max-w-[1440px] mx-auto">
+//           <div className="flex items-center gap-4 md:gap-8">
+//             <Link href="/">
+//               <img 
+//                 alt="ManyRooms Logo" 
+//                 className="h-8 md:h-10 w-auto hover:scale-105 transition-transform" 
+//                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuB9DZnYRdMuRfh66s2y0aufTN6zhyFmIsA5aK66cuCBeLINs4QoP8IyjpBAQjHuPpHixsYPB1HMPOBhT7mUKu2qy7il9h__oTnAUvQ8EU5qv270iXUsGRbz-PlJjGMU5ixs4CUyHd9GoHjR9KulnOy4sz-3QN2VkRzW39ONL6ynO2nSLAUh3VRvj_U51r7i6CxOGm9pnjSOVDUTZd2P3m_LTCAchKE5VwHb0k6YYjDoduMHQU4iyejUYtTsGr0VhJR4tasKZ-e6qrWQ"
+//               />
+//             </Link>
+//             <div className="hidden md:flex items-center gap-6">
+//               <Link href="/" className="text-[#424937] hover:text-[#446900] transition-colors font-bold text-sm">Marketplace</Link>
+//               <Link href="/spaces" className="text-[#424937] hover:text-[#446900] transition-colors font-bold text-sm">Studios</Link>
+//               <Link href="/cities" className="text-[#424937] hover:text-[#446900] transition-colors font-bold text-sm">Vibes</Link>
+//               <Link href="/about" className="text-[#424937] hover:text-[#446900] transition-colors font-bold text-sm">Journal</Link>
+//             </div>
+//           </div>
+//           <div className="flex items-center gap-3">
+//             <Link href="/owner/messages" className="relative p-2 hover:bg-[#edeeef] rounded-full hidden md:block">
+//               <span className="material-symbols-outlined text-[#191c1d]">chat_bubble</span>
+//               {notifications > 0 && (
+//                 <span className="absolute top-1 right-1 w-2 h-2 bg-[#ba1a1a] rounded-full"></span>
+//               )}
+//             </Link>
+//             <span className="material-symbols-outlined text-[#191c1d] cursor-pointer p-2 hover:bg-[#edeeef] rounded-full hidden md:block">notifications</span>
+//             <Link 
+//               href="/owner/list-new"
+//               className="hidden md:block bg-[#beff5f] text-[#111f00] px-6 py-2 rounded-full font-bold text-sm hover:scale-105 transition-transform"
+//             >
+//               List Studio
+//             </Link>
+//             {/* Mobile menu button */}
+//             <button 
+//               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+//               className="lg:hidden p-2 hover:bg-[#edeeef] rounded-full"
+//             >
+//               <span className="material-symbols-outlined">{isMobileMenuOpen ? 'close' : 'menu'}</span>
+//             </button>
+//           </div>
+//         </div>
+//       </nav>
+
+//       {/* Mobile Menu Overlay */}
+//       {isMobileMenuOpen && (
+//         <div 
+//           className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+//           onClick={() => setIsMobileMenuOpen(false)}
+//         />
+//       )}
+
+//       <div className="flex pt-16">
+//         {/* Sidebar */}
+//         <aside className={`
+//           h-screen fixed left-0 top-0 z-40
+//           flex flex-col bg-white border-r border-[#c2c9b1]/20 shadow-xl
+//           pt-20 pb-8 px-4
+//           w-72
+//           transition-transform duration-300
+//           ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+//           lg:sticky lg:top-0
+//         `}>
+//           {/* Profile Section */}
+//           <div className="flex items-center gap-3 px-4 mb-8">
+//             <div className="w-12 h-12 rounded-full overflow-hidden bg-[#e7e8e9] border-2 border-[#beff5f] flex items-center justify-center">
+//               <span className="material-symbols-outlined text-[#446900] text-2xl">person</span>
+//             </div>
+//             <div>
+//               <p className="font-bold text-[#191c1d] text-sm leading-none">Studio Admin</p>
+//               <p className="text-[#424937] text-xs">
+//                 {user?.user_metadata?.role === 'franchisee' ? 'Franchisee' : 'Creative Director'}
+//               </p>
+//             </div>
+//           </div>
+
+//           <div className="flex flex-col gap-1 mb-8">
+//             <div className="px-4 py-2">
+//               <h3 className="text-xs font-bold text-[#737a65] uppercase tracking-widest">Dashboard</h3>
+//             </div>
+//             {sidebarItems.map((item) => (
+//               <Link
+//                 key={item.href}
+//                 href={item.href}
+//                 onClick={() => setIsMobileMenuOpen(false)}
+//                 className={`flex items-center gap-3 py-3 px-4 rounded-xl font-bold transition-all ${
+//                   isActive(item.href)
+//                     ? 'bg-[#beff5f] text-[#4c7500]'
+//                     : 'text-[#424937] hover:bg-[#e7e8e9]'
+//                 }`}
+//               >
+//                 <span 
+//                   className="material-symbols-outlined"
+//                   style={isActive(item.href) ? { fontVariationSettings: "'FILL' 1" } : {}}
+//                 >
+//                   {item.icon}
+//                 </span>
+//                 <span>{item.label}</span>
+//                 {item.label === 'Messages' && (
+//                   <span className="ml-auto bg-[#ba1a1a] text-white text-[10px] font-bold px-2 py-0.5 rounded-full">3</span>
+//                 )}
+//               </Link>
+//             ))}
+//           </div>
+
+//           {/* Upgrade Card */}
+//           <div className="mt-auto p-4 bg-[#e4d7fd] rounded-2xl flex flex-col gap-3">
+//             <p className="font-bold text-[#665c7c]">Upgrade to Pro</p>
+//             <p className="text-xs text-[#665c7c]/80">Get unlimited access to premium vibes and priority booking.</p>
+//             <Link
+//               href="/dashboard/upgrade"
+//               className="w-full py-2 bg-[#665c7c] text-white rounded-lg font-bold text-xs text-center hover:opacity-90 transition-opacity"
+//             >
+//               Unlock Now
+//             </Link>
+//           </div>
+
+//           {/* Bottom Links */}
+//           <div className="mt-6 flex flex-col gap-1 border-t border-[#c2c9b1]/30 pt-6">
+//             <Link
+//               href="/support"
+//               className="flex items-center gap-3 py-2 px-4 text-[#424937] hover:text-[#446900] transition-all"
+//             >
+//               <span className="material-symbols-outlined text-lg">help</span>
+//               <span className="text-sm">Help Center</span>
+//             </Link>
+//             <button
+//               onClick={() => {
+//                 logout();
+//                 router.push('/');
+//               }}
+//               className="flex items-center gap-3 py-2 px-4 text-[#ba1a1a] hover:text-[#ba1a1a]/80 transition-all"
+//             >
+//               <span className="material-symbols-outlined text-lg">logout</span>
+//               <span className="text-sm">Logout</span>
+//             </button>
+//           </div>
+//         </aside>
+
+//         {/* Main Content */}
+//         <main className="flex-1 lg:pl-0">
+//           {children}
+//         </main>
+//       </div>
+
+//       {/* Mobile Bottom Navigation */}
+//       <nav className="md:hidden fixed bottom-0 left-0 w-full bg-white/90 backdrop-blur-xl border-t border-[#c2c9b1]/30 flex justify-around py-3 z-50">
+//         {sidebarItems.slice(0, 5).map((item) => (
+//           <Link
+//             key={item.href}
+//             href={item.href}
+//             className={`flex flex-col items-center gap-1 ${isActive(item.href) ? 'text-[#446900]' : 'text-[#424937]'}`}
+//           >
+//             <span 
+//               className="material-symbols-outlined text-xl"
+//               style={isActive(item.href) ? { fontVariationSettings: "'FILL' 1" } : {}}
+//             >
+//               {item.icon}
+//             </span>
+//             <span className="text-[10px] font-bold uppercase">{item.label}</span>
+//           </Link>
+//         ))}
+//       </nav>
+//     </div>
+//   );
+// }
 
 
 

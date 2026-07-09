@@ -10,6 +10,14 @@ import {
   ArrowDownTrayIcon,
 } from '@heroicons/react/24/outline';
 
+// Brand Colors
+const brand = {
+  yellow: '#F1CB81',
+  blue: '#91ADCD',
+  brown: '#DB8B8C',
+  dark: '#3C291C',
+};
+
 const MaterialIcon = ({ icon, className = '' }: { icon: string; className?: string }) => (
   <span className={`material-symbols-outlined ${className}`}>{icon}</span>
 );
@@ -39,64 +47,42 @@ export default function EarningsPage() {
 
   const [transactions] = useState<Transaction[]>([
     {
-      id: '1',
-      date: 'Oct 12, 2024',
-      studio: 'Neon Loft A',
+      id: '1', date: 'Oct 12, 2024', studio: 'Neon Loft A',
       image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuA2OT5WE-Ca1v81hoFresvEphe-opFhsFwrUnzjl9s7mO6sWcdBKinIW47nHnN6iSTzGeKfcEJr_2b6R91fFUwnDMaiuoqVJW9qSyEqAURgMjt7QkH5eGoYKwQ7XLonL5UmghGqiEB4DH9mFvJIS0WnapDsTiNkQKYkDMFHUD4ZlYQZICu08CLh7ezR182dqIA6Qb-i6_sYd3-AS0HLFpz59kpofdL6Q4DQtEoApA1V-kbfuHCXGU1KVjGM4q8Yw4e0V8jFfbza00xs',
-      reference: '#45922',
-      type: 'Booking',
-      status: 'Completed',
-      amount: 850.00,
+      reference: '#45922', type: 'Booking', status: 'Completed', amount: 850.00,
     },
     {
-      id: '2',
-      date: 'Oct 10, 2024',
-      studio: 'Bank Transfer',
-      reference: 'PAY-9921',
-      type: 'Payout',
-      status: 'Processing',
-      amount: -4200.00,
+      id: '2', date: 'Oct 10, 2024', studio: 'Bank Transfer',
+      reference: 'PAY-9921', type: 'Payout', status: 'Processing', amount: -4200.00,
     },
     {
-      id: '3',
-      date: 'Oct 08, 2024',
-      studio: 'The Green Screen Suite',
+      id: '3', date: 'Oct 08, 2024', studio: 'The Green Screen Suite',
       image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCpjX5rJRzNUMgNQxrWfQtv1fOayAPmI8lgl-kHPjLZLLoJjwGMYDlWgEVWmav10Y5jqCqCot0sm6zpZXNER16Q0HRWG3vivhFt2AXdQ7CPzPeE1WWH8gKExltRP2m92nVcMZ5SxciqvtOop8aNJX3ooNZ-XuXP73JVieVIvZV6mG2ibNy8wNR4kIAas34VQ2_wHrq8xZbSOWE5YX_OPq2-2erhO1petCN4geU7w9wx6WEqfwOjkv_QeY6WJRlkGoNHCiURnJ0EsqJm',
-      reference: '#45910',
-      type: 'Booking',
-      status: 'Completed',
-      amount: 1200.00,
+      reference: '#45910', type: 'Booking', status: 'Completed', amount: 1200.00,
     },
     {
-      id: '4',
-      date: 'Oct 05, 2024',
-      studio: 'Creative Commons',
+      id: '4', date: 'Oct 05, 2024', studio: 'Creative Commons',
       image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAjBKCUK_Ds0TtT9QByrsuWY2rLJAv-nILfPNuNIT_pob9DHibpu5hz2h9pYB6Duu5SU-OvIl98qPRngJhk1m4fjY1ToaKgo2APAWitXa7nF7Jm0cVEn2hrZGrwPWAtsF2DlHYDk-EcZTyacxONBvJQkgnMBa54AUV6Q6HPxv1DX8Y-SMkx2prLDPoqAFxjgs6eD-gYQBqG-2ORBcRkNDnLaLWAmjJIkb2xP2eK58M7WahWN8-vjA8ugx2bK9LZXYfz9EdcxsDcwrns',
-      reference: '#45899',
-      type: 'Booking',
-      status: 'Completed',
-      amount: 450.00,
+      reference: '#45899', type: 'Booking', status: 'Completed', amount: 450.00,
     },
   ]);
 
   return (
-    <div className="min-h-screen bg-[#f8f9fa]">
+    <div className="min-h-screen bg-[#FFFBF5]">
       {/* Header */}
-      <header className="sticky top-16 z-30 bg-white/70 backdrop-blur-xl border-b border-[#c2c9b1]/30 px-4 md:px-8 py-5">
+      <header className="sticky top-16 z-30 bg-white/80 backdrop-blur-xl border-b border-[#3C291C]/10 px-4 md:px-8 py-5">
         <div className="flex justify-between items-center max-w-[1440px] mx-auto">
-          <h1 className="text-2xl md:text-3xl font-extrabold text-[#191c1d]">Earnings & Payouts</h1>
+          <h1 className="text-2xl md:text-3xl font-extrabold text-[#3C291C]">Earnings & Payouts</h1>
           <div className="flex items-center gap-3">
-            <button className="p-2 hover:bg-[#edeeef] rounded-full transition-colors">
-              <span className="material-symbols-outlined text-[#191c1d]">favorite</span>
+            <button className="p-2 hover:bg-[#3C291C]/5 rounded-full transition-colors">
+              <span className="material-symbols-outlined text-[#3C291C]">favorite</span>
             </button>
-            <button className="p-2 hover:bg-[#edeeef] rounded-full transition-colors">
-              <span className="material-symbols-outlined text-[#191c1d]">account_circle</span>
+            <button className="p-2 hover:bg-[#3C291C]/5 rounded-full transition-colors">
+              <span className="material-symbols-outlined text-[#3C291C]">account_circle</span>
             </button>
-            <Link
-              href="/owner/list-new"
-              className="bg-[#446900] text-white px-6 py-2 rounded-full font-bold text-sm hover:scale-105 transition-transform active:scale-95"
-            >
-              List Studio
+            <Link href="/owner/list-new"
+              className="bg-[#F1CB81] text-[#3C291C] px-6 py-2 rounded-full font-bold text-sm hover:bg-[#DB8B8C] hover:text-white transition-all">
+              List Your Space
             </Link>
           </div>
         </div>
@@ -107,31 +93,29 @@ export default function EarningsPage() {
         {/* Summary Cards */}
         <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Total Earnings */}
-          <div className="bg-white/80 backdrop-blur-xl border border-white/40 p-8 rounded-[2rem] shadow-lg relative overflow-hidden group">
-            <div className="absolute -right-4 -top-4 w-32 h-32 bg-[#beff5f]/20 rounded-full blur-3xl group-hover:bg-[#beff5f]/40 transition-colors"></div>
-            <p className="text-xs font-bold text-[#424937] mb-4 uppercase tracking-widest">Total Earnings</p>
-            <h2 className="text-4xl md:text-5xl font-extrabold text-[#446900]">$42,850.00</h2>
-            <div className="mt-6 flex items-center gap-2 text-[#446900] font-bold">
+          <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-[#3C291C]/10 relative overflow-hidden group">
+            <div className="absolute -right-4 -top-4 w-32 h-32 bg-[#F1CB81]/20 rounded-full blur-3xl group-hover:bg-[#F1CB81]/30 transition-colors"></div>
+            <p className="text-xs font-bold text-[#3C291C]/40 mb-4 uppercase tracking-widest">Total Earnings</p>
+            <h2 className="text-4xl md:text-5xl font-extrabold text-[#3C291C]">$42,850.00</h2>
+            <div className="mt-6 flex items-center gap-2 text-[#DB8B8C] font-bold">
               <ArrowTrendingUpIcon className="w-5 h-5" />
               <span className="text-sm">+12% from last month</span>
             </div>
           </div>
 
           {/* Pending Payouts */}
-          <div className="bg-white/80 backdrop-blur-xl border border-white/40 p-8 rounded-[2rem] shadow-lg relative overflow-hidden group">
-            <div className="absolute -right-4 -top-4 w-32 h-32 bg-[#e4d7fd]/20 rounded-full blur-3xl group-hover:bg-[#e4d7fd]/40 transition-colors"></div>
-            <p className="text-xs font-bold text-[#424937] mb-4 uppercase tracking-widest">Pending Payouts</p>
-            <h2 className="text-4xl md:text-5xl font-extrabold text-[#665c7c]">$3,240.50</h2>
-            <div className="mt-6 text-[#424937] font-medium text-sm">
-              Expected processing: 2-3 business days
-            </div>
+          <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-[#3C291C]/10 relative overflow-hidden group">
+            <div className="absolute -right-4 -top-4 w-32 h-32 bg-[#91ADCD]/20 rounded-full blur-3xl group-hover:bg-[#91ADCD]/30 transition-colors"></div>
+            <p className="text-xs font-bold text-[#3C291C]/40 mb-4 uppercase tracking-widest">Pending Payouts</p>
+            <h2 className="text-4xl md:text-5xl font-extrabold text-[#3C291C]">$3,240.50</h2>
+            <div className="mt-6 text-[#3C291C]/60 font-medium text-sm">Expected processing: 2-3 business days</div>
           </div>
 
           {/* Next Payout Date */}
-          <div className="bg-[#beff5f] p-8 rounded-[2rem] shadow-lg relative overflow-hidden group">
-            <p className="text-xs font-bold text-[#111f00] mb-4 uppercase tracking-widest">Next Payout Date</p>
-            <h2 className="text-4xl md:text-5xl font-extrabold text-[#111f00]">Oct 24, 2024</h2>
-            <div className="mt-6 flex items-center gap-2 text-[#111f00] font-bold">
+          <div className="bg-[#F1CB81] rounded-[2rem] p-8 shadow-sm relative overflow-hidden group">
+            <p className="text-xs font-bold text-[#3C291C] mb-4 uppercase tracking-widest">Next Payout Date</p>
+            <h2 className="text-4xl md:text-5xl font-extrabold text-[#3C291C]">Oct 24, 2024</h2>
+            <div className="mt-6 flex items-center gap-2 text-[#3C291C] font-bold">
               <CalendarIcon className="w-5 h-5" />
               <span className="text-sm">Scheduled Automatic Transfer</span>
             </div>
@@ -142,42 +126,33 @@ export default function EarningsPage() {
         <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           
           {/* Monthly Revenue Bar Chart */}
-          <div className="bg-white/80 backdrop-blur-xl border border-white/40 p-8 rounded-[2.5rem] shadow-lg">
+          <div className="bg-white rounded-[2.5rem] p-8 shadow-sm border border-[#3C291C]/10">
             <div className="flex justify-between items-center mb-10">
-              <h3 className="text-2xl font-extrabold text-[#191c1d]">Monthly Revenue</h3>
+              <h3 className="text-2xl font-extrabold text-[#3C291C]">Monthly Revenue</h3>
               <div className="flex items-center gap-2">
-                <span className="w-3 h-3 bg-[#446900] rounded-full"></span>
-                <span className="text-xs font-bold uppercase tracking-widest text-[#424937]">2024 Performance</span>
+                <span className="w-3 h-3 bg-[#F1CB81] rounded-full"></span>
+                <span className="text-xs font-bold uppercase tracking-widest text-[#3C291C]/40">2024 Performance</span>
               </div>
             </div>
             <div className="flex items-end justify-between h-64 gap-2 md:gap-4 px-2">
               {monthlyData.map((data) => (
                 <div key={data.month} className="flex flex-col items-center flex-1 group cursor-pointer">
                   <div className="w-full relative rounded-t-lg transition-all duration-300 hover:opacity-80"
-                    style={{
-                      height: `${data.height * 2.5}px`,
-                      backgroundColor: data.month === 'MAR' || data.month === 'JUN' ? '#446900' : '#edeeef'
-                    }}
-                  >
-                    <div className="absolute -top-8 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-[#2e3132] text-white text-[10px] px-2 py-1 rounded whitespace-nowrap">
-                      ${data.amount.toLocaleString()}k
-                    </div>
+                    style={{ height: `${data.height * 2.5}px`, backgroundColor: data.month === 'MAR' || data.month === 'JUN' ? '#F1CB81' : '#3C291C'/10 }}>
+                    <div className="absolute -top-8 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-[#3C291C] text-white text-[10px] px-2 py-1 rounded whitespace-nowrap">${data.amount.toLocaleString()}k</div>
                   </div>
-                  <span className="mt-4 text-xs font-bold text-[#424937]">{data.month}</span>
+                  <span className="mt-4 text-xs font-bold text-[#3C291C]/40">{data.month}</span>
                 </div>
               ))}
             </div>
           </div>
 
           {/* Payout Volume Graph */}
-          <div className="bg-white/80 backdrop-blur-xl border border-white/40 p-8 rounded-[2.5rem] shadow-lg overflow-hidden relative">
+          <div className="bg-white rounded-[2.5rem] p-8 shadow-sm border border-[#3C291C]/10 overflow-hidden relative">
             <div className="flex justify-between items-center mb-10">
-              <h3 className="text-2xl font-extrabold text-[#191c1d]">Payout Volume</h3>
-              <select
-                value={timeframe}
-                onChange={(e) => setTimeframe(e.target.value as any)}
-                className="bg-[#edeeef] border-none rounded-full px-4 py-2 text-xs font-bold focus:ring-2 focus:ring-[#446900] outline-none"
-              >
+              <h3 className="text-2xl font-extrabold text-[#3C291C]">Payout Volume</h3>
+              <select value={timeframe} onChange={(e) => setTimeframe(e.target.value as any)}
+                className="bg-[#3C291C]/5 border-none rounded-full px-4 py-2 text-xs font-bold focus:ring-2 focus:ring-[#F1CB81] outline-none text-[#3C291C]">
                 <option value="6months">Last 6 Months</option>
                 <option value="year">Last Year</option>
               </select>
@@ -185,98 +160,79 @@ export default function EarningsPage() {
             <div className="relative h-64 w-full">
               <svg className="w-full h-full" viewBox="0 0 400 150">
                 <defs>
-                  <linearGradient id="lineGrad" x1="0%" x2="0%" y1="0%" y2="100%">
-                    <stop offset="0%" style={{ stopColor: '#446900', stopOpacity: 0.2 }} />
-                    <stop offset="100%" style={{ stopColor: '#446900', stopOpacity: 0 }} />
+                  <linearGradient id="lineGrad2" x1="0%" x2="0%" y1="0%" y2="100%">
+                    <stop offset="0%" style={{ stopColor: '#F1CB81', stopOpacity: 0.2 }} />
+                    <stop offset="100%" style={{ stopColor: '#F1CB81', stopOpacity: 0 }} />
                   </linearGradient>
                 </defs>
-                <path d="M0,130 Q50,110 100,120 T200,60 T300,80 T400,20" fill="transparent" stroke="#446900" strokeLinecap="round" strokeWidth="4" />
-                <path d="M0,130 Q50,110 100,120 T200,60 T300,80 T400,20 V150 H0 Z" fill="url(#lineGrad)" />
-                <circle cx="100" cy="120" fill="#446900" r="5" />
-                <circle cx="200" cy="60" fill="#446900" r="5" />
-                <circle cx="300" cy="80" fill="#446900" r="5" />
-                <circle cx="400" cy="20" fill="#446900" r="5" />
+                <path d="M0,130 Q50,110 100,120 T200,60 T300,80 T400,20" fill="transparent" stroke="#F1CB81" strokeLinecap="round" strokeWidth="4" />
+                <path d="M0,130 Q50,110 100,120 T200,60 T300,80 T400,20 V150 H0 Z" fill="url(#lineGrad2)" />
+                <circle cx="100" cy="120" fill="#F1CB81" r="5" />
+                <circle cx="200" cy="60" fill="#F1CB81" r="5" />
+                <circle cx="300" cy="80" fill="#F1CB81" r="5" />
+                <circle cx="400" cy="20" fill="#F1CB81" r="5" />
               </svg>
-              <div className="absolute top-10 right-20 bg-[#2e3132] text-white text-[10px] p-2 rounded-lg shadow-xl">
-                Peak Month: $8.4k
-              </div>
+              <div className="absolute top-10 right-20 bg-[#3C291C] text-white text-[10px] p-2 rounded-lg shadow-xl">Peak Month: $8.4k</div>
             </div>
           </div>
         </section>
 
         {/* Transaction Ledger */}
-        <section className="bg-white/80 backdrop-blur-xl border border-white/40 rounded-[2.5rem] shadow-lg overflow-hidden">
-          <div className="p-6 md:p-8 border-b border-[#c2c9b1]/30 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <section className="bg-white rounded-[2.5rem] shadow-sm border border-[#3C291C]/10 overflow-hidden">
+          <div className="p-6 md:p-8 border-b border-[#3C291C]/10 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-              <h3 className="text-2xl font-extrabold text-[#191c1d]">Transaction Ledger</h3>
-              <p className="text-[#424937] text-sm">Detailed breakdown of all studio bookings and payout events.</p>
+              <h3 className="text-2xl font-extrabold text-[#3C291C]">Transaction Ledger</h3>
+              <p className="text-[#3C291C]/60 text-sm">Detailed breakdown of all studio bookings and payout events.</p>
             </div>
             <div className="flex items-center gap-3">
-              <button className="flex items-center gap-2 px-6 py-2 border-2 border-[#c2c9b1] text-[#191c1d] font-bold rounded-full hover:bg-[#edeeef] transition-all text-sm">
-                <FunnelIcon className="w-4 h-4" />
-                Filter
+              <button className="flex items-center gap-2 px-6 py-2 border-2 border-[#3C291C]/10 text-[#3C291C] font-bold rounded-full hover:bg-[#3C291C]/5 transition-all text-sm">
+                <FunnelIcon className="w-4 h-4" /> Filter
               </button>
-              <button className="flex items-center gap-2 px-6 py-2 bg-[#2e3132] text-white font-bold rounded-full hover:scale-105 transition-transform active:scale-95 text-sm">
-                <ArrowDownTrayIcon className="w-4 h-4" />
-                Export CSV
+              <button className="flex items-center gap-2 px-6 py-2 bg-[#3C291C] text-white font-bold rounded-full hover:bg-[#DB8B8C] transition-all text-sm">
+                <ArrowDownTrayIcon className="w-4 h-4" /> Export CSV
               </button>
             </div>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left">
-              <thead className="bg-[#f3f4f5]">
+              <thead className="bg-[#3C291C]/5">
                 <tr>
-                  <th className="px-6 md:px-8 py-4 text-xs font-bold text-[#424937] uppercase tracking-widest">DATE</th>
-                  <th className="px-6 md:px-8 py-4 text-xs font-bold text-[#424937] uppercase tracking-widest">STUDIO / ITEM</th>
-                  <th className="px-6 md:px-8 py-4 text-xs font-bold text-[#424937] uppercase tracking-widest">TYPE</th>
-                  <th className="px-6 md:px-8 py-4 text-xs font-bold text-[#424937] uppercase tracking-widest">STATUS</th>
-                  <th className="px-6 md:px-8 py-4 text-xs font-bold text-[#424937] uppercase tracking-widest text-right">AMOUNT</th>
+                  <th className="px-6 md:px-8 py-4 text-xs font-bold text-[#3C291C]/40 uppercase tracking-widest">DATE</th>
+                  <th className="px-6 md:px-8 py-4 text-xs font-bold text-[#3C291C]/40 uppercase tracking-widest">STUDIO / ITEM</th>
+                  <th className="px-6 md:px-8 py-4 text-xs font-bold text-[#3C291C]/40 uppercase tracking-widest">TYPE</th>
+                  <th className="px-6 md:px-8 py-4 text-xs font-bold text-[#3C291C]/40 uppercase tracking-widest">STATUS</th>
+                  <th className="px-6 md:px-8 py-4 text-xs font-bold text-[#3C291C]/40 uppercase tracking-widest text-right">AMOUNT</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#c2c9b1]/20">
+              <tbody className="divide-y divide-[#3C291C]/5">
                 {transactions.map((txn) => (
-                  <tr key={txn.id} className="hover:bg-white/50 transition-colors">
-                    <td className="px-6 md:px-8 py-5 font-medium text-sm">{txn.date}</td>
+                  <tr key={txn.id} className="hover:bg-[#3C291C]/[0.02] transition-colors">
+                    <td className="px-6 md:px-8 py-5 font-medium text-sm text-[#3C291C]">{txn.date}</td>
                     <td className="px-6 md:px-8 py-5">
                       <div className="flex items-center gap-3">
                         {txn.image ? (
-                          <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0">
-                            <img className="w-full h-full object-cover" src={txn.image} alt={txn.studio} />
-                          </div>
+                          <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0"><img className="w-full h-full object-cover" src={txn.image} alt={txn.studio} /></div>
                         ) : (
-                          <div className="w-10 h-10 rounded-lg bg-[#edeeef] flex items-center justify-center flex-shrink-0">
-                            <span className="material-symbols-outlined text-[#446900]">account_balance</span>
+                          <div className="w-10 h-10 rounded-lg bg-[#3C291C]/5 flex items-center justify-center flex-shrink-0">
+                            <span className="material-symbols-outlined text-[#3C291C]">account_balance</span>
                           </div>
                         )}
                         <div>
-                          <p className="font-bold text-sm">{txn.studio}</p>
-                          <p className="text-xs text-[#424937]">{txn.type} {txn.reference}</p>
+                          <p className="font-bold text-sm text-[#3C291C]">{txn.studio}</p>
+                          <p className="text-xs text-[#3C291C]/40">{txn.type} {txn.reference}</p>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 md:px-8 py-5">
-                      <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                        txn.type === 'Booking'
-                          ? 'bg-[#ffe6de] text-[#b4471d]'
-                          : 'bg-[#e4d7fd] text-[#665c7c]'
-                      }`}>
-                        {txn.type}
-                      </span>
+                      <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${txn.type === 'Booking' ? 'bg-[#DB8B8C]/20 text-[#3C291C]' : 'bg-[#91ADCD]/20 text-[#3C291C]'}`}>{txn.type}</span>
                     </td>
                     <td className="px-6 md:px-8 py-5">
                       <div className="flex items-center gap-2 font-bold text-sm">
-                        <span className={`w-2 h-2 rounded-full ${
-                          txn.status === 'Completed' ? 'bg-[#446900]' :
-                          txn.status === 'Processing' ? 'bg-[#424937]' : 'bg-amber-500'
-                        }`}></span>
-                        <span className={txn.status === 'Completed' ? 'text-[#446900]' : 'text-[#424937]'}>
-                          {txn.status}
-                        </span>
+                        <span className={`w-2 h-2 rounded-full ${txn.status === 'Completed' ? 'bg-[#3C291C]' : txn.status === 'Processing' ? 'bg-[#F1CB81]' : 'bg-amber-500'}`}></span>
+                        <span className="text-[#3C291C]">{txn.status}</span>
                       </div>
                     </td>
-                    <td className={`px-6 md:px-8 py-5 text-right font-bold text-sm ${
-                      txn.amount > 0 ? 'text-[#191c1d]' : 'text-[#ba1a1a]'
-                    }`}>
+                    <td className={`px-6 md:px-8 py-5 text-right font-bold text-sm ${txn.amount > 0 ? 'text-[#3C291C]' : 'text-[#DB8B8C]'}`}>
                       {txn.amount > 0 ? '+' : ''}${Math.abs(txn.amount).toLocaleString()}.00
                     </td>
                   </tr>
@@ -284,10 +240,9 @@ export default function EarningsPage() {
               </tbody>
             </table>
           </div>
-          <div className="p-6 md:p-8 bg-[#f3f4f5] flex justify-center">
-            <button className="text-[#446900] font-bold flex items-center gap-2 hover:underline transition-all text-sm">
-              Load More Transactions
-              <span className="material-symbols-outlined">expand_more</span>
+          <div className="p-6 md:p-8 bg-[#3C291C]/5 flex justify-center">
+            <button className="text-[#3C291C] font-bold flex items-center gap-2 hover:underline transition-all text-sm">
+              Load More Transactions <span className="material-symbols-outlined">expand_more</span>
             </button>
           </div>
         </section>
@@ -295,6 +250,305 @@ export default function EarningsPage() {
     </div>
   );
 }
+
+
+// // app/owner/earnings/page.tsx
+// 'use client';
+
+// import { useState } from 'react';
+// import Link from 'next/link';
+// import {
+//   ArrowTrendingUpIcon,
+//   CalendarIcon,
+//   FunnelIcon,
+//   ArrowDownTrayIcon,
+// } from '@heroicons/react/24/outline';
+
+// const MaterialIcon = ({ icon, className = '' }: { icon: string; className?: string }) => (
+//   <span className={`material-symbols-outlined ${className}`}>{icon}</span>
+// );
+
+// interface Transaction {
+//   id: string;
+//   date: string;
+//   studio: string;
+//   image?: string;
+//   reference: string;
+//   type: 'Booking' | 'Payout';
+//   status: 'Completed' | 'Processing' | 'Pending';
+//   amount: number;
+// }
+
+// export default function EarningsPage() {
+//   const [timeframe, setTimeframe] = useState<'6months' | 'year'>('6months');
+
+//   const monthlyData = [
+//     { month: 'JAN', amount: 4200, height: 60 },
+//     { month: 'FEB', amount: 3100, height: 45 },
+//     { month: 'MAR', amount: 6800, height: 85 },
+//     { month: 'APR', amount: 5500, height: 70 },
+//     { month: 'MAY', amount: 4000, height: 55 },
+//     { month: 'JUN', amount: 7200, height: 90 },
+//   ];
+
+//   const [transactions] = useState<Transaction[]>([
+//     {
+//       id: '1',
+//       date: 'Oct 12, 2024',
+//       studio: 'Neon Loft A',
+//       image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuA2OT5WE-Ca1v81hoFresvEphe-opFhsFwrUnzjl9s7mO6sWcdBKinIW47nHnN6iSTzGeKfcEJr_2b6R91fFUwnDMaiuoqVJW9qSyEqAURgMjt7QkH5eGoYKwQ7XLonL5UmghGqiEB4DH9mFvJIS0WnapDsTiNkQKYkDMFHUD4ZlYQZICu08CLh7ezR182dqIA6Qb-i6_sYd3-AS0HLFpz59kpofdL6Q4DQtEoApA1V-kbfuHCXGU1KVjGM4q8Yw4e0V8jFfbza00xs',
+//       reference: '#45922',
+//       type: 'Booking',
+//       status: 'Completed',
+//       amount: 850.00,
+//     },
+//     {
+//       id: '2',
+//       date: 'Oct 10, 2024',
+//       studio: 'Bank Transfer',
+//       reference: 'PAY-9921',
+//       type: 'Payout',
+//       status: 'Processing',
+//       amount: -4200.00,
+//     },
+//     {
+//       id: '3',
+//       date: 'Oct 08, 2024',
+//       studio: 'The Green Screen Suite',
+//       image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCpjX5rJRzNUMgNQxrWfQtv1fOayAPmI8lgl-kHPjLZLLoJjwGMYDlWgEVWmav10Y5jqCqCot0sm6zpZXNER16Q0HRWG3vivhFt2AXdQ7CPzPeE1WWH8gKExltRP2m92nVcMZ5SxciqvtOop8aNJX3ooNZ-XuXP73JVieVIvZV6mG2ibNy8wNR4kIAas34VQ2_wHrq8xZbSOWE5YX_OPq2-2erhO1petCN4geU7w9wx6WEqfwOjkv_QeY6WJRlkGoNHCiURnJ0EsqJm',
+//       reference: '#45910',
+//       type: 'Booking',
+//       status: 'Completed',
+//       amount: 1200.00,
+//     },
+//     {
+//       id: '4',
+//       date: 'Oct 05, 2024',
+//       studio: 'Creative Commons',
+//       image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAjBKCUK_Ds0TtT9QByrsuWY2rLJAv-nILfPNuNIT_pob9DHibpu5hz2h9pYB6Duu5SU-OvIl98qPRngJhk1m4fjY1ToaKgo2APAWitXa7nF7Jm0cVEn2hrZGrwPWAtsF2DlHYDk-EcZTyacxONBvJQkgnMBa54AUV6Q6HPxv1DX8Y-SMkx2prLDPoqAFxjgs6eD-gYQBqG-2ORBcRkNDnLaLWAmjJIkb2xP2eK58M7WahWN8-vjA8ugx2bK9LZXYfz9EdcxsDcwrns',
+//       reference: '#45899',
+//       type: 'Booking',
+//       status: 'Completed',
+//       amount: 450.00,
+//     },
+//   ]);
+
+//   return (
+//     <div className="min-h-screen bg-[#f8f9fa]">
+//       {/* Header */}
+//       <header className="sticky top-16 z-30 bg-white/70 backdrop-blur-xl border-b border-[#c2c9b1]/30 px-4 md:px-8 py-5">
+//         <div className="flex justify-between items-center max-w-[1440px] mx-auto">
+//           <h1 className="text-2xl md:text-3xl font-extrabold text-[#191c1d]">Earnings & Payouts</h1>
+//           <div className="flex items-center gap-3">
+//             <button className="p-2 hover:bg-[#edeeef] rounded-full transition-colors">
+//               <span className="material-symbols-outlined text-[#191c1d]">favorite</span>
+//             </button>
+//             <button className="p-2 hover:bg-[#edeeef] rounded-full transition-colors">
+//               <span className="material-symbols-outlined text-[#191c1d]">account_circle</span>
+//             </button>
+//             <Link
+//               href="/owner/list-new"
+//               className="bg-[#446900] text-white px-6 py-2 rounded-full font-bold text-sm hover:scale-105 transition-transform active:scale-95"
+//             >
+//               List Studio
+//             </Link>
+//           </div>
+//         </div>
+//       </header>
+
+//       <div className="max-w-[1440px] mx-auto px-4 md:px-8 py-8 space-y-8">
+        
+//         {/* Summary Cards */}
+//         <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
+//           {/* Total Earnings */}
+//           <div className="bg-white/80 backdrop-blur-xl border border-white/40 p-8 rounded-[2rem] shadow-lg relative overflow-hidden group">
+//             <div className="absolute -right-4 -top-4 w-32 h-32 bg-[#beff5f]/20 rounded-full blur-3xl group-hover:bg-[#beff5f]/40 transition-colors"></div>
+//             <p className="text-xs font-bold text-[#424937] mb-4 uppercase tracking-widest">Total Earnings</p>
+//             <h2 className="text-4xl md:text-5xl font-extrabold text-[#446900]">$42,850.00</h2>
+//             <div className="mt-6 flex items-center gap-2 text-[#446900] font-bold">
+//               <ArrowTrendingUpIcon className="w-5 h-5" />
+//               <span className="text-sm">+12% from last month</span>
+//             </div>
+//           </div>
+
+//           {/* Pending Payouts */}
+//           <div className="bg-white/80 backdrop-blur-xl border border-white/40 p-8 rounded-[2rem] shadow-lg relative overflow-hidden group">
+//             <div className="absolute -right-4 -top-4 w-32 h-32 bg-[#e4d7fd]/20 rounded-full blur-3xl group-hover:bg-[#e4d7fd]/40 transition-colors"></div>
+//             <p className="text-xs font-bold text-[#424937] mb-4 uppercase tracking-widest">Pending Payouts</p>
+//             <h2 className="text-4xl md:text-5xl font-extrabold text-[#665c7c]">$3,240.50</h2>
+//             <div className="mt-6 text-[#424937] font-medium text-sm">
+//               Expected processing: 2-3 business days
+//             </div>
+//           </div>
+
+//           {/* Next Payout Date */}
+//           <div className="bg-[#beff5f] p-8 rounded-[2rem] shadow-lg relative overflow-hidden group">
+//             <p className="text-xs font-bold text-[#111f00] mb-4 uppercase tracking-widest">Next Payout Date</p>
+//             <h2 className="text-4xl md:text-5xl font-extrabold text-[#111f00]">Oct 24, 2024</h2>
+//             <div className="mt-6 flex items-center gap-2 text-[#111f00] font-bold">
+//               <CalendarIcon className="w-5 h-5" />
+//               <span className="text-sm">Scheduled Automatic Transfer</span>
+//             </div>
+//           </div>
+//         </section>
+
+//         {/* Charts Row */}
+//         <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          
+//           {/* Monthly Revenue Bar Chart */}
+//           <div className="bg-white/80 backdrop-blur-xl border border-white/40 p-8 rounded-[2.5rem] shadow-lg">
+//             <div className="flex justify-between items-center mb-10">
+//               <h3 className="text-2xl font-extrabold text-[#191c1d]">Monthly Revenue</h3>
+//               <div className="flex items-center gap-2">
+//                 <span className="w-3 h-3 bg-[#446900] rounded-full"></span>
+//                 <span className="text-xs font-bold uppercase tracking-widest text-[#424937]">2024 Performance</span>
+//               </div>
+//             </div>
+//             <div className="flex items-end justify-between h-64 gap-2 md:gap-4 px-2">
+//               {monthlyData.map((data) => (
+//                 <div key={data.month} className="flex flex-col items-center flex-1 group cursor-pointer">
+//                   <div className="w-full relative rounded-t-lg transition-all duration-300 hover:opacity-80"
+//                     style={{
+//                       height: `${data.height * 2.5}px`,
+//                       backgroundColor: data.month === 'MAR' || data.month === 'JUN' ? '#446900' : '#edeeef'
+//                     }}
+//                   >
+//                     <div className="absolute -top-8 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-[#2e3132] text-white text-[10px] px-2 py-1 rounded whitespace-nowrap">
+//                       ${data.amount.toLocaleString()}k
+//                     </div>
+//                   </div>
+//                   <span className="mt-4 text-xs font-bold text-[#424937]">{data.month}</span>
+//                 </div>
+//               ))}
+//             </div>
+//           </div>
+
+//           {/* Payout Volume Graph */}
+//           <div className="bg-white/80 backdrop-blur-xl border border-white/40 p-8 rounded-[2.5rem] shadow-lg overflow-hidden relative">
+//             <div className="flex justify-between items-center mb-10">
+//               <h3 className="text-2xl font-extrabold text-[#191c1d]">Payout Volume</h3>
+//               <select
+//                 value={timeframe}
+//                 onChange={(e) => setTimeframe(e.target.value as any)}
+//                 className="bg-[#edeeef] border-none rounded-full px-4 py-2 text-xs font-bold focus:ring-2 focus:ring-[#446900] outline-none"
+//               >
+//                 <option value="6months">Last 6 Months</option>
+//                 <option value="year">Last Year</option>
+//               </select>
+//             </div>
+//             <div className="relative h-64 w-full">
+//               <svg className="w-full h-full" viewBox="0 0 400 150">
+//                 <defs>
+//                   <linearGradient id="lineGrad" x1="0%" x2="0%" y1="0%" y2="100%">
+//                     <stop offset="0%" style={{ stopColor: '#446900', stopOpacity: 0.2 }} />
+//                     <stop offset="100%" style={{ stopColor: '#446900', stopOpacity: 0 }} />
+//                   </linearGradient>
+//                 </defs>
+//                 <path d="M0,130 Q50,110 100,120 T200,60 T300,80 T400,20" fill="transparent" stroke="#446900" strokeLinecap="round" strokeWidth="4" />
+//                 <path d="M0,130 Q50,110 100,120 T200,60 T300,80 T400,20 V150 H0 Z" fill="url(#lineGrad)" />
+//                 <circle cx="100" cy="120" fill="#446900" r="5" />
+//                 <circle cx="200" cy="60" fill="#446900" r="5" />
+//                 <circle cx="300" cy="80" fill="#446900" r="5" />
+//                 <circle cx="400" cy="20" fill="#446900" r="5" />
+//               </svg>
+//               <div className="absolute top-10 right-20 bg-[#2e3132] text-white text-[10px] p-2 rounded-lg shadow-xl">
+//                 Peak Month: $8.4k
+//               </div>
+//             </div>
+//           </div>
+//         </section>
+
+//         {/* Transaction Ledger */}
+//         <section className="bg-white/80 backdrop-blur-xl border border-white/40 rounded-[2.5rem] shadow-lg overflow-hidden">
+//           <div className="p-6 md:p-8 border-b border-[#c2c9b1]/30 flex flex-col md:flex-row md:items-center justify-between gap-4">
+//             <div>
+//               <h3 className="text-2xl font-extrabold text-[#191c1d]">Transaction Ledger</h3>
+//               <p className="text-[#424937] text-sm">Detailed breakdown of all studio bookings and payout events.</p>
+//             </div>
+//             <div className="flex items-center gap-3">
+//               <button className="flex items-center gap-2 px-6 py-2 border-2 border-[#c2c9b1] text-[#191c1d] font-bold rounded-full hover:bg-[#edeeef] transition-all text-sm">
+//                 <FunnelIcon className="w-4 h-4" />
+//                 Filter
+//               </button>
+//               <button className="flex items-center gap-2 px-6 py-2 bg-[#2e3132] text-white font-bold rounded-full hover:scale-105 transition-transform active:scale-95 text-sm">
+//                 <ArrowDownTrayIcon className="w-4 h-4" />
+//                 Export CSV
+//               </button>
+//             </div>
+//           </div>
+//           <div className="overflow-x-auto">
+//             <table className="w-full text-left">
+//               <thead className="bg-[#f3f4f5]">
+//                 <tr>
+//                   <th className="px-6 md:px-8 py-4 text-xs font-bold text-[#424937] uppercase tracking-widest">DATE</th>
+//                   <th className="px-6 md:px-8 py-4 text-xs font-bold text-[#424937] uppercase tracking-widest">STUDIO / ITEM</th>
+//                   <th className="px-6 md:px-8 py-4 text-xs font-bold text-[#424937] uppercase tracking-widest">TYPE</th>
+//                   <th className="px-6 md:px-8 py-4 text-xs font-bold text-[#424937] uppercase tracking-widest">STATUS</th>
+//                   <th className="px-6 md:px-8 py-4 text-xs font-bold text-[#424937] uppercase tracking-widest text-right">AMOUNT</th>
+//                 </tr>
+//               </thead>
+//               <tbody className="divide-y divide-[#c2c9b1]/20">
+//                 {transactions.map((txn) => (
+//                   <tr key={txn.id} className="hover:bg-white/50 transition-colors">
+//                     <td className="px-6 md:px-8 py-5 font-medium text-sm">{txn.date}</td>
+//                     <td className="px-6 md:px-8 py-5">
+//                       <div className="flex items-center gap-3">
+//                         {txn.image ? (
+//                           <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0">
+//                             <img className="w-full h-full object-cover" src={txn.image} alt={txn.studio} />
+//                           </div>
+//                         ) : (
+//                           <div className="w-10 h-10 rounded-lg bg-[#edeeef] flex items-center justify-center flex-shrink-0">
+//                             <span className="material-symbols-outlined text-[#446900]">account_balance</span>
+//                           </div>
+//                         )}
+//                         <div>
+//                           <p className="font-bold text-sm">{txn.studio}</p>
+//                           <p className="text-xs text-[#424937]">{txn.type} {txn.reference}</p>
+//                         </div>
+//                       </div>
+//                     </td>
+//                     <td className="px-6 md:px-8 py-5">
+//                       <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+//                         txn.type === 'Booking'
+//                           ? 'bg-[#ffe6de] text-[#b4471d]'
+//                           : 'bg-[#e4d7fd] text-[#665c7c]'
+//                       }`}>
+//                         {txn.type}
+//                       </span>
+//                     </td>
+//                     <td className="px-6 md:px-8 py-5">
+//                       <div className="flex items-center gap-2 font-bold text-sm">
+//                         <span className={`w-2 h-2 rounded-full ${
+//                           txn.status === 'Completed' ? 'bg-[#446900]' :
+//                           txn.status === 'Processing' ? 'bg-[#424937]' : 'bg-amber-500'
+//                         }`}></span>
+//                         <span className={txn.status === 'Completed' ? 'text-[#446900]' : 'text-[#424937]'}>
+//                           {txn.status}
+//                         </span>
+//                       </div>
+//                     </td>
+//                     <td className={`px-6 md:px-8 py-5 text-right font-bold text-sm ${
+//                       txn.amount > 0 ? 'text-[#191c1d]' : 'text-[#ba1a1a]'
+//                     }`}>
+//                       {txn.amount > 0 ? '+' : ''}${Math.abs(txn.amount).toLocaleString()}.00
+//                     </td>
+//                   </tr>
+//                 ))}
+//               </tbody>
+//             </table>
+//           </div>
+//           <div className="p-6 md:p-8 bg-[#f3f4f5] flex justify-center">
+//             <button className="text-[#446900] font-bold flex items-center gap-2 hover:underline transition-all text-sm">
+//               Load More Transactions
+//               <span className="material-symbols-outlined">expand_more</span>
+//             </button>
+//           </div>
+//         </section>
+//       </div>
+//     </div>
+//   );
+// }
 
 
 // 'use client';

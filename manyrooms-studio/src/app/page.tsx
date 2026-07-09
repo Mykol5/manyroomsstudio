@@ -400,7 +400,7 @@ export default function HomePage() {
               <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 hover:bg-gray-100 rounded-full transition-transform duration-200 hover:rotate-90"><XMarkIcon className="w-6 h-6 text-[#3C291C]" /></button>
             </div>
             <nav className="flex flex-col gap-6">
-              {['Marketplace', 'Studios', 'Spaces', 'Journal', 'Services'].map((item, i) => (
+              {['Marketplace', 'Studios', 'Journal'].map((item, i) => (
                 <Link
                   key={item}
                   href={item === 'Marketplace' ? '/' : `/${item.toLowerCase()}`}

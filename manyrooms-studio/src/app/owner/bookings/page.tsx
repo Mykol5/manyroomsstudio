@@ -1,3 +1,4 @@
+
 // app/owner/bookings/page.tsx
 'use client';
 
@@ -16,6 +17,14 @@ import {
   XCircleIcon,
 } from '@heroicons/react/24/outline';
 import { CheckCircleIcon as CheckCircleSolid } from '@heroicons/react/24/solid';
+
+// Brand Colors
+const brand = {
+  yellow: '#F1CB81',
+  blue: '#91ADCD',
+  brown: '#DB8B8C',
+  dark: '#3C291C',
+};
 
 interface Enquiry {
   id: string;
@@ -114,85 +123,85 @@ export default function OwnerBookingsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#f8f9fa] flex items-center justify-center">
+      <div className="min-h-screen bg-[#FFFBF5] flex items-center justify-center">
         <div className="animate-pulse text-center">
-          <div className="w-12 h-12 bg-[#446900]/20 rounded-full mx-auto mb-3"></div>
-          <p className="text-[#446900] font-bold text-sm">Loading bookings...</p>
+          <div className="w-12 h-12 bg-[#F1CB81]/40 rounded-full mx-auto mb-3"></div>
+          <p className="text-[#3C291C] font-bold text-sm">Loading bookings...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#f8f9fa]">
+    <div className="min-h-screen bg-[#FFFBF5]">
       {showSuccessToast && (
         <div className="fixed bottom-8 right-8 z-50">
-          <div className="bg-[#beff5f] border border-[#446900]/20 rounded-xl px-6 py-4 flex items-center gap-3 shadow-lg">
-            <CheckCircleSolid className="w-5 h-5 text-[#111f00]" />
-            <span className="text-sm font-bold text-[#111f00]">{toastMessage}</span>
+          <div className="bg-[#F1CB81] border border-[#3C291C]/10 rounded-xl px-6 py-4 flex items-center gap-3 shadow-lg">
+            <CheckCircleSolid className="w-5 h-5 text-[#3C291C]" />
+            <span className="text-sm font-bold text-[#3C291C]">{toastMessage}</span>
           </div>
         </div>
       )}
 
       <div className="max-w-[1440px] mx-auto px-4 md:px-6 py-8">
         <div className="mb-8">
-          <h2 className="text-3xl md:text-4xl font-extrabold text-[#191c1d] tracking-tight">Bookings & Schedule</h2>
-          <p className="text-[#424937] text-sm mt-1">Manage your studio bookings and approve requests.</p>
+          <h2 className="text-3xl md:text-4xl font-extrabold text-[#3C291C] tracking-tight">Bookings & Schedule</h2>
+          <p className="text-[#3C291C]/60 text-sm mt-1">Manage your studio bookings and approve requests.</p>
         </div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <div className="bg-white rounded-2xl p-5 shadow-sm border border-[#c2c9b1]/20">
-            <p className="text-xs font-bold text-[#737a65] uppercase tracking-widest mb-2">Total Bookings</p>
-            <p className="text-3xl font-extrabold text-[#191c1d]">{totalBookings}</p>
+          <div className="bg-white rounded-2xl p-5 shadow-sm border border-[#3C291C]/10">
+            <p className="text-xs font-bold text-[#3C291C]/40 uppercase tracking-widest mb-2">Total Bookings</p>
+            <p className="text-3xl font-extrabold text-[#3C291C]">{totalBookings}</p>
           </div>
-          <div className="bg-white rounded-2xl p-5 shadow-sm border border-[#c2c9b1]/20">
-            <p className="text-xs font-bold text-[#737a65] uppercase tracking-widest mb-2">Pending</p>
-            <p className="text-3xl font-extrabold text-amber-600">{pendingEnquiries.length}</p>
+          <div className="bg-white rounded-2xl p-5 shadow-sm border border-[#3C291C]/10">
+            <p className="text-xs font-bold text-[#3C291C]/40 uppercase tracking-widest mb-2">Pending</p>
+            <p className="text-3xl font-extrabold text-[#DB8B8C]">{pendingEnquiries.length}</p>
           </div>
-          <div className="bg-white rounded-2xl p-5 shadow-sm border border-[#c2c9b1]/20">
-            <p className="text-xs font-bold text-[#737a65] uppercase tracking-widest mb-2">Approved</p>
+          <div className="bg-white rounded-2xl p-5 shadow-sm border border-[#3C291C]/10">
+            <p className="text-xs font-bold text-[#3C291C]/40 uppercase tracking-widest mb-2">Approved</p>
             <p className="text-3xl font-extrabold text-green-600">{approvedEnquiries.length}</p>
           </div>
-          <div className="bg-white rounded-2xl p-5 shadow-sm border border-[#c2c9b1]/20">
-            <p className="text-xs font-bold text-[#737a65] uppercase tracking-widest mb-2">Studios</p>
-            <p className="text-3xl font-extrabold text-[#191c1d]">—</p>
+          <div className="bg-white rounded-2xl p-5 shadow-sm border border-[#3C291C]/10">
+            <p className="text-xs font-bold text-[#3C291C]/40 uppercase tracking-widest mb-2">Studios</p>
+            <p className="text-3xl font-extrabold text-[#3C291C]">—</p>
           </div>
         </div>
 
         {/* Pending Requests */}
-        <div className="bg-white rounded-2xl shadow-lg border border-[#c2c9b1]/20 overflow-hidden mb-8">
-          <div className="p-6 border-b border-[#c2c9b1]/20 flex items-center justify-between">
-            <h3 className="text-xl font-extrabold text-[#191c1d]">Pending Requests</h3>
+        <div className="bg-white rounded-2xl shadow-sm border border-[#3C291C]/10 overflow-hidden mb-8">
+          <div className="p-6 border-b border-[#3C291C]/10 flex items-center justify-between">
+            <h3 className="text-xl font-extrabold text-[#3C291C]">Pending Requests</h3>
           </div>
-          <div className="divide-y divide-[#c2c9b1]/10">
+          <div className="divide-y divide-[#3C291C]/5">
             {pendingEnquiries.length === 0 ? (
               <div className="p-8 text-center">
-                <CheckCircleIcon className="w-12 h-12 text-[#c2c9b1] mx-auto mb-3" />
-                <p className="text-[#424937] font-bold">No pending requests</p>
+                <CheckCircleIcon className="w-12 h-12 text-[#3C291C]/20 mx-auto mb-3" />
+                <p className="text-[#3C291C]/60 font-bold">No pending requests</p>
               </div>
             ) : (
               pendingEnquiries.map((enq) => (
-                <div key={enq.id} className="flex flex-col md:flex-row md:items-center justify-between p-5 hover:bg-[#f3f4f5] transition-all gap-4">
+                <div key={enq.id} className="flex flex-col md:flex-row md:items-center justify-between p-5 hover:bg-[#3C291C]/[0.02] transition-all gap-4">
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-[#e4d7fd] flex items-center justify-center">
-                      <UsersIcon className="w-6 h-6 text-[#665c7c]" />
+                    <div className="w-12 h-12 rounded-xl bg-[#91ADCD]/20 flex items-center justify-center">
+                      <UsersIcon className="w-6 h-6 text-[#3C291C]" />
                     </div>
                     <div>
-                      <p className="font-bold text-[#191c1d]">{enq.guest_name}</p>
-                      <p className="text-sm text-[#424937]">{enq.studio_name}</p>
-                      <p className="text-xs text-[#737a65] flex items-center gap-1">
+                      <p className="font-bold text-[#3C291C]">{enq.guest_name}</p>
+                      <p className="text-sm text-[#3C291C]/60">{enq.studio_name}</p>
+                      <p className="text-xs text-[#3C291C]/40 flex items-center gap-1">
                         <ClockIcon className="w-3 h-3" />{enq.event_date} • {enq.guests_count} guests
                       </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-3 ml-16 md:ml-0">
                     <button onClick={() => handleApprove(enq.id)}
-                      className="px-5 py-2.5 bg-[#beff5f] text-[#111f00] rounded-xl font-bold text-sm hover:scale-105 transition-all">
+                      className="px-5 py-2.5 bg-[#F1CB81] text-[#3C291C] rounded-xl font-bold text-sm hover:bg-[#DB8B8C] hover:text-white transition-all">
                       Approve
                     </button>
                     <button onClick={() => handleDecline(enq.id)}
-                      className="px-5 py-2.5 bg-red-50 text-[#ba1a1a] border border-red-200 rounded-xl font-bold text-sm hover:bg-red-100 transition-all">
+                      className="px-5 py-2.5 bg-red-50 text-red-600 border border-red-200 rounded-xl font-bold text-sm hover:bg-red-100 transition-all">
                       Decline
                     </button>
                   </div>
@@ -203,27 +212,27 @@ export default function OwnerBookingsPage() {
         </div>
 
         {/* Approved Bookings */}
-        <div className="bg-white rounded-2xl shadow-lg border border-[#c2c9b1]/20 overflow-hidden">
-          <div className="p-6 border-b border-[#c2c9b1]/20 flex items-center justify-between">
-            <h3 className="text-xl font-extrabold text-[#191c1d]">Approved Bookings</h3>
+        <div className="bg-white rounded-2xl shadow-sm border border-[#3C291C]/10 overflow-hidden">
+          <div className="p-6 border-b border-[#3C291C]/10 flex items-center justify-between">
+            <h3 className="text-xl font-extrabold text-[#3C291C]">Approved Bookings</h3>
           </div>
-          <div className="divide-y divide-[#c2c9b1]/10">
+          <div className="divide-y divide-[#3C291C]/5">
             {approvedEnquiries.length === 0 ? (
               <div className="p-8 text-center">
-                <CheckCircleIcon className="w-12 h-12 text-[#c2c9b1] mx-auto mb-3" />
-                <p className="text-[#424937] font-bold">No approved bookings yet</p>
+                <CheckCircleIcon className="w-12 h-12 text-[#3C291C]/20 mx-auto mb-3" />
+                <p className="text-[#3C291C]/60 font-bold">No approved bookings yet</p>
               </div>
             ) : (
               approvedEnquiries.map((enq) => (
-                <div key={enq.id} className="flex flex-col md:flex-row md:items-center justify-between p-5 hover:bg-[#f3f4f5] transition-all gap-4">
+                <div key={enq.id} className="flex flex-col md:flex-row md:items-center justify-between p-5 hover:bg-[#3C291C]/[0.02] transition-all gap-4">
                   <div className="flex items-center gap-4">
                     <div className="w-12 h-12 rounded-xl bg-green-100 flex items-center justify-center">
                       <CheckCircleIcon className="w-6 h-6 text-green-600" />
                     </div>
                     <div>
-                      <p className="font-bold text-[#191c1d]">{enq.guest_name}</p>
-                      <p className="text-sm text-[#424937]">{enq.studio_name}</p>
-                      <p className="text-xs text-[#737a65] flex items-center gap-1">
+                      <p className="font-bold text-[#3C291C]">{enq.guest_name}</p>
+                      <p className="text-sm text-[#3C291C]/60">{enq.studio_name}</p>
+                      <p className="text-xs text-[#3C291C]/40 flex items-center gap-1">
                         <ClockIcon className="w-3 h-3" />{enq.event_date} • {enq.guests_count} guests
                       </p>
                     </div>
@@ -231,7 +240,7 @@ export default function OwnerBookingsPage() {
                   <div className="flex items-center gap-3 ml-16 md:ml-0">
                     <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold">Approved</span>
                     <Link href={`/owner/messages`}
-                      className="px-4 py-2 bg-[#191c1d] text-white rounded-xl font-bold text-sm hover:bg-[#2e3132] transition-all">
+                      className="px-4 py-2 bg-[#3C291C] text-white rounded-xl font-bold text-sm hover:bg-[#DB8B8C] transition-all">
                       Message
                     </Link>
                   </div>
@@ -244,6 +253,255 @@ export default function OwnerBookingsPage() {
     </div>
   );
 }
+
+
+
+// // app/owner/bookings/page.tsx
+// 'use client';
+
+// import { useState, useEffect } from 'react';
+// import Link from 'next/link';
+// import { useAuth } from '@/context/AuthContext';
+// import { supabase } from '@/lib/supabase';
+// import {
+//   ChevronLeftIcon,
+//   ChevronRightIcon,
+//   CheckCircleIcon,
+//   UsersIcon,
+//   ArrowRightIcon,
+//   StarIcon,
+//   ClockIcon,
+//   XCircleIcon,
+// } from '@heroicons/react/24/outline';
+// import { CheckCircleIcon as CheckCircleSolid } from '@heroicons/react/24/solid';
+
+// interface Enquiry {
+//   id: string;
+//   guest_name: string;
+//   guest_email: string;
+//   guest_phone: string;
+//   event_date: string;
+//   guests_count: number;
+//   brief: string;
+//   status: string;
+//   studio_id: string;
+//   studio_name: string;
+//   studio_image: string;
+//   studio_city: string;
+//   studio_state: string;
+//   created_at: string;
+// }
+
+// export default function OwnerBookingsPage() {
+//   const { user } = useAuth();
+//   const [enquiries, setEnquiries] = useState<Enquiry[]>([]);
+//   const [loading, setLoading] = useState(true);
+//   const [showSuccessToast, setShowSuccessToast] = useState(false);
+//   const [toastMessage, setToastMessage] = useState('');
+
+//   useEffect(() => {
+//     if (user) fetchEnquiries();
+//   }, [user]);
+
+//   const fetchEnquiries = async () => {
+//     try {
+//       const { data: studiosData } = await supabase.from('studios').select('id').eq('owner_id', user?.id);
+//       if (!studiosData || studiosData.length === 0) { setEnquiries([]); setLoading(false); return; }
+
+//       const studioIds = studiosData.map(s => s.id);
+//       const { data, error } = await supabase
+//         .from('enquiries')
+//         .select('*, studios(name, images, city, state)')
+//         .in('studio_id', studioIds)
+//         .order('created_at', { ascending: false });
+
+//       if (error) throw error;
+
+//       const mapped = (data || []).map((enq: any) => ({
+//         id: enq.id,
+//         guest_name: enq.guest_name,
+//         guest_email: enq.guest_email,
+//         guest_phone: enq.guest_phone,
+//         event_date: enq.event_date,
+//         guests_count: enq.guests_count,
+//         brief: enq.brief,
+//         status: enq.status,
+//         studio_id: enq.studio_id,
+//         studio_name: enq.studios?.name || 'Unknown Studio',
+//         studio_image: enq.studios?.images?.[0] || '',
+//         studio_city: enq.studios?.city || '',
+//         studio_state: enq.studios?.state || '',
+//         created_at: enq.created_at,
+//       }));
+
+//       setEnquiries(mapped);
+//     } catch (err) { console.error('Error:', err); } finally { setLoading(false); }
+//   };
+
+//   const handleApprove = async (id: string) => {
+//     await supabase.from('enquiries').update({ status: 'approved' }).eq('id', id);
+//     await supabase.from('messages').insert({
+//       enquiry_id: id,
+//       sender_id: user?.id,
+//       sender_type: 'system',
+//       message: '✅ BOOKING APPROVED: Your enquiry has been approved! The studio is confirmed for your session.',
+//       read: false,
+//       created_at: new Date().toISOString(),
+//     });
+//     setEnquiries(prev => prev.map(e => e.id === id ? { ...e, status: 'approved' } : e));
+//     setToastMessage('Booking approved!'); setShowSuccessToast(true); setTimeout(() => setShowSuccessToast(false), 3000);
+//   };
+
+//   const handleDecline = async (id: string) => {
+//     await supabase.from('enquiries').update({ status: 'declined' }).eq('id', id);
+//     await supabase.from('messages').insert({
+//       enquiry_id: id,
+//       sender_id: user?.id,
+//       sender_type: 'system',
+//       message: '❌ BOOKING DECLINED: Unfortunately your enquiry could not be accommodated.',
+//       read: false,
+//       created_at: new Date().toISOString(),
+//     });
+//     setEnquiries(prev => prev.map(e => e.id === id ? { ...e, status: 'declined' } : e));
+//     setToastMessage('Booking declined.'); setShowSuccessToast(true); setTimeout(() => setShowSuccessToast(false), 3000);
+//   };
+
+//   const pendingEnquiries = enquiries.filter(e => e.status === 'pending');
+//   const approvedEnquiries = enquiries.filter(e => e.status === 'approved');
+//   const totalBookings = enquiries.length;
+
+//   if (loading) {
+//     return (
+//       <div className="min-h-screen bg-[#f8f9fa] flex items-center justify-center">
+//         <div className="animate-pulse text-center">
+//           <div className="w-12 h-12 bg-[#446900]/20 rounded-full mx-auto mb-3"></div>
+//           <p className="text-[#446900] font-bold text-sm">Loading bookings...</p>
+//         </div>
+//       </div>
+//     );
+//   }
+
+//   return (
+//     <div className="min-h-screen bg-[#f8f9fa]">
+//       {showSuccessToast && (
+//         <div className="fixed bottom-8 right-8 z-50">
+//           <div className="bg-[#beff5f] border border-[#446900]/20 rounded-xl px-6 py-4 flex items-center gap-3 shadow-lg">
+//             <CheckCircleSolid className="w-5 h-5 text-[#111f00]" />
+//             <span className="text-sm font-bold text-[#111f00]">{toastMessage}</span>
+//           </div>
+//         </div>
+//       )}
+
+//       <div className="max-w-[1440px] mx-auto px-4 md:px-6 py-8">
+//         <div className="mb-8">
+//           <h2 className="text-3xl md:text-4xl font-extrabold text-[#191c1d] tracking-tight">Bookings & Schedule</h2>
+//           <p className="text-[#424937] text-sm mt-1">Manage your studio bookings and approve requests.</p>
+//         </div>
+
+//         {/* Stats Cards */}
+//         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+//           <div className="bg-white rounded-2xl p-5 shadow-sm border border-[#c2c9b1]/20">
+//             <p className="text-xs font-bold text-[#737a65] uppercase tracking-widest mb-2">Total Bookings</p>
+//             <p className="text-3xl font-extrabold text-[#191c1d]">{totalBookings}</p>
+//           </div>
+//           <div className="bg-white rounded-2xl p-5 shadow-sm border border-[#c2c9b1]/20">
+//             <p className="text-xs font-bold text-[#737a65] uppercase tracking-widest mb-2">Pending</p>
+//             <p className="text-3xl font-extrabold text-amber-600">{pendingEnquiries.length}</p>
+//           </div>
+//           <div className="bg-white rounded-2xl p-5 shadow-sm border border-[#c2c9b1]/20">
+//             <p className="text-xs font-bold text-[#737a65] uppercase tracking-widest mb-2">Approved</p>
+//             <p className="text-3xl font-extrabold text-green-600">{approvedEnquiries.length}</p>
+//           </div>
+//           <div className="bg-white rounded-2xl p-5 shadow-sm border border-[#c2c9b1]/20">
+//             <p className="text-xs font-bold text-[#737a65] uppercase tracking-widest mb-2">Studios</p>
+//             <p className="text-3xl font-extrabold text-[#191c1d]">—</p>
+//           </div>
+//         </div>
+
+//         {/* Pending Requests */}
+//         <div className="bg-white rounded-2xl shadow-lg border border-[#c2c9b1]/20 overflow-hidden mb-8">
+//           <div className="p-6 border-b border-[#c2c9b1]/20 flex items-center justify-between">
+//             <h3 className="text-xl font-extrabold text-[#191c1d]">Pending Requests</h3>
+//           </div>
+//           <div className="divide-y divide-[#c2c9b1]/10">
+//             {pendingEnquiries.length === 0 ? (
+//               <div className="p-8 text-center">
+//                 <CheckCircleIcon className="w-12 h-12 text-[#c2c9b1] mx-auto mb-3" />
+//                 <p className="text-[#424937] font-bold">No pending requests</p>
+//               </div>
+//             ) : (
+//               pendingEnquiries.map((enq) => (
+//                 <div key={enq.id} className="flex flex-col md:flex-row md:items-center justify-between p-5 hover:bg-[#f3f4f5] transition-all gap-4">
+//                   <div className="flex items-center gap-4">
+//                     <div className="w-12 h-12 rounded-xl bg-[#e4d7fd] flex items-center justify-center">
+//                       <UsersIcon className="w-6 h-6 text-[#665c7c]" />
+//                     </div>
+//                     <div>
+//                       <p className="font-bold text-[#191c1d]">{enq.guest_name}</p>
+//                       <p className="text-sm text-[#424937]">{enq.studio_name}</p>
+//                       <p className="text-xs text-[#737a65] flex items-center gap-1">
+//                         <ClockIcon className="w-3 h-3" />{enq.event_date} • {enq.guests_count} guests
+//                       </p>
+//                     </div>
+//                   </div>
+//                   <div className="flex items-center gap-3 ml-16 md:ml-0">
+//                     <button onClick={() => handleApprove(enq.id)}
+//                       className="px-5 py-2.5 bg-[#beff5f] text-[#111f00] rounded-xl font-bold text-sm hover:scale-105 transition-all">
+//                       Approve
+//                     </button>
+//                     <button onClick={() => handleDecline(enq.id)}
+//                       className="px-5 py-2.5 bg-red-50 text-[#ba1a1a] border border-red-200 rounded-xl font-bold text-sm hover:bg-red-100 transition-all">
+//                       Decline
+//                     </button>
+//                   </div>
+//                 </div>
+//               ))
+//             )}
+//           </div>
+//         </div>
+
+//         {/* Approved Bookings */}
+//         <div className="bg-white rounded-2xl shadow-lg border border-[#c2c9b1]/20 overflow-hidden">
+//           <div className="p-6 border-b border-[#c2c9b1]/20 flex items-center justify-between">
+//             <h3 className="text-xl font-extrabold text-[#191c1d]">Approved Bookings</h3>
+//           </div>
+//           <div className="divide-y divide-[#c2c9b1]/10">
+//             {approvedEnquiries.length === 0 ? (
+//               <div className="p-8 text-center">
+//                 <CheckCircleIcon className="w-12 h-12 text-[#c2c9b1] mx-auto mb-3" />
+//                 <p className="text-[#424937] font-bold">No approved bookings yet</p>
+//               </div>
+//             ) : (
+//               approvedEnquiries.map((enq) => (
+//                 <div key={enq.id} className="flex flex-col md:flex-row md:items-center justify-between p-5 hover:bg-[#f3f4f5] transition-all gap-4">
+//                   <div className="flex items-center gap-4">
+//                     <div className="w-12 h-12 rounded-xl bg-green-100 flex items-center justify-center">
+//                       <CheckCircleIcon className="w-6 h-6 text-green-600" />
+//                     </div>
+//                     <div>
+//                       <p className="font-bold text-[#191c1d]">{enq.guest_name}</p>
+//                       <p className="text-sm text-[#424937]">{enq.studio_name}</p>
+//                       <p className="text-xs text-[#737a65] flex items-center gap-1">
+//                         <ClockIcon className="w-3 h-3" />{enq.event_date} • {enq.guests_count} guests
+//                       </p>
+//                     </div>
+//                   </div>
+//                   <div className="flex items-center gap-3 ml-16 md:ml-0">
+//                     <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold">Approved</span>
+//                     <Link href={`/owner/messages`}
+//                       className="px-4 py-2 bg-[#191c1d] text-white rounded-xl font-bold text-sm hover:bg-[#2e3132] transition-all">
+//                       Message
+//                     </Link>
+//                   </div>
+//                 </div>
+//               ))
+//             )}
+//           </div>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// }
 
 
 

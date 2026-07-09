@@ -270,7 +270,7 @@ export default function StudioDetailPage() {
               </span>
             </Link>
             <div className="hidden lg:flex gap-6 items-center">
-              {['Marketplace', 'Studios', 'Spaces', 'Journal', 'Services'].map((item) => (
+              {['Marketplace', 'Studios', 'Journal'].map((item) => (
                 <Link key={item} href={item === 'Marketplace' ? '/' : `/${item.toLowerCase()}`} 
                   className={`py-1 font-bold text-sm transition-colors text-[#3C291C]/70 hover:text-[#3C291C] ${
                     item === 'Studios' ? 'text-[#DB8B8C] border-b-2 border-[#DB8B8C]' : ''

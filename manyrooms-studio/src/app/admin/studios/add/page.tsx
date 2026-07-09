@@ -1,8 +1,288 @@
+// app/admin/studios/add/page.tsx
+'use client';
+
+import { useState, useRef } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { useAuth } from '@/context/AuthContext';
+import { supabase } from '@/lib/supabase';
+import {
+  ArrowLeftIcon,
+  ArrowRightIcon,
+  XMarkIcon,
+  PhotoIcon,
+} from '@heroicons/react/24/outline';
+
+// Brand Colors
+const brand = {
+  yellow: '#F1CB81',
+  blue: '#91ADCD',
+  brown: '#DB8B8C',
+  dark: '#3C291C',
+};
+
+const MaterialIcon = ({ icon, className = '', fill = false }: { icon: string; className?: string; fill?: boolean }) => (
+  <span className={`material-symbols-outlined ${className}`} style={fill ? { fontVariationSettings: "'FILL' 1" } : undefined}>{icon}</span>
+);
+
+export default function AdminAddStudio() {
+  const router = useRouter();
+  const { user } = useAuth();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [currentStep, setCurrentStep] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [formData, setFormData] = useState({
+    studioName: '', ownerEmail: '', category: '', description: '',
+    streetAddress: '', city: '', state: '', postalCode: '', country: 'United States',
+    hourlyRate: '', capacity: '', amenities: [] as string[],
+    images: [] as File[], imagePreviews: [] as string[], status: 'pending',
+  });
+
+  const categories = ['Photography & Stills','Video Production','Audio Recording','Fashion & Editorial','Art Studio','Creative Office','Event Space','Other'];
+  const amenitiesList = ['Natural Light','Studio Lighting Kit','Backdrop Paper','Changing Room','Makeup Station','WiFi','AC/Heating','Parking','Kitchenette','Bluetooth Speakers','Projector','Whiteboard'];
+
+  const handleInputChange = (field: string, value: any) => { setFormData(prev => ({ ...prev, [field]: value })); setError(''); };
+  const handleAmenityToggle = (item: string) => setFormData(prev => ({ ...prev, amenities: prev.amenities.includes(item) ? prev.amenities.filter(a => a !== item) : [...prev.amenities, item] }));
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (formData.images.length + files.length > 10) { setError('Maximum 10 images allowed'); return; }
+    setFormData(prev => ({ ...prev, images: [...prev.images, ...files], imagePreviews: [...prev.imagePreviews, ...files.map(f => URL.createObjectURL(f))] }));
+    setError('');
+  };
+
+  const removeImage = (index: number) => setFormData(prev => ({ ...prev, images: prev.images.filter((_, i) => i !== index), imagePreviews: prev.imagePreviews.filter((_, i) => i !== index) }));
+
+  const handleSubmit = async () => {
+    setLoading(true); setError('');
+    try {
+      let ownerId = null;
+      if (formData.ownerEmail) {
+        const { data: existingUser } = await supabase.from('users').select('id').eq('email', formData.ownerEmail).single();
+        if (existingUser) { ownerId = existingUser.id; }
+        else {
+          const { data: newUser, error: userError } = await supabase.from('users').insert([{ email: formData.ownerEmail, name: formData.ownerEmail.split('@')[0], role: 'owner', created_at: new Date().toISOString() }]).select().single();
+          if (userError) throw userError;
+          ownerId = newUser.id;
+        }
+      }
+      const imageUrls = await Promise.all(formData.images.map(async (image) => { const bytes = await image.arrayBuffer(); return `data:${image.type};base64,${Buffer.from(bytes).toString('base64')}`; }));
+      const { error: studioError } = await supabase.from('studios').insert([{
+        name: formData.studioName, owner_id: ownerId, category: formData.category,
+        capacity: parseInt(formData.capacity) || 0, description: formData.description,
+        street_address: formData.streetAddress, city: formData.city, state: formData.state,
+        postal_code: formData.postalCode, country: formData.country,
+        hourly_rate: parseFloat(formData.hourlyRate) || 0, amenities: formData.amenities,
+        images: imageUrls, status: formData.status, created_at: new Date().toISOString(),
+      }]).select().single();
+      if (studioError) throw studioError;
+      setSuccess(`Studio "${formData.studioName}" created successfully!`);
+      setTimeout(() => router.push('/admin/studios'), 2000);
+    } catch (err: any) { setError(err.message || 'Failed to create studio'); }
+    finally { setLoading(false); }
+  };
+
+  const steps = [
+    { number: 1, label: 'Basic Info', icon: 'info' },
+    { number: 2, label: 'Location', icon: 'location_on' },
+    { number: 3, label: 'Pricing & Details', icon: 'payments' },
+    { number: 4, label: 'Media & Review', icon: 'photo_library' },
+  ];
+
+  const isStepValid = () => {
+    if (currentStep === 1) return formData.studioName && formData.ownerEmail && formData.category;
+    if (currentStep === 2) return formData.streetAddress && formData.city && formData.state;
+    if (currentStep === 3) return formData.hourlyRate && formData.capacity;
+    return true;
+  };
+
+  const handleNext = () => {
+    if (currentStep < 4 && isStepValid()) { setCurrentStep(currentStep + 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+    else if (currentStep === 4) handleSubmit();
+  };
+
+  const handleBack = () => {
+    if (currentStep > 1) { setCurrentStep(currentStep - 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+    else router.push('/admin/studios');
+  };
+
+  return (
+    <div className="min-h-screen bg-[#FFFBF5] p-4 md:p-8">
+      <div className="max-w-4xl mx-auto">
+        
+        {/* Header */}
+        <div className="mb-8">
+          <Link href="/admin/studios" className="inline-flex items-center gap-2 text-[#3C291C]/40 hover:text-[#3C291C] mb-4 transition-colors font-bold text-sm">
+            <ArrowLeftIcon className="w-4 h-4" /> Back to Studios
+          </Link>
+          <h1 className="text-3xl font-extrabold text-[#3C291C] tracking-tight">Add New Studio</h1>
+          <p className="text-[#3C291C]/60 text-sm mt-1">Create a new studio listing on the ManyRooms platform.</p>
+        </div>
+
+        {/* Messages */}
+        {success && <div className="mb-6 p-4 bg-[#F1CB81]/20 border border-[#F1CB81]/30 rounded-xl"><p className="text-[#3C291C] text-sm font-bold">{success}</p></div>}
+        {error && <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl"><p className="text-red-600 text-sm">{error}</p></div>}
+
+        {/* Step Indicator */}
+        <div className="mb-10">
+          <div className="flex items-center justify-between">
+            {steps.map((step, idx) => (
+              <div key={step.number} className="flex items-center flex-1">
+                <div className="flex flex-col items-center">
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${currentStep >= step.number ? 'bg-[#F1CB81] text-[#3C291C]' : 'bg-[#3C291C]/5 text-[#3C291C]/30'}`}>
+                    {currentStep > step.number ? <MaterialIcon icon="check" className="text-lg" /> : <MaterialIcon icon={step.icon} className="text-lg" />}
+                  </div>
+                  <span className={`text-[10px] font-bold uppercase tracking-widest mt-2 ${currentStep >= step.number ? 'text-[#3C291C]' : 'text-[#3C291C]/30'}`}>{step.label}</span>
+                </div>
+                {idx < steps.length - 1 && <div className={`flex-1 h-px mx-4 ${currentStep > step.number ? 'bg-[#F1CB81]' : 'bg-[#3C291C]/10'}`} />}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Form */}
+        <div className="bg-white rounded-2xl border border-[#3C291C]/10 shadow-sm p-8">
+          
+          {currentStep === 1 && (
+            <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-bold text-[#3C291C] mb-2">Studio Name *</label>
+                <input type="text" value={formData.studioName} onChange={(e) => handleInputChange('studioName', e.target.value)} placeholder="e.g., Sunset Sound Studio"
+                  className="w-full rounded-xl border border-[#3C291C]/10 bg-[#3C291C]/5 px-4 py-3 text-sm focus:border-[#F1CB81] focus:ring-[#F1CB81] outline-none text-[#3C291C] placeholder:text-[#3C291C]/30" />
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-[#3C291C] mb-2">Owner Email *</label>
+                <input type="email" value={formData.ownerEmail} onChange={(e) => handleInputChange('ownerEmail', e.target.value)} placeholder="owner@example.com"
+                  className="w-full rounded-xl border border-[#3C291C]/10 bg-[#3C291C]/5 px-4 py-3 text-sm focus:border-[#F1CB81] focus:ring-[#F1CB81] outline-none text-[#3C291C] placeholder:text-[#3C291C]/30" />
+                <p className="text-xs text-[#3C291C]/40 mt-1">If owner doesn't exist, an account will be created.</p>
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-[#3C291C] mb-2">Category *</label>
+                <select value={formData.category} onChange={(e) => handleInputChange('category', e.target.value)}
+                  className="w-full rounded-xl border border-[#3C291C]/10 bg-[#3C291C]/5 px-4 py-3 text-sm focus:border-[#F1CB81] outline-none text-[#3C291C]">
+                  <option value="">Select a category</option>
+                  {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-[#3C291C] mb-2">Description</label>
+                <textarea value={formData.description} onChange={(e) => handleInputChange('description', e.target.value)} rows={4} placeholder="Describe the studio..."
+                  className="w-full rounded-xl border border-[#3C291C]/10 bg-[#3C291C]/5 px-4 py-3 text-sm focus:border-[#F1CB81] focus:ring-[#F1CB81] outline-none resize-none text-[#3C291C] placeholder:text-[#3C291C]/30" />
+              </div>
+            </div>
+          )}
+
+          {currentStep === 2 && (
+            <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-bold text-[#3C291C] mb-2">Street Address *</label>
+                <input type="text" value={formData.streetAddress} onChange={(e) => handleInputChange('streetAddress', e.target.value)} placeholder="123 Main St"
+                  className="w-full rounded-xl border border-[#3C291C]/10 bg-[#3C291C]/5 px-4 py-3 text-sm focus:border-[#F1CB81] outline-none text-[#3C291C] placeholder:text-[#3C291C]/30" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div><label className="block text-sm font-bold text-[#3C291C] mb-2">City *</label><input type="text" value={formData.city} onChange={(e) => handleInputChange('city', e.target.value)} placeholder="Los Angeles" className="w-full rounded-xl border border-[#3C291C]/10 bg-[#3C291C]/5 px-4 py-3 text-sm focus:border-[#F1CB81] outline-none text-[#3C291C] placeholder:text-[#3C291C]/30" /></div>
+                <div><label className="block text-sm font-bold text-[#3C291C] mb-2">State *</label><input type="text" value={formData.state} onChange={(e) => handleInputChange('state', e.target.value)} placeholder="California" className="w-full rounded-xl border border-[#3C291C]/10 bg-[#3C291C]/5 px-4 py-3 text-sm focus:border-[#F1CB81] outline-none text-[#3C291C] placeholder:text-[#3C291C]/30" /></div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div><label className="block text-sm font-bold text-[#3C291C] mb-2">Postal Code *</label><input type="text" value={formData.postalCode} onChange={(e) => handleInputChange('postalCode', e.target.value)} placeholder="90001" className="w-full rounded-xl border border-[#3C291C]/10 bg-[#3C291C]/5 px-4 py-3 text-sm focus:border-[#F1CB81] outline-none text-[#3C291C] placeholder:text-[#3C291C]/30" /></div>
+                <div><label className="block text-sm font-bold text-[#3C291C] mb-2">Country</label><input type="text" value={formData.country} onChange={(e) => handleInputChange('country', e.target.value)} className="w-full rounded-xl border border-[#3C291C]/10 bg-[#3C291C]/5 px-4 py-3 text-sm focus:border-[#F1CB81] outline-none text-[#3C291C] placeholder:text-[#3C291C]/30" /></div>
+              </div>
+            </div>
+          )}
+
+          {currentStep === 3 && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-2 gap-4">
+                <div><label className="block text-sm font-bold text-[#3C291C] mb-2">Hourly Rate ($) *</label><input type="number" value={formData.hourlyRate} onChange={(e) => handleInputChange('hourlyRate', e.target.value)} placeholder="120" className="w-full rounded-xl border border-[#3C291C]/10 bg-[#3C291C]/5 px-4 py-3 text-sm focus:border-[#F1CB81] outline-none text-[#3C291C] placeholder:text-[#3C291C]/30" /></div>
+                <div><label className="block text-sm font-bold text-[#3C291C] mb-2">Max Capacity *</label><input type="number" value={formData.capacity} onChange={(e) => handleInputChange('capacity', e.target.value)} placeholder="12" className="w-full rounded-xl border border-[#3C291C]/10 bg-[#3C291C]/5 px-4 py-3 text-sm focus:border-[#F1CB81] outline-none text-[#3C291C] placeholder:text-[#3C291C]/30" /></div>
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-[#3C291C] mb-3">Amenities</label>
+                <div className="grid grid-cols-2 gap-3">
+                  {amenitiesList.map((item) => (
+                    <label key={item} className="flex items-center gap-2 cursor-pointer">
+                      <input type="checkbox" checked={formData.amenities.includes(item)} onChange={() => handleAmenityToggle(item)} className="w-4 h-4 text-[#F1CB81] rounded border-[#3C291C]/20 focus:ring-[#F1CB81]" />
+                      <span className="text-sm text-[#3C291C]">{item}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-[#3C291C] mb-2">Status</label>
+                <select value={formData.status} onChange={(e) => handleInputChange('status', e.target.value)}
+                  className="w-full rounded-xl border border-[#3C291C]/10 bg-[#3C291C]/5 px-4 py-3 text-sm focus:border-[#F1CB81] outline-none text-[#3C291C]">
+                  <option value="pending">Pending Review</option>
+                  <option value="approved">Approved (Immediately Live)</option>
+                </select>
+              </div>
+            </div>
+          )}
+
+          {currentStep === 4 && (
+            <div className="space-y-6">
+              <div>
+                <label className="block text-sm font-bold text-[#3C291C] mb-4">Studio Photos * (Minimum 1)</label>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {formData.imagePreviews.map((preview, index) => (
+                    <div key={index} className="relative aspect-square rounded-xl overflow-hidden bg-[#3C291C]/5">
+                      <img src={preview} alt={`Preview ${index + 1}`} className="w-full h-full object-cover" />
+                      <button type="button" onClick={() => removeImage(index)} className="absolute top-2 right-2 p-1 bg-red-500 rounded-lg text-white hover:bg-red-600 transition-colors"><XMarkIcon className="w-4 h-4" /></button>
+                    </div>
+                  ))}
+                  {formData.images.length < 10 && (
+                    <button type="button" onClick={() => fileInputRef.current?.click()}
+                      className="aspect-square rounded-xl bg-[#3C291C]/5 border-2 border-dashed border-[#3C291C]/20 hover:border-[#F1CB81] transition-colors flex flex-col items-center justify-center gap-2">
+                      <PhotoIcon className="w-8 h-8 text-[#3C291C]/30" />
+                      <span className="text-xs text-[#3C291C]/40">Upload Photo</span>
+                    </button>
+                  )}
+                </div>
+                <input ref={fileInputRef} type="file" accept="image/*" multiple onChange={handleImageUpload} className="hidden" />
+                <p className="text-xs text-[#3C291C]/40 mt-3">Upload up to 10 photos. First photo will be the cover image.</p>
+              </div>
+              <div className="bg-[#3C291C]/5 rounded-xl p-6">
+                <h3 className="font-extrabold text-[#3C291C] mb-4">Review Summary</h3>
+                <div className="space-y-3 text-sm">
+                  {[['Studio Name', formData.studioName], ['Owner Email', formData.ownerEmail], ['Category', formData.category], ['Location', `${formData.city}, ${formData.state}`], ['Hourly Rate', `$${formData.hourlyRate || '0'}/hr`], ['Capacity', `${formData.capacity || '0'} persons`], ['Photos', `${formData.images.length} uploaded`]].map(([label, value]) => (
+                    <div key={label} className="flex justify-between"><span className="text-[#3C291C]/40">{label}</span><span className="font-medium text-[#3C291C]">{value || '—'}</span></div>
+                  ))}
+                  <div className="flex justify-between">
+                    <span className="text-[#3C291C]/40">Status</span>
+                    <span className={`font-bold ${formData.status === 'approved' ? 'text-green-600' : 'text-amber-600'}`}>{formData.status === 'approved' ? 'Approved' : 'Pending Review'}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Navigation */}
+          <div className="flex items-center justify-between mt-8 pt-6 border-t border-[#3C291C]/10">
+            <button onClick={handleBack} className="flex items-center gap-2 px-6 py-3 border border-[#3C291C]/10 rounded-xl text-sm font-bold text-[#3C291C] hover:bg-[#3C291C]/5 transition-colors">
+              <ArrowLeftIcon className="w-4 h-4" /> {currentStep === 1 ? 'Cancel' : 'Back'}
+            </button>
+            <button onClick={handleNext} disabled={!isStepValid() || loading}
+              className="flex items-center gap-2 px-6 py-3 bg-[#F1CB81] text-[#3C291C] rounded-xl text-sm font-bold hover:bg-[#DB8B8C] hover:text-white transition-all disabled:opacity-50">
+              {loading ? 'Creating...' : (currentStep === 4 ? 'Create Studio' : 'Continue')} <ArrowRightIcon className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+
+
 // 'use client';
 
-// import { useState } from 'react';
+// import { useState, useRef } from 'react';
 // import { useRouter } from 'next/navigation';
 // import Link from 'next/link';
+// import { useAuth } from '@/context/AuthContext';
+// import { supabase } from '@/lib/supabase';
 // import {
 //   ArrowLeftIcon,
 //   ArrowRightIcon,
@@ -23,10 +303,14 @@
 
 // export default function AdminAddStudio() {
 //   const router = useRouter();
+//   const { user } = useAuth();
+//   const fileInputRef = useRef<HTMLInputElement>(null);
 //   const [currentStep, setCurrentStep] = useState(1);
+//   const [loading, setLoading] = useState(false);
+//   const [error, setError] = useState('');
+//   const [success, setSuccess] = useState('');
 //   const [formData, setFormData] = useState({
 //     studioName: '',
-//     ownerName: '',
 //     ownerEmail: '',
 //     category: '',
 //     description: '',
@@ -37,51 +321,161 @@
 //     country: 'United States',
 //     hourlyRate: '',
 //     capacity: '',
-//     equipment: [] as string[],
+//     amenities: [] as string[],
 //     images: [] as File[],
+//     imagePreviews: [] as string[],
 //     status: 'pending',
 //   });
 
 //   const categories = [
-//     'Photography Studio',
-//     'Recording Studio',
+//     'Photography & Stills',
 //     'Video Production',
-//     'Rehearsal Space',
+//     'Audio Recording',
+//     'Fashion & Editorial',
 //     'Art Studio',
-//     'Creative Workspace',
-//     'Podcast Suite',
+//     'Creative Office',
+//     'Event Space',
 //     'Other',
 //   ];
 
-//   const equipmentList = [
-//     'Professional Lighting',
-//     'Backdrop System',
-//     'Audio Interface',
-//     'Studio Monitors',
-//     'Microphones',
-//     'Mixing Console',
-//     'Green Screen',
-//     'Camera Equipment',
-//     'Props & Sets',
+//   const amenitiesList = [
+//     'Natural Light',
+//     'Studio Lighting Kit',
+//     'Backdrop Paper',
+//     'Changing Room',
 //     'Makeup Station',
+//     'WiFi',
+//     'AC/Heating',
+//     'Parking',
+//     'Kitchenette',
+//     'Bluetooth Speakers',
+//     'Projector',
+//     'Whiteboard',
 //   ];
 
 //   const handleInputChange = (field: string, value: any) => {
 //     setFormData(prev => ({ ...prev, [field]: value }));
+//     setError('');
 //   };
 
-//   const handleEquipmentToggle = (item: string) => {
+//   const handleAmenityToggle = (item: string) => {
 //     setFormData(prev => ({
 //       ...prev,
-//       equipment: prev.equipment.includes(item)
-//         ? prev.equipment.filter(e => e !== item)
-//         : [...prev.equipment, item],
+//       amenities: prev.amenities.includes(item)
+//         ? prev.amenities.filter(a => a !== item)
+//         : [...prev.amenities, item],
 //     }));
 //   };
 
-//   const handleSubmit = () => {
-//     alert('Studio added successfully!');
-//     router.push('/admin/studios');
+//   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+//     const files = Array.from(e.target.files || []);
+//     const newImages = [...formData.images, ...files];
+    
+//     if (newImages.length > 10) {
+//       setError('Maximum 10 images allowed');
+//       return;
+//     }
+
+//     const newPreviews = files.map(file => URL.createObjectURL(file));
+    
+//     setFormData(prev => ({
+//       ...prev,
+//       images: newImages,
+//       imagePreviews: [...prev.imagePreviews, ...newPreviews],
+//     }));
+//     setError('');
+//   };
+
+//   const removeImage = (index: number) => {
+//     setFormData(prev => ({
+//       ...prev,
+//       images: prev.images.filter((_, i) => i !== index),
+//       imagePreviews: prev.imagePreviews.filter((_, i) => i !== index),
+//     }));
+//   };
+
+//   const handleSubmit = async () => {
+//     setLoading(true);
+//     setError('');
+    
+//     try {
+//       // First, find or create the owner
+//       let ownerId = null;
+      
+//       if (formData.ownerEmail) {
+//         const { data: existingUser } = await supabase
+//           .from('users')
+//           .select('id')
+//           .eq('email', formData.ownerEmail)
+//           .single();
+        
+//         if (existingUser) {
+//           ownerId = existingUser.id;
+//         } else {
+//           // Create a placeholder user (you might want to send an invite email)
+//           const { data: newUser, error: userError } = await supabase
+//             .from('users')
+//             .insert([{
+//               email: formData.ownerEmail,
+//               name: formData.ownerEmail.split('@')[0],
+//               role: 'owner',
+//               created_at: new Date().toISOString(),
+//             }])
+//             .select()
+//             .single();
+          
+//           if (userError) throw userError;
+//           ownerId = newUser.id;
+//         }
+//       }
+
+//       // Process images to base64
+//       const imageBase64Promises = formData.images.map(async (image) => {
+//         const bytes = await image.arrayBuffer();
+//         const buffer = Buffer.from(bytes);
+//         const base64 = buffer.toString('base64');
+//         const mimeType = image.type;
+//         return `data:${mimeType};base64,${base64}`;
+//       });
+      
+//       const imageUrls = await Promise.all(imageBase64Promises);
+
+//       // Create studio
+//       const { data: studio, error: studioError } = await supabase
+//         .from('studios')
+//         .insert([{
+//           name: formData.studioName,
+//           owner_id: ownerId,
+//           category: formData.category,
+//           capacity: parseInt(formData.capacity) || 0,
+//           description: formData.description,
+//           street_address: formData.streetAddress,
+//           city: formData.city,
+//           state: formData.state,
+//           postal_code: formData.postalCode,
+//           country: formData.country,
+//           hourly_rate: parseFloat(formData.hourlyRate) || 0,
+//           amenities: formData.amenities,
+//           images: imageUrls,
+//           status: formData.status,
+//           created_at: new Date().toISOString(),
+//         }])
+//         .select()
+//         .single();
+
+//       if (studioError) throw studioError;
+
+//       setSuccess(`Studio "${formData.studioName}" created successfully!`);
+//       setTimeout(() => {
+//         router.push('/admin/studios');
+//       }, 2000);
+      
+//     } catch (err: any) {
+//       console.error('Error creating studio:', err);
+//       setError(err.message || 'Failed to create studio');
+//     } finally {
+//       setLoading(false);
+//     }
 //   };
 
 //   const steps = [
@@ -93,7 +487,7 @@
 
 //   const isStepValid = () => {
 //     if (currentStep === 1) {
-//       return formData.studioName && formData.ownerName && formData.ownerEmail && formData.category;
+//       return formData.studioName && formData.ownerEmail && formData.category;
 //     }
 //     if (currentStep === 2) {
 //       return formData.streetAddress && formData.city && formData.state && formData.postalCode;
@@ -134,6 +528,18 @@
 //           <h1 className="text-3xl font-black tracking-tight text-slate-900 dark:text-white">Add New Studio</h1>
 //           <p className="text-slate-500 dark:text-slate-400 mt-1">Create a new studio listing on the ManyRooms platform.</p>
 //         </div>
+
+//         {/* Success/Error Messages */}
+//         {success && (
+//           <div className="mb-6 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
+//             <p className="text-emerald-500 text-sm">{success}</p>
+//           </div>
+//         )}
+//         {error && (
+//           <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
+//             <p className="text-red-500 text-sm">{error}</p>
+//           </div>
+//         )}
 
 //         {/* Step Indicator */}
 //         <div className="mb-10">
@@ -179,27 +585,16 @@
 //                   className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-3 text-sm focus:border-primary focus:ring-primary outline-none"
 //                 />
 //               </div>
-//               <div className="grid grid-cols-2 gap-4">
-//                 <div>
-//                   <label className="block text-sm font-bold mb-2">Owner Name *</label>
-//                   <input
-//                     type="text"
-//                     value={formData.ownerName}
-//                     onChange={(e) => handleInputChange('ownerName', e.target.value)}
-//                     placeholder="Full name"
-//                     className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-3 text-sm focus:border-primary focus:ring-primary outline-none"
-//                   />
-//                 </div>
-//                 <div>
-//                   <label className="block text-sm font-bold mb-2">Owner Email *</label>
-//                   <input
-//                     type="email"
-//                     value={formData.ownerEmail}
-//                     onChange={(e) => handleInputChange('ownerEmail', e.target.value)}
-//                     placeholder="owner@example.com"
-//                     className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-3 text-sm focus:border-primary focus:ring-primary outline-none"
-//                   />
-//                 </div>
+//               <div>
+//                 <label className="block text-sm font-bold mb-2">Owner Email *</label>
+//                 <input
+//                   type="email"
+//                   value={formData.ownerEmail}
+//                   onChange={(e) => handleInputChange('ownerEmail', e.target.value)}
+//                   placeholder="owner@example.com"
+//                   className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-3 text-sm focus:border-primary focus:ring-primary outline-none"
+//                 />
+//                 <p className="text-xs text-slate-500 mt-1">If owner doesn't exist, an account will be created for them.</p>
 //               </div>
 //               <div>
 //                 <label className="block text-sm font-bold mb-2">Category *</label>
@@ -312,14 +707,14 @@
 //                 </div>
 //               </div>
 //               <div>
-//                 <label className="block text-sm font-bold mb-3">Equipment & Amenities</label>
+//                 <label className="block text-sm font-bold mb-3">Amenities</label>
 //                 <div className="grid grid-cols-2 gap-3">
-//                   {equipmentList.map((item) => (
+//                   {amenitiesList.map((item) => (
 //                     <label key={item} className="flex items-center gap-2 cursor-pointer">
 //                       <input
 //                         type="checkbox"
-//                         checked={formData.equipment.includes(item)}
-//                         onChange={() => handleEquipmentToggle(item)}
+//                         checked={formData.amenities.includes(item)}
+//                         onChange={() => handleAmenityToggle(item)}
 //                         className="w-4 h-4 text-primary rounded border-slate-300 focus:ring-primary"
 //                       />
 //                       <span className="text-sm">{item}</span>
@@ -335,7 +730,7 @@
 //                   className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-3 text-sm focus:border-primary focus:ring-primary outline-none"
 //                 >
 //                   <option value="pending">Pending Review</option>
-//                   <option value="active">Active (Immediately Live)</option>
+//                   <option value="approved">Approved (Immediately Live)</option>
 //                 </select>
 //               </div>
 //             </div>
@@ -345,22 +740,52 @@
 //           {currentStep === 4 && (
 //             <div className="space-y-6">
 //               <div>
-//                 <label className="block text-sm font-bold mb-2">Studio Photos</label>
-//                 <div className="border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-lg p-8 text-center">
-//                   <PhotoIcon className="w-12 h-12 text-slate-400 mx-auto mb-4" />
-//                   <p className="text-sm text-slate-500 mb-2">Drag and drop photos here, or click to select</p>
-//                   <p className="text-xs text-slate-400">Upload up to 10 photos (JPG, PNG, WEBP)</p>
-//                   <button className="mt-4 px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors">
-//                     Select Images
-//                   </button>
+//                 <label className="block text-sm font-bold mb-4">Studio Photos * (Minimum 1)</label>
+//                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+//                   {formData.imagePreviews.map((preview, index) => (
+//                     <div key={index} className="relative aspect-square rounded-lg overflow-hidden bg-white/5 border border-white/10">
+//                       <img src={preview} alt={`Preview ${index + 1}`} className="w-full h-full object-cover" />
+//                       <button
+//                         type="button"
+//                         onClick={() => removeImage(index)}
+//                         className="absolute top-2 right-2 p-1 bg-red-500 rounded-full text-white hover:bg-red-600 transition-colors"
+//                       >
+//                         <XMarkIcon className="w-4 h-4" />
+//                       </button>
+//                     </div>
+//                   ))}
+//                   {formData.images.length < 10 && (
+//                     <button
+//                       type="button"
+//                       onClick={() => fileInputRef.current?.click()}
+//                       className="aspect-square rounded-lg bg-white/5 border-2 border-dashed border-white/10 hover:border-primary/50 transition-colors flex flex-col items-center justify-center gap-2"
+//                     >
+//                       <PhotoIcon className="w-8 h-8 text-slate-400" />
+//                       <span className="text-xs text-slate-400">Upload Photo</span>
+//                     </button>
+//                   )}
 //                 </div>
+//                 <input
+//                   ref={fileInputRef}
+//                   type="file"
+//                   accept="image/*"
+//                   multiple
+//                   onChange={handleImageUpload}
+//                   className="hidden"
+//                 />
+//                 <p className="text-xs text-slate-500 mt-3">Upload up to 10 photos. First photo will be the cover image.</p>
 //               </div>
+              
 //               <div className="bg-slate-50 dark:bg-slate-800 rounded-lg p-6">
 //                 <h3 className="font-bold mb-4">Review Summary</h3>
 //                 <div className="space-y-3 text-sm">
 //                   <div className="flex justify-between">
 //                     <span className="text-slate-500">Studio Name:</span>
 //                     <span className="font-medium">{formData.studioName || '—'}</span>
+//                   </div>
+//                   <div className="flex justify-between">
+//                     <span className="text-slate-500">Owner Email:</span>
+//                     <span className="font-medium">{formData.ownerEmail || '—'}</span>
 //                   </div>
 //                   <div className="flex justify-between">
 //                     <span className="text-slate-500">Category:</span>
@@ -380,9 +805,13 @@
 //                   </div>
 //                   <div className="flex justify-between">
 //                     <span className="text-slate-500">Status:</span>
-//                     <span className={`font-medium ${formData.status === 'active' ? 'text-emerald-500' : 'text-amber-500'}`}>
-//                       {formData.status === 'active' ? 'Active' : 'Pending Review'}
+//                     <span className={`font-medium ${formData.status === 'approved' ? 'text-emerald-500' : 'text-amber-500'}`}>
+//                       {formData.status === 'approved' ? 'Approved' : 'Pending Review'}
 //                     </span>
+//                   </div>
+//                   <div className="flex justify-between">
+//                     <span className="text-slate-500">Photos:</span>
+//                     <span className="font-medium">{formData.images.length} uploaded</span>
 //                   </div>
 //                 </div>
 //               </div>
@@ -400,10 +829,10 @@
 //             </button>
 //             <button
 //               onClick={handleNext}
-//               disabled={!isStepValid()}
+//               disabled={!isStepValid() || loading}
 //               className="flex items-center gap-2 px-6 py-2.5 bg-primary text-white rounded-lg text-sm font-bold hover:bg-primary/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
 //             >
-//               {currentStep === 4 ? 'Create Studio' : 'Continue'}
+//               {loading ? 'Creating...' : (currentStep === 4 ? 'Create Studio' : 'Continue')}
 //               <ArrowRightIcon className="w-4 h-4" />
 //             </button>
 //           </div>
@@ -412,572 +841,3 @@
 //     </div>
 //   );
 // }
-
-
-
-
-'use client';
-
-import { useState, useRef } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { useAuth } from '@/context/AuthContext';
-import { supabase } from '@/lib/supabase';
-import {
-  ArrowLeftIcon,
-  ArrowRightIcon,
-  PlusIcon,
-  XMarkIcon,
-  PhotoIcon,
-} from '@heroicons/react/24/outline';
-
-// Material Icon component
-const MaterialIcon = ({ icon, className = '', fill = false }: { icon: string; className?: string; fill?: boolean }) => (
-  <span 
-    className={`material-symbols-outlined ${className}`} 
-    style={fill ? { fontVariationSettings: "'FILL' 1" } : undefined}
-  >
-    {icon}
-  </span>
-);
-
-export default function AdminAddStudio() {
-  const router = useRouter();
-  const { user } = useAuth();
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [currentStep, setCurrentStep] = useState(1);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
-  const [formData, setFormData] = useState({
-    studioName: '',
-    ownerEmail: '',
-    category: '',
-    description: '',
-    streetAddress: '',
-    city: '',
-    state: '',
-    postalCode: '',
-    country: 'United States',
-    hourlyRate: '',
-    capacity: '',
-    amenities: [] as string[],
-    images: [] as File[],
-    imagePreviews: [] as string[],
-    status: 'pending',
-  });
-
-  const categories = [
-    'Photography & Stills',
-    'Video Production',
-    'Audio Recording',
-    'Fashion & Editorial',
-    'Art Studio',
-    'Creative Office',
-    'Event Space',
-    'Other',
-  ];
-
-  const amenitiesList = [
-    'Natural Light',
-    'Studio Lighting Kit',
-    'Backdrop Paper',
-    'Changing Room',
-    'Makeup Station',
-    'WiFi',
-    'AC/Heating',
-    'Parking',
-    'Kitchenette',
-    'Bluetooth Speakers',
-    'Projector',
-    'Whiteboard',
-  ];
-
-  const handleInputChange = (field: string, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-    setError('');
-  };
-
-  const handleAmenityToggle = (item: string) => {
-    setFormData(prev => ({
-      ...prev,
-      amenities: prev.amenities.includes(item)
-        ? prev.amenities.filter(a => a !== item)
-        : [...prev.amenities, item],
-    }));
-  };
-
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    const newImages = [...formData.images, ...files];
-    
-    if (newImages.length > 10) {
-      setError('Maximum 10 images allowed');
-      return;
-    }
-
-    const newPreviews = files.map(file => URL.createObjectURL(file));
-    
-    setFormData(prev => ({
-      ...prev,
-      images: newImages,
-      imagePreviews: [...prev.imagePreviews, ...newPreviews],
-    }));
-    setError('');
-  };
-
-  const removeImage = (index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      images: prev.images.filter((_, i) => i !== index),
-      imagePreviews: prev.imagePreviews.filter((_, i) => i !== index),
-    }));
-  };
-
-  const handleSubmit = async () => {
-    setLoading(true);
-    setError('');
-    
-    try {
-      // First, find or create the owner
-      let ownerId = null;
-      
-      if (formData.ownerEmail) {
-        const { data: existingUser } = await supabase
-          .from('users')
-          .select('id')
-          .eq('email', formData.ownerEmail)
-          .single();
-        
-        if (existingUser) {
-          ownerId = existingUser.id;
-        } else {
-          // Create a placeholder user (you might want to send an invite email)
-          const { data: newUser, error: userError } = await supabase
-            .from('users')
-            .insert([{
-              email: formData.ownerEmail,
-              name: formData.ownerEmail.split('@')[0],
-              role: 'owner',
-              created_at: new Date().toISOString(),
-            }])
-            .select()
-            .single();
-          
-          if (userError) throw userError;
-          ownerId = newUser.id;
-        }
-      }
-
-      // Process images to base64
-      const imageBase64Promises = formData.images.map(async (image) => {
-        const bytes = await image.arrayBuffer();
-        const buffer = Buffer.from(bytes);
-        const base64 = buffer.toString('base64');
-        const mimeType = image.type;
-        return `data:${mimeType};base64,${base64}`;
-      });
-      
-      const imageUrls = await Promise.all(imageBase64Promises);
-
-      // Create studio
-      const { data: studio, error: studioError } = await supabase
-        .from('studios')
-        .insert([{
-          name: formData.studioName,
-          owner_id: ownerId,
-          category: formData.category,
-          capacity: parseInt(formData.capacity) || 0,
-          description: formData.description,
-          street_address: formData.streetAddress,
-          city: formData.city,
-          state: formData.state,
-          postal_code: formData.postalCode,
-          country: formData.country,
-          hourly_rate: parseFloat(formData.hourlyRate) || 0,
-          amenities: formData.amenities,
-          images: imageUrls,
-          status: formData.status,
-          created_at: new Date().toISOString(),
-        }])
-        .select()
-        .single();
-
-      if (studioError) throw studioError;
-
-      setSuccess(`Studio "${formData.studioName}" created successfully!`);
-      setTimeout(() => {
-        router.push('/admin/studios');
-      }, 2000);
-      
-    } catch (err: any) {
-      console.error('Error creating studio:', err);
-      setError(err.message || 'Failed to create studio');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const steps = [
-    { number: 1, label: 'Basic Info', icon: 'info' },
-    { number: 2, label: 'Location', icon: 'location_on' },
-    { number: 3, label: 'Pricing & Details', icon: 'attach_money' },
-    { number: 4, label: 'Media & Review', icon: 'image' },
-  ];
-
-  const isStepValid = () => {
-    if (currentStep === 1) {
-      return formData.studioName && formData.ownerEmail && formData.category;
-    }
-    if (currentStep === 2) {
-      return formData.streetAddress && formData.city && formData.state && formData.postalCode;
-    }
-    if (currentStep === 3) {
-      return formData.hourlyRate && formData.capacity;
-    }
-    return true;
-  };
-
-  const handleNext = () => {
-    if (currentStep < 4 && isStepValid()) {
-      setCurrentStep(currentStep + 1);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } else if (currentStep === 4) {
-      handleSubmit();
-    }
-  };
-
-  const handleBack = () => {
-    if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } else {
-      router.push('/admin/studios');
-    }
-  };
-
-  return (
-    <div className="p-8">
-      <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <Link href="/admin/studios" className="inline-flex items-center gap-2 text-slate-500 hover:text-primary mb-4 transition-colors">
-            <ArrowLeftIcon className="w-4 h-4" />
-            Back to Studios
-          </Link>
-          <h1 className="text-3xl font-black tracking-tight text-slate-900 dark:text-white">Add New Studio</h1>
-          <p className="text-slate-500 dark:text-slate-400 mt-1">Create a new studio listing on the ManyRooms platform.</p>
-        </div>
-
-        {/* Success/Error Messages */}
-        {success && (
-          <div className="mb-6 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-lg">
-            <p className="text-emerald-500 text-sm">{success}</p>
-          </div>
-        )}
-        {error && (
-          <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
-            <p className="text-red-500 text-sm">{error}</p>
-          </div>
-        )}
-
-        {/* Step Indicator */}
-        <div className="mb-10">
-          <div className="flex items-center justify-between">
-            {steps.map((step, idx) => (
-              <div key={step.number} className="flex items-center flex-1">
-                <div className="flex flex-col items-center">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
-                    currentStep >= step.number ? 'bg-primary text-white' : 'bg-slate-200 dark:bg-slate-800 text-slate-500'
-                  }`}>
-                    {currentStep > step.number ? (
-                      <MaterialIcon icon="check" className="text-lg" />
-                    ) : (
-                      <MaterialIcon icon={step.icon} className="text-lg" />
-                    )}
-                  </div>
-                  <span className={`text-[10px] font-bold uppercase tracking-widest mt-2 ${
-                    currentStep >= step.number ? 'text-primary' : 'text-slate-500'
-                  }`}>
-                    {step.label}
-                  </span>
-                </div>
-                {idx < steps.length - 1 && (
-                  <div className={`flex-1 h-px mx-4 ${currentStep > step.number ? 'bg-primary' : 'bg-slate-200 dark:bg-slate-800'}`} />
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Form Content */}
-        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-8">
-          {/* Step 1: Basic Info */}
-          {currentStep === 1 && (
-            <div className="space-y-6">
-              <div>
-                <label className="block text-sm font-bold mb-2">Studio Name *</label>
-                <input
-                  type="text"
-                  value={formData.studioName}
-                  onChange={(e) => handleInputChange('studioName', e.target.value)}
-                  placeholder="e.g., Sunset Sound Studio"
-                  className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-3 text-sm focus:border-primary focus:ring-primary outline-none"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-bold mb-2">Owner Email *</label>
-                <input
-                  type="email"
-                  value={formData.ownerEmail}
-                  onChange={(e) => handleInputChange('ownerEmail', e.target.value)}
-                  placeholder="owner@example.com"
-                  className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-3 text-sm focus:border-primary focus:ring-primary outline-none"
-                />
-                <p className="text-xs text-slate-500 mt-1">If owner doesn't exist, an account will be created for them.</p>
-              </div>
-              <div>
-                <label className="block text-sm font-bold mb-2">Category *</label>
-                <select
-                  value={formData.category}
-                  onChange={(e) => handleInputChange('category', e.target.value)}
-                  className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-3 text-sm focus:border-primary focus:ring-primary outline-none"
-                >
-                  <option value="">Select a category</option>
-                  {categories.map((cat) => (
-                    <option key={cat} value={cat}>{cat}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-bold mb-2">Description</label>
-                <textarea
-                  value={formData.description}
-                  onChange={(e) => handleInputChange('description', e.target.value)}
-                  rows={4}
-                  placeholder="Describe the studio's features, ambiance, and unique qualities..."
-                  className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-3 text-sm focus:border-primary focus:ring-primary outline-none resize-none"
-                />
-              </div>
-            </div>
-          )}
-
-          {/* Step 2: Location */}
-          {currentStep === 2 && (
-            <div className="space-y-6">
-              <div>
-                <label className="block text-sm font-bold mb-2">Street Address *</label>
-                <input
-                  type="text"
-                  value={formData.streetAddress}
-                  onChange={(e) => handleInputChange('streetAddress', e.target.value)}
-                  placeholder="123 Main St"
-                  className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-3 text-sm focus:border-primary focus:ring-primary outline-none"
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-bold mb-2">City *</label>
-                  <input
-                    type="text"
-                    value={formData.city}
-                    onChange={(e) => handleInputChange('city', e.target.value)}
-                    placeholder="Los Angeles"
-                    className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-3 text-sm focus:border-primary focus:ring-primary outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-bold mb-2">State / Region *</label>
-                  <input
-                    type="text"
-                    value={formData.state}
-                    onChange={(e) => handleInputChange('state', e.target.value)}
-                    placeholder="California"
-                    className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-3 text-sm focus:border-primary focus:ring-primary outline-none"
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-bold mb-2">Postal Code *</label>
-                  <input
-                    type="text"
-                    value={formData.postalCode}
-                    onChange={(e) => handleInputChange('postalCode', e.target.value)}
-                    placeholder="90001"
-                    className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-3 text-sm focus:border-primary focus:ring-primary outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-bold mb-2">Country</label>
-                  <input
-                    type="text"
-                    value={formData.country}
-                    onChange={(e) => handleInputChange('country', e.target.value)}
-                    className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-3 text-sm focus:border-primary focus:ring-primary outline-none"
-                  />
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Step 3: Pricing & Details */}
-          {currentStep === 3 && (
-            <div className="space-y-6">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-bold mb-2">Hourly Rate ($) *</label>
-                  <input
-                    type="number"
-                    value={formData.hourlyRate}
-                    onChange={(e) => handleInputChange('hourlyRate', e.target.value)}
-                    placeholder="120"
-                    className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-3 text-sm focus:border-primary focus:ring-primary outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-bold mb-2">Max Capacity (Persons) *</label>
-                  <input
-                    type="number"
-                    value={formData.capacity}
-                    onChange={(e) => handleInputChange('capacity', e.target.value)}
-                    placeholder="12"
-                    className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-3 text-sm focus:border-primary focus:ring-primary outline-none"
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-bold mb-3">Amenities</label>
-                <div className="grid grid-cols-2 gap-3">
-                  {amenitiesList.map((item) => (
-                    <label key={item} className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={formData.amenities.includes(item)}
-                        onChange={() => handleAmenityToggle(item)}
-                        className="w-4 h-4 text-primary rounded border-slate-300 focus:ring-primary"
-                      />
-                      <span className="text-sm">{item}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-bold mb-2">Status</label>
-                <select
-                  value={formData.status}
-                  onChange={(e) => handleInputChange('status', e.target.value)}
-                  className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-3 text-sm focus:border-primary focus:ring-primary outline-none"
-                >
-                  <option value="pending">Pending Review</option>
-                  <option value="approved">Approved (Immediately Live)</option>
-                </select>
-              </div>
-            </div>
-          )}
-
-          {/* Step 4: Media & Review */}
-          {currentStep === 4 && (
-            <div className="space-y-6">
-              <div>
-                <label className="block text-sm font-bold mb-4">Studio Photos * (Minimum 1)</label>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {formData.imagePreviews.map((preview, index) => (
-                    <div key={index} className="relative aspect-square rounded-lg overflow-hidden bg-white/5 border border-white/10">
-                      <img src={preview} alt={`Preview ${index + 1}`} className="w-full h-full object-cover" />
-                      <button
-                        type="button"
-                        onClick={() => removeImage(index)}
-                        className="absolute top-2 right-2 p-1 bg-red-500 rounded-full text-white hover:bg-red-600 transition-colors"
-                      >
-                        <XMarkIcon className="w-4 h-4" />
-                      </button>
-                    </div>
-                  ))}
-                  {formData.images.length < 10 && (
-                    <button
-                      type="button"
-                      onClick={() => fileInputRef.current?.click()}
-                      className="aspect-square rounded-lg bg-white/5 border-2 border-dashed border-white/10 hover:border-primary/50 transition-colors flex flex-col items-center justify-center gap-2"
-                    >
-                      <PhotoIcon className="w-8 h-8 text-slate-400" />
-                      <span className="text-xs text-slate-400">Upload Photo</span>
-                    </button>
-                  )}
-                </div>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  onChange={handleImageUpload}
-                  className="hidden"
-                />
-                <p className="text-xs text-slate-500 mt-3">Upload up to 10 photos. First photo will be the cover image.</p>
-              </div>
-              
-              <div className="bg-slate-50 dark:bg-slate-800 rounded-lg p-6">
-                <h3 className="font-bold mb-4">Review Summary</h3>
-                <div className="space-y-3 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">Studio Name:</span>
-                    <span className="font-medium">{formData.studioName || '—'}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">Owner Email:</span>
-                    <span className="font-medium">{formData.ownerEmail || '—'}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">Category:</span>
-                    <span className="font-medium">{formData.category || '—'}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">Location:</span>
-                    <span className="font-medium">{formData.city}, {formData.state}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">Hourly Rate:</span>
-                    <span className="font-medium">${formData.hourlyRate || '0'}/hr</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">Capacity:</span>
-                    <span className="font-medium">{formData.capacity || '0'} persons</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">Status:</span>
-                    <span className={`font-medium ${formData.status === 'approved' ? 'text-emerald-500' : 'text-amber-500'}`}>
-                      {formData.status === 'approved' ? 'Approved' : 'Pending Review'}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">Photos:</span>
-                    <span className="font-medium">{formData.images.length} uploaded</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Navigation Buttons */}
-          <div className="flex items-center justify-between mt-8 pt-6 border-t border-slate-200 dark:border-slate-800">
-            <button
-              onClick={handleBack}
-              className="flex items-center gap-2 px-6 py-2.5 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
-            >
-              <ArrowLeftIcon className="w-4 h-4" />
-              {currentStep === 1 ? 'Cancel' : 'Back'}
-            </button>
-            <button
-              onClick={handleNext}
-              disabled={!isStepValid() || loading}
-              className="flex items-center gap-2 px-6 py-2.5 bg-primary text-white rounded-lg text-sm font-bold hover:bg-primary/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? 'Creating...' : (currentStep === 4 ? 'Create Studio' : 'Continue')}
-              <ArrowRightIcon className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}

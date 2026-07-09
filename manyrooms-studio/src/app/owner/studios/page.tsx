@@ -285,6 +285,7 @@
 
 
 
+
 // app/owner/studios/page.tsx
 'use client';
 
@@ -298,12 +299,17 @@ import {
   PencilIcon,
   MapPinIcon,
   HomeIcon,
-  CurrencyDollarIcon,
   CheckCircleIcon,
   ClockIcon,
-  StarIcon,
-  ChatBubbleLeftIcon,
 } from '@heroicons/react/24/outline';
+
+// Brand Colors
+const brand = {
+  yellow: '#F1CB81',
+  blue: '#91ADCD',
+  brown: '#DB8B8C',
+  dark: '#3C291C',
+};
 
 const MaterialIcon = ({ icon, className = '' }: { icon: string; className?: string }) => (
   <span className={`material-symbols-outlined ${className}`}>{icon}</span>
@@ -329,33 +335,20 @@ export default function OwnerStudiosPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!authLoading && !user) {
-      router.push('/login');
-      return;
-    }
-    if (user) {
-      fetchStudios();
-    }
+    if (!authLoading && !user) { router.push('/login'); return; }
+    if (user) fetchStudios();
   }, [user, authLoading]);
 
   const fetchStudios = async () => {
     if (!user?.id) return;
     setLoading(true);
-    
     try {
       const { data, error } = await supabase
-        .from('studios')
-        .select('*')
-        .eq('owner_id', user.id)
-        .order('created_at', { ascending: false });
-
+        .from('studios').select('*').eq('owner_id', user.id).order('created_at', { ascending: false });
       if (error) throw error;
       setStudios(data || []);
-    } catch (error) {
-      console.error('Error fetching studios:', error);
-    } finally {
-      setLoading(false);
-    }
+    } catch (error) { console.error('Error fetching studios:', error); }
+    finally { setLoading(false); }
   };
 
   const activeStudios = studios.filter(s => s.status === 'approved' || s.status === 'active');
@@ -363,35 +356,25 @@ export default function OwnerStudiosPage() {
   const estimatedRevenue = studios.reduce((sum, s) => sum + (s.hourly_rate * 50), 0);
   const uniqueCities = [...new Set(studios.map(s => s.city))].length;
 
-  const getCoverImage = (images: string[]) => {
-    if (!images || images.length === 0) return null;
-    return images[0];
-  };
+  const getCoverImage = (images: string[]) => (!images || images.length === 0 ? null : images[0]);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'approved':
-      case 'active':
+      case 'approved': case 'active':
         return (
-          <span className="px-3 py-1 bg-[#beff5f] text-[#111f00] text-[10px] font-bold uppercase tracking-wider rounded-full border border-[#446900]/20">
+          <span className="px-3 py-1 bg-[#F1CB81]/30 text-[#3C291C] text-[10px] font-bold uppercase tracking-wider rounded-full border border-[#F1CB81]/50">
             Active
           </span>
         );
-      case 'pending':
+      case 'pending': case 'draft':
         return (
-          <span className="px-3 py-1 bg-[#ffdbcf] text-[#822800] text-[10px] font-bold uppercase tracking-wider rounded-full border border-[#a43c12]/20">
-            Draft
-          </span>
-        );
-      case 'draft':
-        return (
-          <span className="px-3 py-1 bg-[#ffdbcf] text-[#822800] text-[10px] font-bold uppercase tracking-wider rounded-full border border-[#a43c12]/20">
-            Draft
+          <span className="px-3 py-1 bg-[#DB8B8C]/20 text-[#3C291C] text-[10px] font-bold uppercase tracking-wider rounded-full border border-[#DB8B8C]/30">
+            {status === 'pending' ? 'Pending' : 'Draft'}
           </span>
         );
       default:
         return (
-          <span className="px-3 py-1 bg-[#edeeef] text-[#424937] text-[10px] font-bold uppercase tracking-wider rounded-full">
+          <span className="px-3 py-1 bg-[#3C291C]/5 text-[#3C291C]/60 text-[10px] font-bold uppercase tracking-wider rounded-full">
             {status || 'Draft'}
           </span>
         );
@@ -400,31 +383,29 @@ export default function OwnerStudiosPage() {
 
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen bg-[#f8f9fa] flex items-center justify-center">
+      <div className="min-h-screen bg-[#FFFBF5] flex items-center justify-center">
         <div className="animate-pulse space-y-4 text-center">
-          <div className="w-16 h-16 bg-[#446900]/20 rounded-full mx-auto"></div>
-          <p className="text-[#446900] font-bold">Loading Studios...</p>
+          <div className="w-16 h-16 bg-[#F1CB81]/40 rounded-full mx-auto"></div>
+          <p className="text-[#3C291C] font-bold">Loading Studios...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#f8f9fa]">
+    <div className="min-h-screen bg-[#FFFBF5]">
       <div className="max-w-6xl mx-auto px-4 md:px-6 py-8">
         
-        {/* Header Section */}
+        {/* Header */}
         <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
           <div>
-            <h1 className="text-4xl md:text-6xl font-extrabold text-[#191c1d] leading-tight">My Studios</h1>
-            <p className="text-lg text-[#424937] mt-2 max-w-lg">
+            <h1 className="text-4xl md:text-6xl font-extrabold text-[#3C291C] leading-tight">My Studios</h1>
+            <p className="text-lg text-[#3C291C]/60 mt-2 max-w-lg">
               Manage your creative spaces, view booking schedules, and optimize your listings.
             </p>
           </div>
-          <Link
-            href="/owner/list-new"
-            className="bg-[#beff5f] text-[#111f00] flex items-center gap-2 px-6 md:px-8 py-4 md:py-5 rounded-2xl font-extrabold text-lg hover:scale-105 transition-all duration-300 shadow-lg active:scale-95 group"
-          >
+          <Link href="/owner/list-new"
+            className="bg-[#F1CB81] text-[#3C291C] flex items-center gap-2 px-6 md:px-8 py-4 md:py-5 rounded-2xl font-extrabold text-lg hover:bg-[#DB8B8C] hover:text-white transition-all duration-300 shadow-lg active:scale-95">
             <PlusCircleIcon className="w-6 h-6" />
             List New Room
           </Link>
@@ -432,67 +413,48 @@ export default function OwnerStudiosPage() {
 
         {/* Studio Grid */}
         {studios.length === 0 ? (
-          <div className="bg-white/80 backdrop-blur-xl border border-white/40 rounded-[32px] p-12 text-center shadow-lg">
-            <div className="w-20 h-20 bg-[#beff5f]/30 rounded-full flex items-center justify-center mx-auto mb-6">
-              <PlusCircleIcon className="w-10 h-10 text-[#446900]" />
+          <div className="bg-white rounded-[32px] p-12 text-center shadow-sm border border-[#3C291C]/10">
+            <div className="w-20 h-20 bg-[#F1CB81]/30 rounded-full flex items-center justify-center mx-auto mb-6">
+              <PlusCircleIcon className="w-10 h-10 text-[#3C291C]" />
             </div>
-            <h3 className="text-2xl font-extrabold text-[#191c1d] mb-2">No Studios Yet</h3>
-            <p className="text-[#424937] mb-8 max-w-md mx-auto">
-              Get started by listing your first creative space. Reach creative professionals worldwide.
-            </p>
-            <Link
-              href="/owner/list-new"
-              className="inline-flex items-center gap-2 px-8 py-4 bg-[#beff5f] text-[#111f00] rounded-2xl font-extrabold text-lg hover:scale-105 transition-all shadow-lg"
-            >
-              <PlusCircleIcon className="w-5 h-5" />
-              List Your First Studio
+            <h3 className="text-2xl font-extrabold text-[#3C291C] mb-2">No Studios Yet</h3>
+            <p className="text-[#3C291C]/60 mb-8 max-w-md mx-auto">Get started by listing your first creative space.</p>
+            <Link href="/owner/list-new"
+              className="inline-flex items-center gap-2 px-8 py-4 bg-[#F1CB81] text-[#3C291C] rounded-2xl font-extrabold text-lg hover:bg-[#DB8B8C] hover:text-white transition-all shadow-lg">
+              <PlusCircleIcon className="w-5 h-5" /> List Your First Studio
             </Link>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
             {studios.map((studio) => (
-              <div
-                key={studio.id}
-                className="group relative flex flex-col bg-white/80 backdrop-blur-xl border border-white/40 rounded-[32px] overflow-hidden shadow-lg transition-all duration-500 hover:-translate-y-2"
-              >
-                {/* Image */}
+              <div key={studio.id}
+                className="group relative flex flex-col bg-white rounded-[32px] overflow-hidden shadow-sm border border-[#3C291C]/10 transition-all duration-500 hover:-translate-y-2 hover:shadow-lg">
+                
                 <div className="relative h-[320px] md:h-[400px] overflow-hidden">
                   {getCoverImage(studio.images) ? (
-                    <img
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                      src={getCoverImage(studio.images)!}
-                      alt={studio.name}
-                    />
+                    <img className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                      src={getCoverImage(studio.images)!} alt={studio.name} />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-[#edeeef]">
-                      <HomeIcon className="w-16 h-16 text-[#c2c9b1]" />
+                    <div className="w-full h-full flex items-center justify-center bg-[#3C291C]/5">
+                      <HomeIcon className="w-16 h-16 text-[#3C291C]/20" />
                     </div>
                   )}
-                  <div className="absolute top-6 right-6">
-                    {getStatusBadge(studio.status)}
-                  </div>
+                  <div className="absolute top-6 right-6">{getStatusBadge(studio.status)}</div>
                 </div>
 
-                {/* Glass Card Overlay */}
-                <div className="p-6 md:p-8 -mt-16 bg-white/80 backdrop-blur-xl border border-white/40 relative mx-4 md:mx-6 mb-4 md:mb-6 rounded-2xl shadow-lg">
-                  <h2 className="text-2xl font-extrabold text-[#191c1d] mb-1">{studio.name}</h2>
-                  <p className="text-[#424937] text-sm mb-5 flex items-center gap-1">
-                    <MapPinIcon className="w-4 h-4" />
-                    {studio.city}, {studio.state}
+                <div className="p-6 md:p-8 -mt-16 bg-white border border-[#3C291C]/10 relative mx-4 md:mx-6 mb-4 md:mb-6 rounded-2xl shadow-sm">
+                  <h2 className="text-2xl font-extrabold text-[#3C291C] mb-1">{studio.name}</h2>
+                  <p className="text-[#3C291C]/60 text-sm mb-5 flex items-center gap-1">
+                    <MapPinIcon className="w-4 h-4 text-[#DB8B8C]" /> {studio.city}, {studio.state}
                   </p>
                   <div className="flex items-center gap-3">
-                    <Link
-                      href={`/owner/studios/${studio.id}/edit`}
-                      className="flex-grow bg-[#2e3132] text-white py-3 rounded-xl font-bold text-sm hover:bg-[#446900] transition-colors flex items-center justify-center gap-2"
-                    >
-                      <PencilIcon className="w-4 h-4" />
-                      Edit Profile
+                    <Link href={`/owner/studios/${studio.id}/edit`}
+                      className="flex-grow bg-[#3C291C] text-white py-3 rounded-xl font-bold text-sm hover:bg-[#DB8B8C] transition-colors flex items-center justify-center gap-2">
+                      <PencilIcon className="w-4 h-4" /> Edit Profile
                     </Link>
-                    <Link
-                      href={`/owner/studios/${studio.id}/bookings`}
-                      className="w-12 h-12 flex items-center justify-center bg-[#e7e8e9] text-[#191c1d] rounded-xl hover:bg-[#e4d7fd] transition-colors"
-                      title="View Bookings"
-                    >
+                    <Link href={`/owner/studios/${studio.id}/bookings`}
+                      className="w-12 h-12 flex items-center justify-center bg-[#3C291C]/5 text-[#3C291C] rounded-xl hover:bg-[#F1CB81]/30 transition-colors"
+                      title="View Bookings">
                       <MaterialIcon icon="calendar_today" />
                     </Link>
                   </div>
@@ -505,41 +467,31 @@ export default function OwnerStudiosPage() {
         {/* Stats Bar */}
         {studios.length > 0 && (
           <section className="mt-16 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
-            <div className="bg-white/80 backdrop-blur-xl border border-white/40 p-8 rounded-3xl shadow-sm flex flex-col items-center text-center">
-              <span className="text-4xl md:text-5xl font-extrabold text-[#446900] mb-1">{studios.length}</span>
-              <span className="text-xs font-bold text-[#424937] tracking-widest uppercase">Total Studios</span>
-            </div>
-            <div className="bg-white/80 backdrop-blur-xl border border-white/40 p-8 rounded-3xl shadow-sm flex flex-col items-center text-center">
-              <span className="text-4xl md:text-5xl font-extrabold text-[#446900] mb-1">{activeStudios.length}</span>
-              <span className="text-xs font-bold text-[#424937] tracking-widest uppercase">Active Listings</span>
-            </div>
-            <div className="bg-white/80 backdrop-blur-xl border border-white/40 p-8 rounded-3xl shadow-sm flex flex-col items-center text-center">
-              <span className="text-4xl md:text-5xl font-extrabold text-[#446900] mb-1">${(estimatedRevenue / 1000).toFixed(1)}k</span>
-              <span className="text-xs font-bold text-[#424937] tracking-widest uppercase">Monthly Revenue</span>
-            </div>
-            <div className="bg-white/80 backdrop-blur-xl border border-white/40 p-8 rounded-3xl shadow-sm flex flex-col items-center text-center">
-              <span className="text-4xl md:text-5xl font-extrabold text-[#446900] mb-1">{uniqueCities}</span>
-              <span className="text-xs font-bold text-[#424937] tracking-widest uppercase">Cities</span>
-            </div>
+            {[
+              { value: studios.length, label: 'Total Studios', color: 'text-[#3C291C]' },
+              { value: activeStudios.length, label: 'Active Listings', color: 'text-[#3C291C]' },
+              { value: `$${(estimatedRevenue / 1000).toFixed(1)}k`, label: 'Monthly Revenue', color: 'text-[#DB8B8C]' },
+              { value: uniqueCities, label: 'Cities', color: 'text-[#3C291C]' },
+            ].map((stat, i) => (
+              <div key={i} className="bg-white rounded-3xl p-8 shadow-sm border border-[#3C291C]/10 flex flex-col items-center text-center">
+                <span className={`text-4xl md:text-5xl font-extrabold mb-1 ${stat.color}`}>{stat.value}</span>
+                <span className="text-xs font-bold text-[#3C291C]/40 tracking-widest uppercase">{stat.label}</span>
+              </div>
+            ))}
           </section>
         )}
 
         {/* Expand Portfolio CTA */}
-        <div className="mt-12 bg-white/80 backdrop-blur-xl border border-white/40 rounded-[32px] p-8 md:p-12 text-center shadow-lg">
+        <div className="mt-12 bg-white rounded-[32px] p-8 md:p-12 text-center shadow-sm border border-[#3C291C]/10">
           <div className="max-w-2xl mx-auto">
-            <div className="w-16 h-16 bg-[#beff5f]/30 rounded-full flex items-center justify-center mx-auto mb-6">
-              <PlusCircleIcon className="w-8 h-8 text-[#446900]" />
+            <div className="w-16 h-16 bg-[#F1CB81]/30 rounded-full flex items-center justify-center mx-auto mb-6">
+              <PlusCircleIcon className="w-8 h-8 text-[#3C291C]" />
             </div>
-            <h3 className="text-2xl font-extrabold text-[#191c1d] mb-2">Expand Your Portfolio</h3>
-            <p className="text-[#424937] mb-8">
-              Have a new space? Start a new listing in minutes and reach creative professionals worldwide.
-            </p>
-            <Link
-              href="/owner/list-new"
-              className="inline-flex items-center gap-2 px-8 py-4 bg-[#beff5f] text-[#111f00] rounded-2xl font-extrabold text-lg hover:scale-105 transition-all shadow-lg"
-            >
-              <PlusCircleIcon className="w-5 h-5" />
-              Start Drafting
+            <h3 className="text-2xl font-extrabold text-[#3C291C] mb-2">Expand Your Portfolio</h3>
+            <p className="text-[#3C291C]/60 mb-8">Have a new space? Start a new listing in minutes and reach creative professionals worldwide.</p>
+            <Link href="/owner/list-new"
+              className="inline-flex items-center gap-2 px-8 py-4 bg-[#F1CB81] text-[#3C291C] rounded-2xl font-extrabold text-lg hover:bg-[#DB8B8C] hover:text-white transition-all shadow-lg">
+              <PlusCircleIcon className="w-5 h-5" /> Start Drafting
             </Link>
           </div>
         </div>
@@ -547,6 +499,271 @@ export default function OwnerStudiosPage() {
     </div>
   );
 }
+
+
+
+// // app/owner/studios/page.tsx
+// 'use client';
+
+// import { useState, useEffect } from 'react';
+// import Link from 'next/link';
+// import { useAuth } from '@/context/AuthContext';
+// import { useRouter } from 'next/navigation';
+// import { supabase } from '@/lib/supabase';
+// import {
+//   PlusCircleIcon,
+//   PencilIcon,
+//   MapPinIcon,
+//   HomeIcon,
+//   CurrencyDollarIcon,
+//   CheckCircleIcon,
+//   ClockIcon,
+//   StarIcon,
+//   ChatBubbleLeftIcon,
+// } from '@heroicons/react/24/outline';
+
+// const MaterialIcon = ({ icon, className = '' }: { icon: string; className?: string }) => (
+//   <span className={`material-symbols-outlined ${className}`}>{icon}</span>
+// );
+
+// interface Studio {
+//   id: string;
+//   name: string;
+//   city: string;
+//   state: string;
+//   street_address: string;
+//   images: string[];
+//   status: string;
+//   hourly_rate: number;
+//   capacity: number;
+//   created_at: string;
+// }
+
+// export default function OwnerStudiosPage() {
+//   const { user, loading: authLoading } = useAuth();
+//   const router = useRouter();
+//   const [studios, setStudios] = useState<Studio[]>([]);
+//   const [loading, setLoading] = useState(true);
+
+//   useEffect(() => {
+//     if (!authLoading && !user) {
+//       router.push('/login');
+//       return;
+//     }
+//     if (user) {
+//       fetchStudios();
+//     }
+//   }, [user, authLoading]);
+
+//   const fetchStudios = async () => {
+//     if (!user?.id) return;
+//     setLoading(true);
+    
+//     try {
+//       const { data, error } = await supabase
+//         .from('studios')
+//         .select('*')
+//         .eq('owner_id', user.id)
+//         .order('created_at', { ascending: false });
+
+//       if (error) throw error;
+//       setStudios(data || []);
+//     } catch (error) {
+//       console.error('Error fetching studios:', error);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   const activeStudios = studios.filter(s => s.status === 'approved' || s.status === 'active');
+//   const draftStudios = studios.filter(s => s.status === 'pending' || s.status === 'draft');
+//   const estimatedRevenue = studios.reduce((sum, s) => sum + (s.hourly_rate * 50), 0);
+//   const uniqueCities = [...new Set(studios.map(s => s.city))].length;
+
+//   const getCoverImage = (images: string[]) => {
+//     if (!images || images.length === 0) return null;
+//     return images[0];
+//   };
+
+//   const getStatusBadge = (status: string) => {
+//     switch (status) {
+//       case 'approved':
+//       case 'active':
+//         return (
+//           <span className="px-3 py-1 bg-[#beff5f] text-[#111f00] text-[10px] font-bold uppercase tracking-wider rounded-full border border-[#446900]/20">
+//             Active
+//           </span>
+//         );
+//       case 'pending':
+//         return (
+//           <span className="px-3 py-1 bg-[#ffdbcf] text-[#822800] text-[10px] font-bold uppercase tracking-wider rounded-full border border-[#a43c12]/20">
+//             Draft
+//           </span>
+//         );
+//       case 'draft':
+//         return (
+//           <span className="px-3 py-1 bg-[#ffdbcf] text-[#822800] text-[10px] font-bold uppercase tracking-wider rounded-full border border-[#a43c12]/20">
+//             Draft
+//           </span>
+//         );
+//       default:
+//         return (
+//           <span className="px-3 py-1 bg-[#edeeef] text-[#424937] text-[10px] font-bold uppercase tracking-wider rounded-full">
+//             {status || 'Draft'}
+//           </span>
+//         );
+//     }
+//   };
+
+//   if (authLoading || loading) {
+//     return (
+//       <div className="min-h-screen bg-[#f8f9fa] flex items-center justify-center">
+//         <div className="animate-pulse space-y-4 text-center">
+//           <div className="w-16 h-16 bg-[#446900]/20 rounded-full mx-auto"></div>
+//           <p className="text-[#446900] font-bold">Loading Studios...</p>
+//         </div>
+//       </div>
+//     );
+//   }
+
+//   return (
+//     <div className="min-h-screen bg-[#f8f9fa]">
+//       <div className="max-w-6xl mx-auto px-4 md:px-6 py-8">
+        
+//         {/* Header Section */}
+//         <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+//           <div>
+//             <h1 className="text-4xl md:text-6xl font-extrabold text-[#191c1d] leading-tight">My Studios</h1>
+//             <p className="text-lg text-[#424937] mt-2 max-w-lg">
+//               Manage your creative spaces, view booking schedules, and optimize your listings.
+//             </p>
+//           </div>
+//           <Link
+//             href="/owner/list-new"
+//             className="bg-[#beff5f] text-[#111f00] flex items-center gap-2 px-6 md:px-8 py-4 md:py-5 rounded-2xl font-extrabold text-lg hover:scale-105 transition-all duration-300 shadow-lg active:scale-95 group"
+//           >
+//             <PlusCircleIcon className="w-6 h-6" />
+//             List New Room
+//           </Link>
+//         </header>
+
+//         {/* Studio Grid */}
+//         {studios.length === 0 ? (
+//           <div className="bg-white/80 backdrop-blur-xl border border-white/40 rounded-[32px] p-12 text-center shadow-lg">
+//             <div className="w-20 h-20 bg-[#beff5f]/30 rounded-full flex items-center justify-center mx-auto mb-6">
+//               <PlusCircleIcon className="w-10 h-10 text-[#446900]" />
+//             </div>
+//             <h3 className="text-2xl font-extrabold text-[#191c1d] mb-2">No Studios Yet</h3>
+//             <p className="text-[#424937] mb-8 max-w-md mx-auto">
+//               Get started by listing your first creative space. Reach creative professionals worldwide.
+//             </p>
+//             <Link
+//               href="/owner/list-new"
+//               className="inline-flex items-center gap-2 px-8 py-4 bg-[#beff5f] text-[#111f00] rounded-2xl font-extrabold text-lg hover:scale-105 transition-all shadow-lg"
+//             >
+//               <PlusCircleIcon className="w-5 h-5" />
+//               List Your First Studio
+//             </Link>
+//           </div>
+//         ) : (
+//           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+//             {studios.map((studio) => (
+//               <div
+//                 key={studio.id}
+//                 className="group relative flex flex-col bg-white/80 backdrop-blur-xl border border-white/40 rounded-[32px] overflow-hidden shadow-lg transition-all duration-500 hover:-translate-y-2"
+//               >
+//                 {/* Image */}
+//                 <div className="relative h-[320px] md:h-[400px] overflow-hidden">
+//                   {getCoverImage(studio.images) ? (
+//                     <img
+//                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+//                       src={getCoverImage(studio.images)!}
+//                       alt={studio.name}
+//                     />
+//                   ) : (
+//                     <div className="w-full h-full flex items-center justify-center bg-[#edeeef]">
+//                       <HomeIcon className="w-16 h-16 text-[#c2c9b1]" />
+//                     </div>
+//                   )}
+//                   <div className="absolute top-6 right-6">
+//                     {getStatusBadge(studio.status)}
+//                   </div>
+//                 </div>
+
+//                 {/* Glass Card Overlay */}
+//                 <div className="p-6 md:p-8 -mt-16 bg-white/80 backdrop-blur-xl border border-white/40 relative mx-4 md:mx-6 mb-4 md:mb-6 rounded-2xl shadow-lg">
+//                   <h2 className="text-2xl font-extrabold text-[#191c1d] mb-1">{studio.name}</h2>
+//                   <p className="text-[#424937] text-sm mb-5 flex items-center gap-1">
+//                     <MapPinIcon className="w-4 h-4" />
+//                     {studio.city}, {studio.state}
+//                   </p>
+//                   <div className="flex items-center gap-3">
+//                     <Link
+//                       href={`/owner/studios/${studio.id}/edit`}
+//                       className="flex-grow bg-[#2e3132] text-white py-3 rounded-xl font-bold text-sm hover:bg-[#446900] transition-colors flex items-center justify-center gap-2"
+//                     >
+//                       <PencilIcon className="w-4 h-4" />
+//                       Edit Profile
+//                     </Link>
+//                     <Link
+//                       href={`/owner/studios/${studio.id}/bookings`}
+//                       className="w-12 h-12 flex items-center justify-center bg-[#e7e8e9] text-[#191c1d] rounded-xl hover:bg-[#e4d7fd] transition-colors"
+//                       title="View Bookings"
+//                     >
+//                       <MaterialIcon icon="calendar_today" />
+//                     </Link>
+//                   </div>
+//                 </div>
+//               </div>
+//             ))}
+//           </div>
+//         )}
+
+//         {/* Stats Bar */}
+//         {studios.length > 0 && (
+//           <section className="mt-16 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
+//             <div className="bg-white/80 backdrop-blur-xl border border-white/40 p-8 rounded-3xl shadow-sm flex flex-col items-center text-center">
+//               <span className="text-4xl md:text-5xl font-extrabold text-[#446900] mb-1">{studios.length}</span>
+//               <span className="text-xs font-bold text-[#424937] tracking-widest uppercase">Total Studios</span>
+//             </div>
+//             <div className="bg-white/80 backdrop-blur-xl border border-white/40 p-8 rounded-3xl shadow-sm flex flex-col items-center text-center">
+//               <span className="text-4xl md:text-5xl font-extrabold text-[#446900] mb-1">{activeStudios.length}</span>
+//               <span className="text-xs font-bold text-[#424937] tracking-widest uppercase">Active Listings</span>
+//             </div>
+//             <div className="bg-white/80 backdrop-blur-xl border border-white/40 p-8 rounded-3xl shadow-sm flex flex-col items-center text-center">
+//               <span className="text-4xl md:text-5xl font-extrabold text-[#446900] mb-1">${(estimatedRevenue / 1000).toFixed(1)}k</span>
+//               <span className="text-xs font-bold text-[#424937] tracking-widest uppercase">Monthly Revenue</span>
+//             </div>
+//             <div className="bg-white/80 backdrop-blur-xl border border-white/40 p-8 rounded-3xl shadow-sm flex flex-col items-center text-center">
+//               <span className="text-4xl md:text-5xl font-extrabold text-[#446900] mb-1">{uniqueCities}</span>
+//               <span className="text-xs font-bold text-[#424937] tracking-widest uppercase">Cities</span>
+//             </div>
+//           </section>
+//         )}
+
+//         {/* Expand Portfolio CTA */}
+//         <div className="mt-12 bg-white/80 backdrop-blur-xl border border-white/40 rounded-[32px] p-8 md:p-12 text-center shadow-lg">
+//           <div className="max-w-2xl mx-auto">
+//             <div className="w-16 h-16 bg-[#beff5f]/30 rounded-full flex items-center justify-center mx-auto mb-6">
+//               <PlusCircleIcon className="w-8 h-8 text-[#446900]" />
+//             </div>
+//             <h3 className="text-2xl font-extrabold text-[#191c1d] mb-2">Expand Your Portfolio</h3>
+//             <p className="text-[#424937] mb-8">
+//               Have a new space? Start a new listing in minutes and reach creative professionals worldwide.
+//             </p>
+//             <Link
+//               href="/owner/list-new"
+//               className="inline-flex items-center gap-2 px-8 py-4 bg-[#beff5f] text-[#111f00] rounded-2xl font-extrabold text-lg hover:scale-105 transition-all shadow-lg"
+//             >
+//               <PlusCircleIcon className="w-5 h-5" />
+//               Start Drafting
+//             </Link>
+//           </div>
+//         </div>
+//       </div>
+//     </div>
+//   );
+// }
 
 // 'use client';
 
