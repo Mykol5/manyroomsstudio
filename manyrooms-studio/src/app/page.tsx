@@ -152,11 +152,25 @@ export default function HomePage() {
   const [searchLocation, setSearchLocation] = useState('');
   const [isSearching, setIsSearching] = useState(false);
 
-  const chatSequence: ChatMessage[] = [
-    { text: "Hi! Is the studio available for a 4-hour shoot this Friday?", type: "user" },
-    { text: "Hey! Yes, we have a slot from 2 PM - 6 PM. Want me to book you in?", type: "owner" },
-    { text: "Perfect, sending the request now!", type: "user" },
-  ];
+  // const chatSequence: ChatMessage[] = [
+  //   { text: "Hi! Is the studio available for a 4-hour shoot this Friday?", type: "user" },
+  //   { text: "Hey! Yes, we have a slot from 2 PM - 6 PM. Want me to book you in?", type: "owner" },
+  //   { text: "Perfect, sending the request now!", type: "user" },
+  // ];
+
+  // In your component, update the chatSequence for two different conversations:
+const chatSequence: ChatMessage[] = [
+  // Thread 1 - Studio Booking
+  { text: "Hi! Is the studio available for a 4-hour shoot this Friday?", type: "user" },
+  { text: "Hey! Yes, we have a slot from 2 PM - 6 PM. Want me to book you in?", type: "owner" },
+  { text: "Perfect, sending the request now!", type: "user" },
+];
+
+// For Thread 2 - Production Inquiry  
+const chatSequence2: ChatMessage[] = [
+  { text: "Is the studio free next Thursday?", type: "user" },
+  { text: "Yes! 10am - 6pm available.", type: "owner" },
+];
 
   const allReviews = [
     { text: "ManyRooms transformed how we book studio spaces. The search is incredibly accurate!", name: "Sarah Chen", role: "Creative Director, Vogue", initials: "SC", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=150" },
@@ -364,7 +378,7 @@ export default function HomePage() {
       </div>
 
       {/* ============ HERO SECTION - No Phone Mockup ============ */}
-      <header className="relative min-h-screen flex items-center pt-24 overflow-hidden bg-gradient-to-br from-[#0f172a] via-[#1e1b4b] to-[#312e81]">
+      {/* <header className="relative min-h-screen flex items-center pt-24 overflow-hidden bg-gradient-to-br from-[#0f172a] via-[#1e1b4b] to-[#312e81]">
         <div className="absolute inset-0 z-0">
           <img
             src="https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?auto=format&fit=crop&q=80&w=2000"
@@ -474,7 +488,178 @@ export default function HomePage() {
             </div>
           </div>
         </div>
-      </header>
+      </header> */}
+
+
+    {/* ============ HERO SECTION - No Phone Mockup ============ */}
+<header className="relative min-h-screen flex items-center pt-24 overflow-hidden bg-gradient-to-br from-[#0f172a] via-[#1e1b4b] to-[#312e81]">
+  <div className="absolute inset-0 z-0">
+    <img
+      src="https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?auto=format&fit=crop&q=80&w=2000"
+      alt="Creative studio space"
+      className="w-full h-full object-cover opacity-40 animate-kenburns"
+    />
+    <div className="absolute inset-0 bg-gradient-to-r from-[#0f172a]/90 via-[#0f172a]/70 to-transparent"></div>
+  </div>
+
+  {/* Animated background blobs */}
+  <div className="absolute top-16 right-[8%] w-72 h-72 rounded-full bg-[#A78BFA]/20 blur-[100px] animate-float-slow pointer-events-none z-0"></div>
+  <div className="absolute bottom-0 left-[2%] w-96 h-96 rounded-full bg-[#34D399]/15 blur-[120px] animate-float-slower pointer-events-none z-0"></div>
+  <div className="absolute top-1/3 left-[35%] w-56 h-56 rounded-full bg-[#FF6B6B]/10 blur-[90px] animate-float-slow pointer-events-none z-0" style={{ animationDelay: '2s' }}></div>
+
+  <div className="relative z-10 w-full max-w-[1440px] mx-auto px-4 md:px-16 grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
+    <div className="flex flex-col items-start gap-6">
+      <div className={`transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+        <span className="inline-block px-4 py-1 rounded-full bg-gradient-to-r from-[#F1CB81] to-[#FB923C] text-[#0f172a] font-bold text-sm uppercase tracking-wider mb-4 pulse-dot">The Creative Evolution</span>
+        <h1 className="text-[56px] leading-[62px] md:text-[84px] md:leading-[92px] font-extrabold text-white tracking-tighter">
+          Space <span className="text-[#F1CB81] italic">smarter</span>,<br/>not harder.
+        </h1>
+      </div>
+      <p className={`text-lg text-white/80 max-w-xl transition-all duration-700 delay-100 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+        Monetize your creative square footage with powerful automations for booking, lighting, and access. Join 1M+ creators worldwide.
+      </p>
+
+      {/* Search Bar with Date */}
+      <div className={`w-full max-w-2xl transition-all duration-700 delay-200 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+        <form onSubmit={handleSearch} className="bg-white/10 backdrop-blur-md border border-white/20 p-2 rounded-[32px] flex flex-col md:flex-row items-stretch md:items-center gap-2 shadow-xl transition-shadow duration-500 focus-within:shadow-[0_0_0_4px_rgba(241,203,129,0.25)] focus-within:border-[#F1CB81]/50">
+          {/* Search Input */}
+          <div className="flex-grow flex items-center px-4">
+            <MagnifyingGlassIcon className="w-5 h-5 text-[#F1CB81] mr-3 flex-shrink-0" />
+            <input
+              className="w-full bg-transparent border-none focus:ring-0 text-base outline-none text-white placeholder:text-white/60"
+              placeholder="Describe the aesthetic (e.g. '70s synth-wave desert loft')"
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          
+          <div className="hidden md:block w-px h-8 bg-white/20"></div>
+          
+          {/* Location Input */}
+          <div className="flex-grow flex items-center px-4">
+            <MapPinIcon className="w-5 h-5 text-[#F1CB81] mr-3 flex-shrink-0" />
+            <input
+              className="w-full bg-transparent border-none focus:ring-0 text-base outline-none text-white placeholder:text-white/60"
+              placeholder="Location or country"
+              type="text"
+              value={searchLocation}
+              onChange={(e) => setSearchLocation(e.target.value)}
+            />
+          </div>
+          
+          <div className="hidden md:block w-px h-8 bg-white/20"></div>
+          
+          {/* Date Input */}
+          <div className="flex-grow flex items-center px-4">
+            <span className="material-symbols-outlined text-[#F1CB81] mr-3 text-xl">calendar_today</span>
+            <input
+              className="w-full bg-transparent border-none focus:ring-0 text-base outline-none text-white placeholder:text-white/60 [color-scheme:dark]"
+              placeholder="Select date"
+              type="date"
+              min={new Date().toISOString().split('T')[0]}
+              onChange={(e) => {
+                // Handle date selection
+                console.log('Selected date:', e.target.value);
+              }}
+            />
+          </div>
+          
+          <button
+            type="submit"
+            disabled={isSearching}
+            className="btn-shine bg-[#F1CB81] text-[#0f172a] px-8 py-4 rounded-[24px] font-bold flex items-center justify-center gap-2 hover:bg-[#FF6B6B] hover:text-white hover:shadow-lg hover:shadow-[#FF6B6B]/40 transition-all whitespace-nowrap disabled:opacity-50"
+          >
+            <MagnifyingGlassIcon className={`w-4 h-4 ${isSearching ? 'animate-spin' : ''}`} />
+            {isSearching ? 'Searching...' : 'Search'}
+          </button>
+        </form>
+        
+        <div className="flex gap-4 mt-4 px-4 overflow-x-auto whitespace-nowrap">
+          <span className="text-white/60 text-sm font-bold">Popular:</span>
+          <button onClick={() => { setSearchQuery('photography studio'); setSearchLocation('London'); handleSearch(); }} className="text-[#F1CB81] hover:underline text-sm inline-flex items-center gap-1.5 hover:text-white transition-colors">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#F1CB81] pulse-dot"></span>#PhotographyStudios
+          </button>
+          <button onClick={() => { setSearchQuery('music recording'); handleSearch(); }} className="text-[#A78BFA] hover:underline text-sm inline-flex items-center gap-1.5 hover:text-white transition-colors">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#A78BFA] pulse-dot" style={{ animationDelay: '0.6s' }}></span>#MusicRooms
+          </button>
+          <button onClick={() => { setSearchQuery('podcast space'); handleSearch(); }} className="text-[#34D399] hover:underline text-sm inline-flex items-center gap-1.5 hover:text-white transition-colors">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#34D399] pulse-dot" style={{ animationDelay: '1.2s' }}></span>#PodcastSpaces
+          </button>
+        </div>
+      </div>
+    </div>
+
+    {/* Premium Chat Animation - Two Threads */}
+    <div className="hidden lg:flex flex-col items-center justify-center relative h-[550px]">
+      <div className="relative w-full max-w-sm">
+        
+        {/* Chat Thread 1 - Studio Owner (Top) */}
+        <div className="absolute top-0 left-0 right-0">
+          {phoneMessages.slice(0, 2).map((msg, idx) => (
+            <div
+              key={`thread1-${idx}`}
+              className={`absolute chat-bubble-premium ${
+                msg.type === 'user' ? 'chat-bubble-user-premium' : 'chat-bubble-owner-premium'
+              }`}
+              style={{
+                animationDelay: `${idx * 2.2}s`,
+                top: `${10 + (idx * 70)}px`,
+                left: msg.type === 'user' ? '45%' : '5%',
+              }}
+            >
+              <div className={`px-4 py-2.5 rounded-2xl text-xs font-medium shadow-lg ${
+                msg.type === 'user' 
+                  ? 'bg-[#91ADCD] text-white rounded-tr-none' 
+                  : 'bg-[#F1CB81] text-[#0f172a] rounded-tl-none'
+              }`}>
+                {msg.text}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Chat Thread 2 - Production Manager (Bottom) */}
+        <div className="absolute top-[180px] left-0 right-0">
+          {phoneMessages.slice(0, 2).map((msg, idx) => (
+            <div
+              key={`thread2-${idx}`}
+              className={`absolute chat-bubble-premium ${
+                msg.type === 'user' ? 'chat-bubble-user-premium' : 'chat-bubble-owner-premium'
+              }`}
+              style={{
+                animationDelay: `${1.5 + (idx * 2.2)}s`,
+                top: `${10 + (idx * 70)}px`,
+                left: msg.type === 'user' ? '10%' : '40%',
+              }}
+            >
+              <div className={`px-4 py-2.5 rounded-2xl text-xs font-medium shadow-lg ${
+                msg.type === 'user' 
+                  ? 'bg-[#A78BFA] text-white rounded-tl-none' 
+                  : 'bg-[#34D399] text-white rounded-tr-none'
+              }`}>
+                {msg.type === 'user' ? "Is the studio free next Thursday?" : "Yes! 10am - 6pm available."}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Loading dots */}
+        {phoneMessages.length === 0 && (
+          <div className="flex items-center justify-center gap-1.5 h-full">
+            <span className="w-2.5 h-2.5 rounded-full bg-white/30 animate-bounce" style={{ animationDelay: '0ms' }}></span>
+            <span className="w-2.5 h-2.5 rounded-full bg-white/30 animate-bounce" style={{ animationDelay: '150ms' }}></span>
+            <span className="w-2.5 h-2.5 rounded-full bg-white/30 animate-bounce" style={{ animationDelay: '300ms' }}></span>
+          </div>
+        )}
+
+        {/* Decorative connecting lines */}
+        <div className="absolute top-[170px] left-[30%] w-[120px] h-[2px] bg-gradient-to-r from-[#F1CB81]/20 to-[#A78BFA]/20 animate-pulse"></div>
+        <div className="absolute top-[170px] right-[30%] w-[120px] h-[2px] bg-gradient-to-l from-[#F1CB81]/20 to-[#34D399]/20 animate-pulse" style={{ animationDelay: '0.5s' }}></div>
+      </div>
+    </div>
+  </div>
+</header>
 
       {/* Reviews Section */}
       {/* <section className="py-16 md:py-20 bg-white overflow-hidden">
@@ -1319,6 +1504,74 @@ export default function HomePage() {
           95% { opacity: 0; transform: translateY(-20px) scale(0.9); }
           100% { opacity: 0; transform: translateY(-30px) scale(0.8); }
         }
+
+        /* Premium Chat Bubble Animations */
+@keyframes slideUpChat {
+  0% { 
+    opacity: 0; 
+    transform: translateY(30px) scale(0.85) rotate(-2deg);
+  }
+  15% { 
+    opacity: 1; 
+    transform: translateY(-5px) scale(1.02) rotate(0.5deg);
+  }
+  25% { 
+    transform: translateY(2px) scale(0.98) rotate(0deg);
+  }
+  35% { 
+    transform: translateY(0) scale(1) rotate(0deg);
+  }
+  85% { 
+    opacity: 1; 
+    transform: translateY(0) scale(1) rotate(0deg);
+  }
+  95% { 
+    opacity: 0.5; 
+    transform: translateY(-10px) scale(0.95);
+  }
+  100% { 
+    opacity: 0; 
+    transform: translateY(-20px) scale(0.9);
+  }
+}
+
+.chat-bubble-premium {
+  position: absolute;
+  animation: slideUpChat 8s ease-in-out infinite;
+  opacity: 0;
+}
+
+.chat-bubble-user-premium {
+  animation-delay: 0s;
+}
+
+.chat-bubble-owner-premium {
+  animation-delay: 1.2s;
+}
+
+/* For date input styling */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1) brightness(0.8);
+  cursor: pointer;
+}
+input[type="date"]::-webkit-datetime-edit {
+  color: white;
+}
+input[type="date"]::-webkit-datetime-edit-fields-wrapper {
+  color: white;
+}
+input[type="date"]::-webkit-datetime-edit-text {
+  color: rgba(255,255,255,0.5);
+}
+input[type="date"]::-webkit-datetime-edit-month-field {
+  color: white;
+}
+input[type="date"]::-webkit-datetime-edit-day-field {
+  color: white;
+}
+input[type="date"]::-webkit-datetime-edit-year-field {
+  color: white;
+}
 
         @media (prefers-reduced-motion: reduce) {
           .reveal, .animate-float-slow, .animate-float-slower, .animate-float-phone,
