@@ -477,7 +477,7 @@ export default function HomePage() {
       </header>
 
       {/* Reviews Section */}
-      <section className="py-16 md:py-20 bg-white overflow-hidden">
+      {/* <section className="py-16 md:py-20 bg-white overflow-hidden">
         <div className="max-w-[1440px] mx-auto px-4 md:px-16 mb-10">
           <Reveal>
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
@@ -541,8 +541,84 @@ export default function HomePage() {
             ))}
           </div>
         </div>
-      </section>
+      </section> */}
 
+
+
+{/* Reviews Section - Classic Black & White */}
+<section className="py-12 md:py-16 bg-white overflow-hidden">
+  <div className="max-w-[1440px] mx-auto px-4 md:px-16 mb-8">
+    <Reveal>
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+          <span className="inline-block px-3 py-1 border border-[#0f172a]/20 text-[#0f172a] font-mono text-[10px] uppercase tracking-wider mb-2">
+            Trusted by Creators
+          </span>
+          <h3 className="text-2xl md:text-3xl font-bold text-[#0f172a] font-mono">
+            What our <span className="text-[#0f172a] border-b-2 border-[#0f172a]">community</span> says
+          </h3>
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="flex -space-x-2">
+            {[1,2,3,4,5].map(i => (
+              <div key={i} className="w-7 h-7 rounded-full border border-[#0f172a]/20 bg-white flex items-center justify-center text-[8px] font-bold text-[#0f172a] shadow-sm hover:-translate-y-1 hover:z-10 transition-transform font-mono">
+                ★
+              </div>
+            ))}
+          </div>
+          <div>
+            <p className="text-sm font-bold text-[#0f172a] font-mono">4.9 / 5.0</p>
+            <p className="text-[10px] text-[#0f172a]/50 font-mono">from 2,000+ reviews</p>
+          </div>
+        </div>
+      </div>
+    </Reveal>
+  </div>
+
+  <div className="relative">
+    <div className="pointer-events-none absolute inset-y-0 left-0 w-16 md:w-40 bg-gradient-to-r from-white to-transparent z-10"></div>
+    <div className="pointer-events-none absolute inset-y-0 right-0 w-16 md:w-40 bg-gradient-to-l from-white to-transparent z-10"></div>
+    <div className="flex gap-4 animate-scroll-right hover:pause-animation pb-4 px-4">
+      {[...allReviews, ...allReviews].map((review, i) => (
+        <div
+          key={`review-${i}`}
+          className="min-w-[220px] max-w-[220px] md:min-w-[260px] md:max-w-[260px] bg-white rounded-xl p-4 border border-[#0f172a]/10 hover:border-[#0f172a]/40 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex-shrink-0 flex flex-col animate-card"
+          style={{ animationDelay: `${i * 0.05}s` }}
+        >
+          <div className="flex items-center gap-0.5 mb-2">
+            {[...Array(5)].map((_, s) => (
+              <span key={s} className="text-[#0f172a] text-xs font-mono">★</span>
+            ))}
+          </div>
+          
+          <p className="text-[#0f172a]/80 text-[11px] leading-relaxed mb-3 flex-grow line-clamp-3 font-mono">
+            "{review.text}"
+          </p>
+          
+          <div className="flex items-center gap-2.5 pt-2.5 border-t border-[#0f172a]/10">
+            <div className="w-8 h-8 rounded-full overflow-hidden shrink-0 border border-[#0f172a]/20 bg-[#0f172a]/5 transition-all hover:border-[#0f172a]/40">
+              {review.avatar ? (
+                <img src={review.avatar} alt={review.name} className="w-full h-full object-cover grayscale" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center font-bold text-[10px] text-[#0f172a]/60 font-mono">
+                  {review.initials}
+                </div>
+              )}
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="font-bold text-[11px] text-[#0f172a] truncate font-mono">{review.name}</p>
+              <p className="text-[9px] text-[#0f172a]/40 truncate font-mono">{review.role}</p>
+            </div>
+            <span className="text-[#0f172a]/20 text-sm font-mono">"</span>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+
+      
       {/* ============ EVERYWHERE SECTION - 3 ROWS ============ */}
       <section className="py-20 md:py-24 bg-[#91ADCD]/10">
         <div className="max-w-[1440px] mx-auto px-4 md:px-16">
