@@ -378,7 +378,8 @@ const chatSequence2: ChatMessage[] = [
       </div>
 
       {/* ============ HERO SECTION - No Phone Mockup ============ */}
-      {/* <header className="relative min-h-screen flex items-center pt-24 overflow-hidden bg-gradient-to-br from-[#0f172a] via-[#1e1b4b] to-[#312e81]">
+      {false && (
+      <header className="relative min-h-screen flex items-center pt-24 overflow-hidden bg-gradient-to-br from-[#0f172a] via-[#1e1b4b] to-[#312e81]">
         <div className="absolute inset-0 z-0">
           <img
             src="https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?auto=format&fit=crop&q=80&w=2000"
@@ -488,7 +489,8 @@ const chatSequence2: ChatMessage[] = [
             </div>
           </div>
         </div>
-      </header> */}
+      </header>
+      )}
 
 
     {/* ============ HERO SECTION - No Phone Mockup ============ */}
