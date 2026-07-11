@@ -873,7 +873,7 @@ export default function HomePage() {
       </section>
 
       {/* Steps */}
-      <section className="py-20 md:py-24 bg-white">
+      {/* <section className="py-20 md:py-24 bg-white">
         <Reveal>
           <div className="max-w-[1440px] mx-auto px-4 md:px-16 text-center mb-12 md:mb-16">
             <h2 className="text-3xl md:text-5xl font-extrabold mb-4 text-[#0f172a]">Get up and running in <span className="italic text-[#FF6B6B]">3 simple steps</span>.</h2>
@@ -896,7 +896,102 @@ export default function HomePage() {
             </Reveal>
           ))}
         </div>
-      </section>
+      </section> */}
+
+
+{/* Why ManyRooms - 3 Steps Section */}
+<section className="py-20 md:py-24 bg-[#F1CB81] relative overflow-hidden">
+  {/* Background Image with Overlay */}
+  <div className="absolute inset-0 z-0">
+    <div className="absolute inset-0 bg-[#F1CB81]/85 mix-blend-multiply"></div>
+    <img 
+      src="https://images.unsplash.com/photo-1531123897727-8f129e1688ce?auto=format&fit=crop&q=80&w=2000" 
+      alt="Woman looking forward confidently" 
+      className="w-full h-full object-cover"
+    />
+  </div>
+  
+  {/* Decorative elements */}
+  <div className="absolute top-0 right-0 w-96 h-96 bg-[#FF6B6B]/10 rounded-full blur-3xl animate-float-slow pointer-events-none z-0"></div>
+  <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#0f172a]/5 rounded-full blur-3xl animate-float-slower pointer-events-none z-0"></div>
+  
+  <div className="max-w-[1440px] mx-auto px-4 md:px-16 relative z-10">
+    <Reveal>
+      <div className="text-center mb-12 md:mb-16">
+        <span className="inline-block px-4 py-1 rounded-full bg-[#0f172a] text-[#F1CB81] font-bold text-xs uppercase tracking-wider mb-4">
+          Why ManyRooms
+        </span>
+        <h2 className="text-3xl md:text-5xl font-extrabold mb-4 text-[#0f172a]">
+          Get up and running in <span className="italic text-[#FF6B6B]">3 simple steps</span>.
+        </h2>
+        <p className="text-base md:text-lg text-[#0f172a]/70 max-w-2xl mx-auto">
+          The most creative spaces, handled with care, no hidden costs.
+        </p>
+      </div>
+    </Reveal>
+
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-10">
+      {[
+        { 
+          icon: 'search', 
+          title: 'Search & Book', 
+          desc: 'We host the most sought after spaces in your city. Find and book the most creative spaces in the world.',
+          color: '#FF6B6B',
+          delay: 0
+        },
+        { 
+          icon: 'handshake', 
+          title: 'We handle the hard part', 
+          desc: 'No need to chase studios for availability. LIVE availability of all studios and creatives. Insurance and comprehensive support included.',
+          color: '#A78BFA',
+          delay: 130
+        },
+        { 
+          icon: 'payments', 
+          title: 'No hidden costs', 
+          desc: 'What you see is what you pay! Complete cost breakdown including add-ons, extra time and site fees. Budgeting made easy.',
+          color: '#34D399',
+          delay: 260
+        },
+      ].map((step, i) => (
+        <Reveal key={i} delay={step.delay}>
+          <div className="group relative bg-white/90 backdrop-blur-sm rounded-[32px] p-8 md:p-10 shadow-xl hover:-translate-y-2 hover:shadow-2xl transition-all duration-500 border border-white/20 h-full flex flex-col items-start">
+            {/* Icon Circle */}
+            <div className="w-16 h-16 rounded-full flex items-center justify-center mb-6 transition-all duration-300 group-hover:scale-110 group-hover:rotate-6" style={{ backgroundColor: step.color + '20' }}>
+              <span className="material-symbols-outlined text-3xl" style={{ color: step.color, fontVariationSettings: "'FILL' 1" }}>
+                {step.icon}
+              </span>
+            </div>
+            
+            <h3 className="text-xl md:text-2xl font-extrabold text-[#0f172a] mb-3 group-hover:text-[#FF6B6B] transition-colors">
+              {step.title}
+            </h3>
+            <p className="text-[#0f172a]/70 text-sm md:text-base leading-relaxed">
+              {step.desc}
+            </p>
+            
+            {/* Step number badge */}
+            <div className="absolute -top-3 -right-3 w-10 h-10 rounded-full bg-[#0f172a] text-[#F1CB81] text-sm font-bold flex items-center justify-center shadow-lg">
+              {String(i + 1).padStart(2, '0')}
+            </div>
+          </div>
+        </Reveal>
+      ))}
+    </div>
+
+    {/* Bottom CTA */}
+    <Reveal delay={400}>
+      <div className="mt-12 text-center">
+        <Link href="/spaces" className="inline-flex items-center gap-3 bg-[#0f172a] text-white px-8 py-4 rounded-full font-bold text-sm hover:bg-[#FF6B6B] hover:-translate-y-1 hover:shadow-xl hover:shadow-[#FF6B6B]/30 transition-all duration-300">
+          Start searching now
+          <span className="material-symbols-outlined text-lg">arrow_forward</span>
+        </Link>
+      </div>
+    </Reveal>
+  </div>
+</section>
+
+      
 
       {/* Featured Studios */}
       <section className="py-20 md:py-24 bg-gradient-to-br from-[#F1CB81]/20 to-[#91ADCD]/20 overflow-hidden">
