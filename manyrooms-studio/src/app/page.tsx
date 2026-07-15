@@ -1,80 +1,13 @@
 // app/page.tsx
 'use client';
 
-import { useEffect, useRef } from 'react';
-import Script from 'next/script';
-import Chatbot from '@/components/Chatbot';
+import Link from 'next/link';
 
 export default function HomePage() {
-  const preloaderRef = useRef<HTMLDivElement>(null);
-  const cursorRef = useRef<HTMLDivElement>(null);
-  const ballRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    // Preloader
-    const loader = preloaderRef.current;
-    if (loader) {
-      let count = 0;
-      const countText = loader.querySelector('.count__text');
-      const interval = setInterval(() => {
-        if (count < 100) {
-          count += Math.floor(Math.random() * 10) + 1;
-          if (count > 100) count = 100;
-          if (countText) countText.textContent = count.toString();
-        } else {
-          clearInterval(interval);
-          setTimeout(() => {
-            loader.classList.add('loaded');
-            setTimeout(() => {
-              if (loader.parentNode) {
-                loader.parentNode.removeChild(loader);
-              }
-            }, 500);
-          }, 300);
-        }
-      }, 50);
-    }
-
-    // Magic cursor
-    const cursor = cursorRef.current;
-    const ball = ballRef.current;
-    if (cursor && ball) {
-      const handleMouseMove = (e: MouseEvent) => {
-        cursor.style.left = e.clientX + 'px';
-        cursor.style.top = e.clientY + 'px';
-        ball.style.left = e.clientX + 'px';
-        ball.style.top = e.clientY + 'px';
-      };
-      document.addEventListener('mousemove', handleMouseMove);
-      return () => document.removeEventListener('mousemove', handleMouseMove);
-    }
-
-    // Back to top
-    const backToTop = document.getElementById('back_to_top');
-    if (backToTop) {
-      const handleScroll = () => {
-        if (window.scrollY > 300) {
-          backToTop.classList.add('show');
-        } else {
-          backToTop.classList.remove('show');
-        }
-      };
-      const handleClick = () => {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      };
-      window.addEventListener('scroll', handleScroll);
-      backToTop.addEventListener('click', handleClick);
-      return () => {
-        window.removeEventListener('scroll', handleScroll);
-        backToTop.removeEventListener('click', handleClick);
-      };
-    }
-  }, []);
-
   return (
     <>
-      {/* Preloader */}
-      <div ref={preloaderRef} id="loader" className="loader">
+      {/* ============ PRELOADER ============ */}
+      <div id="loader" className="loader">
         <div className="loader__wrapper">
           <div className="loader__content">
             <div className="loader__count">
@@ -86,12 +19,12 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Magic Cursor */}
-      <div ref={cursorRef} id="magic-cursor" className="cursor-white-bg">
-        <div ref={ballRef} id="ball"></div>
+      {/* ============ MAGIC CURSOR ============ */}
+      <div id="magic-cursor" className="cursor-white-bg">
+        <div id="ball"></div>
       </div>
 
-      {/* Back to Top */}
+      {/* ============ BACK TO TOP ============ */}
       <div className="back-to-top-wrapper">
         <button id="back_to_top" type="button" className="back-to-top-btn">
           <svg width="12" height="7" viewBox="0 0 12 7" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -102,47 +35,53 @@ export default function HomePage() {
 
       <div className="px-blur-bottom"></div>
 
-      {/* Header */}
-      <header>
-        <div className="tp-header-creative">
+      {/* ============ HEADER ============ */}
+      <div className="tp-header-creative">
+        <header>
           <div className="px-header-area header-transparent px-header-ptb px-header-style-black">
             <div className="row align-items-center">
               <div className="col-lg-4 col-md-3 col-6">
                 <div className="px-header-logo tp-el-logo">
-                  <a href="/">
-                    <img src="/logo-orange.png" alt="ManyRooms" style={{ width: '90px' }} />
-                  </a>
+                  <Link href="/">
+                    <img src="/images/pixora/logo-orange.png" alt="ManyRooms" style={{ width: '90px' }} />
+                  </Link>
                 </div>
               </div>
               <div className="col-lg-8 col-md-9 col-6">
                 <div className="px-header-box d-flex justify-content-end align-items-center">
                   <div className="px-header-menu tp-header-dropdown dropdown-white-bg d-none d-xl-block">
-                    <nav>
-                      <ul>
-                        <li className="has-dropdown">
-                          <a href="/">Home</a>
+                    <nav className="tp-mobile-menu-active">
+                      <ul className="tp-nav-menu">
+                        <li className="menu-item current-menu-item nav-item">
+                          <Link href="/" className="nav-links">Home</Link>
                         </li>
-                        <li className="has-dropdown">
-                          <a href="#">Pages</a>
-                          <ul className="tp-submenu">
-                            <li><a href="/about">About</a></li>
-                            <li><a href="/services">Services</a></li>
-                            <li><a href="/team">Team</a></li>
+                        <li className="menu-item menu-item-has-children dropdown has-dropdown nav-item">
+                          <Link href="#" className="nav-links">Pages</Link>
+                          <ul className="tp-submenu submenu sub-menu">
+                            <li className="menu-item nav-item">
+                              <Link href="/about" className="dropdown-items">About</Link>
+                            </li>
+                            <li className="menu-item nav-item">
+                              <Link href="/services" className="dropdown-items">Services</Link>
+                            </li>
+                            <li className="menu-item nav-item">
+                              <Link href="/team" className="dropdown-items">Team</Link>
+                            </li>
                           </ul>
                         </li>
-                        <li className="has-dropdown">
-                          <a href="/spaces">Spaces</a>
+                        <li className="menu-item nav-item">
+                          <Link href="/spaces" className="nav-links">Spaces</Link>
                         </li>
-                        <li className="has-dropdown">
-                          <a href="/blog">Blog</a>
+                        <li className="menu-item nav-item">
+                          <Link href="/blog" className="nav-links">Blog</Link>
                         </li>
-                        <li className="has-dropdown">
-                          <a href="/contact">Contact</a>
+                        <li className="menu-item nav-item">
+                          <Link href="/contact" className="nav-links">Contact</Link>
                         </li>
                       </ul>
                     </nav>
                   </div>
-                  <div className="px-header-action">
+                  <div className="px-header-action tp-el-block">
                     <button className="px-header-bar tp-offcanvas-open-btn">
                       <span></span>
                       <span></span>
@@ -152,15 +91,15 @@ export default function HomePage() {
               </div>
             </div>
           </div>
-        </div>
-      </header>
+        </header>
+      </div>
 
-      {/* Smooth Scroll Wrapper */}
+      {/* ============ SMOOTH SCROLL WRAPPER ============ */}
       <div id="smooth-wrapper">
         <div id="smooth-content">
-          
-          {/* ============ HERO SECTION ============ */}
-          <div className="bf-hero-area bf-hero-3-spacing bf-hero-anime-area">
+
+          {/* ============ HERO ============ */}
+          <div className="bf-hero-area bf-hero-3-spacing bf-hero-anime-area tp-el-section">
             <div className="container">
               <div className="row">
                 <div className="col-12">
@@ -174,13 +113,13 @@ export default function HomePage() {
                       </div>
                       <span className="bf-item-anime marque d-inline-block">CREATIVE</span>
                       <div className="spacing pr-140 d-inline-block p-relative">
-                        <span className="bf-item-anime-md marque d-inline-block">experien­ces</span>
-                        <img decoding="async" className="bf-hero-3-thumb d-none d-xl-inline-block" src="https://images.unsplash.com/photo-1554048612-b6a482bc67e5?auto=format&fit=crop&q=80&w=150" alt="" />
+                        <span className="bf-item-anime-md marque d-inline-block">experiences</span>
+                        <img className="bf-hero-3-thumb d-none d-xl-inline-block" src="https://images.unsplash.com/photo-1554048612-b6a482bc67e5?auto=format&fit=crop&q=80&w=150" alt="" />
                       </div>
                       <span className="bf-item-anime marque d-inline-block">that</span>
                       <div className="spacing pr-35 d-inline-block p-relative">
                         <span className="bf-item-anime-md marque d-inline-block">Shape</span>
-                        <img decoding="async" className="bf-hero-3-thumb-2 d-none d-xl-inline-block" src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&q=80&w=150" alt="" />
+                        <img className="bf-hero-3-thumb-2 d-none d-xl-inline-block" src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&q=80&w=150" alt="" />
                       </div>
                       <span className="bf-item-anime marque d-inline-block">TOMMOROW.</span>
                     </h2>
@@ -189,10 +128,10 @@ export default function HomePage() {
                 <div className="col-lg-6 col-md-3">
                   <div className="bf-rounded-btn-wrap text-md-end mt-50 mr-185 mb-30">
                     <div className="btn_wrapper d-inline-block">
-                      <a href="/spaces" className="bf-btn-rounded btn-item tp-el-btn">
+                      <Link href="/spaces" className="bf-btn-rounded btn-item tp-el-btn">
                         Discover<br /> Work
                         <i className="bf-btn-circle-dot"></i>
-                      </a>
+                      </Link>
                     </div>
                   </div>
                 </div>
@@ -207,28 +146,28 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Hero Video */}
-          <div className="bf-hero-3-video-wrap">
+          {/* Hero Video Background */}
+          <div className="bf-hero-3-video-wrap tp-el-section tp-el-video">
             <video loop muted autoPlay playsInline>
               <source src="https://videos.pexels.com/video-files/3196294/3196294-hd_1920_1080_25fps.mp4" type="video/mp4" />
             </video>
           </div>
 
-          {/* ============ ABOUT SECTION ============ */}
-          <section className="py-20 md:py-28">
+          {/* ============ ABOUT ============ */}
+          <section style={{ padding: '5rem 0' }}>
             <div className="container">
               <div className="row">
                 <div className="col-lg-4">
                   <span className="section-label">About us</span>
                 </div>
                 <div className="col-lg-8">
-                  <h2 className="about-heading reveal-text">
+                  <h2 className="tp-section-tittle mb-50 tp-el-title reveal-text">
                     An independent web design and branding agency in Manchester set up 2010 who care, build relationships, have industry experience, and win awards.
                   </h2>
                 </div>
               </div>
 
-              <div className="row mt-14">
+              <div className="row mt-5">
                 <div className="col-lg-3">
                   <img src="https://images.unsplash.com/photo-1554048612-b6a482bc67e5?auto=format&fit=crop&q=80&w=256" alt="" className="rounded-2xl w-full" />
                 </div>
@@ -237,18 +176,28 @@ export default function HomePage() {
                 </div>
                 <div className="col-lg-5">
                   <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=140&h=54" alt="" className="mb-4" />
-                  <p className="text-muted mb-8">Driven by a passion for innovation, we specialize in delivering top-quality design solutions</p>
+                  <p className="text-muted mb-8">
+                    Driven by a passion for innovation, we specialize in delivering top-quality design solutions
+                  </p>
                   <div className="row">
                     <div className="col-6">
-                      <div className="counter">
-                        <span className="counter-number" data-target="98">0</span>%
-                        <span className="counter-label">Clients Satisfied and Repeating</span>
+                      <div className="elementor-counter">
+                        <div className="elementor-counter-number-wrapper">
+                          <span className="elementor-counter-number-prefix"></span>
+                          <span className="elementor-counter-number" data-duration="2000" data-to-value="98">0</span>
+                          <span className="elementor-counter-number-suffix">%</span>
+                        </div>
+                        <div className="elementor-counter-title">Clients Satisfied and Repeating</div>
                       </div>
                     </div>
                     <div className="col-6">
-                      <div className="counter">
-                        <span className="counter-number" data-target="125">0</span>+
-                        <span className="counter-label">Projects Completed in 24 Countries</span>
+                      <div className="elementor-counter">
+                        <div className="elementor-counter-number-wrapper">
+                          <span className="elementor-counter-number-prefix"></span>
+                          <span className="elementor-counter-number" data-duration="2000" data-to-value="125">0</span>
+                          <span className="elementor-counter-number-suffix">+</span>
+                        </div>
+                        <div className="elementor-counter-title">Projects Completed in 24 Countries</div>
                       </div>
                     </div>
                   </div>
@@ -257,38 +206,41 @@ export default function HomePage() {
             </div>
           </section>
 
-          {/* ============ SERVICES SECTION ============ */}
-          <section className="services-section py-20 md:py-28">
+          {/* ============ SERVICES ============ */}
+          <section className="services-section" style={{ padding: '5rem 0', background: '#f8f9fb' }}>
             <div className="container">
-              <div className="row mb-14">
+              <div className="row mb-5">
                 <div className="col-lg-4">
                   <span className="section-label">OUR SERVICES</span>
                 </div>
                 <div className="col-lg-8">
-                  <h2 className="services-main-title">Service we&apos;re<br />always provides</h2>
-                  <p className="text-muted">ManyRooms power of our 8+ years of experience. We build excellence works. That will help you to grow your business products.</p>
+                  <h2 className="services-main-title">
+                    Service we&apos;re<br />always provides
+                  </h2>
+                  <p className="text-muted mt-3">
+                    ManyRooms power of our 8+ years of experience. We build excellence works. That will help you to grow your business products.
+                  </p>
                 </div>
               </div>
 
-              {/* Service Items */}
               {[
-                { title: 'Development', img: 'https://images.unsplash.com/photo-1598653222000-6b7b7a552625?auto=format&fit=crop&q=80&w=400', tags: ['UX Design', 'User Testing', 'Product Prototype', 'Mobile UI', 'Web app design'] },
-                { title: 'Marketing', img: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=400', tags: ['SEO', 'Content Strategy', 'Social Media', 'Email Marketing', 'PPC'] },
-                { title: 'Graphics', img: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=400', tags: ['Branding', 'Illustration', 'Print Design', 'Packaging', 'Logo Design'] },
-                { title: 'Technology', img: 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?auto=format&fit=crop&q=80&w=400', tags: ['Web Dev', 'App Dev', 'API', 'Cloud', 'DevOps'] },
+                { title: 'Development', img: 'https://images.unsplash.com/photo-1598653222000-6b7b7a552625?auto=format&fit=crop&q=80&w=400' },
+                { title: 'Marketing', img: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=400' },
+                { title: 'Graphics', img: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=400' },
+                { title: 'Technology', img: 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?auto=format&fit=crop&q=80&w=400' },
               ].map((service, i) => (
                 <div key={i} className="bf-service-item-3 fix">
                   <div className="row gx-0">
                     <div className="col-lg-6">
                       <div className="bf-service-item-3-wrap d-flex align-items-center">
                         <div className="bf-service-item-3-thumb">
-                          <a href="/services" className="common-underline">
+                          <Link href="/services" className="common-underline tp-el-title">
                             <img src={service.img} alt={service.title} />
-                          </a>
+                          </Link>
                         </div>
                         <div className="bf-service-item-3-text">
                           <h4 className="bf-service-item-3-title">
-                            <a href="/services" className="common-underline">{service.title}</a>
+                            <Link href="/services" className="common-underline tp-el-title">{service.title}</Link>
                           </h4>
                         </div>
                       </div>
@@ -296,18 +248,18 @@ export default function HomePage() {
                     <div className="col-lg-6">
                       <div className="bf-service-item-3-wrapper p-relative fix">
                         <div className="bf-service-item-3-btn">
-                          <a href="/services" className="common-underline">
+                          <Link href="/services" className="common-underline tp-el-title">
                             <span>
                               <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
                                 <path d="M1 13L13 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                                 <path d="M1 1H13V13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                               </svg>
                             </span>
-                          </a>
+                          </Link>
                         </div>
                         <div className="bf-service-item-3-slider">
                           <div className="bf-service-item-3-tags">
-                            {[...service.tags, ...service.tags, ...service.tags].map((tag, ti) => (
+                            {['UX Design', 'User Testing', 'Product Prototype', 'Mobile UI', 'Web app design', 'UX Design', 'User Testing', 'Product Prototype', 'Mobile UI', 'Web app design', 'UX Design', 'User Testing', 'Product Prototype', 'Mobile UI', 'Web app design'].map((tag, ti) => (
                               <span key={ti}>{tag}</span>
                             ))}
                           </div>
@@ -320,10 +272,10 @@ export default function HomePage() {
             </div>
           </section>
 
-          {/* ============ PORTFOLIO SECTION ============ */}
-          <section className="py-20 md:py-28">
+          {/* ============ PORTFOLIO ============ */}
+          <section style={{ padding: '5rem 0' }}>
             <div className="container">
-              <div className="row mb-16">
+              <div className="row mb-5 align-items-end">
                 <div className="col-lg-8">
                   <h4 className="bf-portfolio-3-sectitle mb-45">
                     <span className="d-block text-end reveal-text">recent</span>
@@ -332,12 +284,12 @@ export default function HomePage() {
                   <p>In the creative wilderness,<br />our work becomes the beacon<br />clients grow to love.</p>
                 </div>
                 <div className="col-lg-4 text-lg-end">
-                  <a href="/spaces" className="tp-btn-yellow-green green-solid btn-60">
+                  <Link href="/spaces" className="tp-btn-yellow-green green-solid btn-60 tp-el-btn">
                     <span>
                       <span className="text-1">Explore Work</span>
                       <span className="text-2">Explore Work</span>
                     </span>
-                  </a>
+                  </Link>
                 </div>
               </div>
 
@@ -351,17 +303,17 @@ export default function HomePage() {
                   <div key={i} className="bf-portfolio-3-item mb-80">
                     <div className="row align-items-center">
                       <div className={`col-xl-5 ${isReversed ? '' : 'order-xl-0 order-1'}`}>
-                        <div className={`bf-portfolio-3-content ${isReversed ? 'pl-200' : ''}`}>
-                          <h4 className="bf-portfolio-3-title">
-                            <a href="#">{item.title}</a>
+                        <div className={`bf-portfolio-3-content tp-el-content ${isReversed ? 'pl-200' : ''}`}>
+                          <h4 className="bf-portfolio-3-title tp-el-title">
+                            <Link href="#">{item.title}</Link>
                           </h4>
-                          <span className="mb-50">{item.cat}</span>
-                          <a className="bf-btn bf-btn-border bf-btn-xl d-inline-flex align-items-center" href="#">
+                          <span className="mb-50 tp-el-des">{item.cat}</span>
+                          <Link href="#" className="bf-btn bf-btn-border bf-btn-xl d-inline-flex align-items-center tp-el-btn">
                             <span>
                               <span className="text-1">View project</span>
                               <span className="text-2">View project</span>
                             </span>
-                          </a>
+                          </Link>
                         </div>
                       </div>
                       <div className={`col-xl-7 ${isReversed ? '' : 'order-xl-1 order-0'}`}>
@@ -377,107 +329,124 @@ export default function HomePage() {
           </section>
 
           {/* ============ TEXT SLIDER ============ */}
-          <div className="tp-text-slider-area bf-text-slider-style">
+          <div className="tp-text-slider-area bf-text-slider-style tp-el-section">
             <div className="tp-text-slide-top">
-              <div className="tp-text-slide-active">
-                <div className="slide-transtion" style={{ display: 'flex', animation: 'scrollRight 30s linear infinite' }}>
+              <div className="swiper-container tp-text-slide-active">
+                <div className="swiper-wrapper slide-transtion">
                   {[...Array(3)].map((_, i) => (
-                    <span key={i} className="tp-top-slider" style={{ fontFamily: 'ThunderMed, sans-serif', fontSize: 'clamp(2rem, 5vw, 4rem)', fontWeight: 900, color: 'var(--yellow)', textTransform: 'uppercase', whiteSpace: 'nowrap', paddingRight: '2rem' }}>
-                      Award & recognitions
-                    </span>
+                    <div key={i} className="swiper-slide">
+                      <div className="tp-text-content">
+                        <span className="tp-top-slider">Award & recognitions</span>
+                      </div>
+                    </div>
                   ))}
                 </div>
               </div>
             </div>
             <div className="tp-text-slide-bottom">
-              <div className="tp-text-slide-active" style={{ direction: 'rtl' }}>
-                <div className="slide-transtion" style={{ display: 'flex', animation: 'scrollLeft 30s linear infinite' }}>
+              <div className="swiper-container tp-text-slide-active" dir="rtl">
+                <div className="swiper-wrapper slide-transtion">
                   {[...Array(3)].map((_, i) => (
-                    <span key={i} className="tp-bottom-slider" style={{ fontFamily: 'ThunderMed, sans-serif', fontSize: 'clamp(2rem, 5vw, 4rem)', fontWeight: 900, color: 'var(--yellow)', textTransform: 'uppercase', whiteSpace: 'nowrap', paddingRight: '2rem' }}>
-                      Award & recognitions
-                    </span>
+                    <div key={i} className="swiper-slide">
+                      <div className="tp-text-content">
+                        <span className="tp-bottom-slider">Award & recognitions</span>
+                      </div>
+                    </div>
                   ))}
                 </div>
               </div>
             </div>
           </div>
 
-          {/* ============ AWARDS SECTION ============ */}
-          <section className="py-20 bg-dark">
+          {/* ============ AWARDS ============ */}
+          <section className="awards-section-dark" style={{ padding: '4rem 0', background: '#0f172a' }}>
             <div className="container">
-              {[
-                { title: "A' Design Awards & competition", result: 'Silver Medal' },
-                { title: 'AWWWARDS', result: '2X - Honorable' },
-                { title: 'CSS Design Awards', result: '2X - Website of the day' },
-                { title: 'FWA', result: '2X - Website of the day' },
-                { title: 'CSS Reels', result: 'Featured of the day' },
-                { title: 'Web Gurus', result: '2X - Guru of the day' },
-              ].map((award, i) => (
-                <div key={i} className="design-award-item hover-reveal-item p-relative" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.5rem 0', borderBottom: '1px solid rgba(255,255,255,0.06)', color: '#fff' }}>
-                  <h4 style={{ fontSize: '1.25rem', fontWeight: 600 }}>{award.title}</h4>
-                  <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.85rem' }}>{award.result}</span>
+              <div className="design-award-wrap">
+                <div className="row row-cols-1">
+                  {[
+                    { title: "A' Design Awards & competition", result: 'Silver Medal' },
+                    { title: 'AWWWARDS', result: '2X - Honorable' },
+                    { title: 'CSS Design Awards', result: '2X - Website of the day' },
+                    { title: 'FWA', result: '2X - Website of the day' },
+                    { title: 'CSS Reels', result: 'Featured of the day' },
+                    { title: 'Web Gurus', result: '2X - Guru of the day' },
+                  ].map((award, i) => (
+                    <div key={i} className="col tp-el-full-bg">
+                      <div className="design-award-item hover-reveal-item p-relative tp-el-title-hover">
+                        <div className="design-award-content design-award-content-xs d-flex align-items-center justify-content-between">
+                          <h4 className="tp-el-title">{award.title}</h4>
+                          <span className="tp-el-description">{award.result}</span>
+                        </div>
+                        <div className="design-award-reveal-img" style={{ backgroundImage: `url(https://images.unsplash.com/photo-1554048612-b6a482bc67e5?auto=format&fit=crop&q=80&w=500)` }}></div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              </div>
             </div>
           </section>
 
-          {/* ============ CONTACT SECTION ============ */}
-          <section className="py-20 md:py-28 bg-dark text-white">
+          {/* ============ CONTACT ============ */}
+          <section className="contact-section-dark" style={{ padding: '5rem 0', background: '#0f172a', color: '#fff' }}>
             <div className="container">
               <div className="row">
                 <div className="col-lg-6">
-                  <span className="bf-contact-subtitle">ManyRooms@</span>
-                  <h3 className="bf-contact-title mb-25">Leave a reply</h3>
-                  <form className="tp-creative-contact-form">
-                    <div className="tp-contact-form-input mb-15">
-                      <label className="tp-label" htmlFor="name">Name *</label>
-                      <input type="text" id="name" className="tp-input" />
+                  <div className="bf-contact-form tp-el-section">
+                    <span className="bf-contact-subtitle tp-el-subtitle">ManyRooms@</span>
+                    <h3 className="bf-contact-title mb-25 tp-el-title">Leave a reply</h3>
+                    <div className="tp-page-contact-form">
+                      <form className="tp-creative-contact-form">
+                        <div className="tp-contact-form-input mb-15">
+                          <label className="tp-label" htmlFor="name">Name *</label>
+                          <input type="text" id="name" className="tp-input" />
+                        </div>
+                        <div className="tp-contact-form-input mb-15">
+                          <label className="tp-label" htmlFor="email">Email *</label>
+                          <input type="email" id="email" className="tp-input" />
+                        </div>
+                        <div className="tp-contact-form-input mb-15">
+                          <label className="tp-label" htmlFor="message">Message *</label>
+                          <textarea id="message" className="tp-input tp-textarea" rows={4}></textarea>
+                        </div>
+                        <button type="submit" className="tp-btn tp-btn-xl d-inline-flex align-items-center justify-content-center w-100">
+                          <span>
+                            <span className="text-1">Send Message</span>
+                            <span className="text-2">Send Message</span>
+                          </span>
+                        </button>
+                      </form>
                     </div>
-                    <div className="tp-contact-form-input mb-15">
-                      <label className="tp-label" htmlFor="email">Email *</label>
-                      <input type="email" id="email" className="tp-input" />
-                    </div>
-                    <div className="tp-contact-form-input mb-15">
-                      <label className="tp-label" htmlFor="message">Message *</label>
-                      <textarea id="message" className="tp-input tp-textarea" rows={4}></textarea>
-                    </div>
-                    <button type="submit" className="tp-btn tp-btn-xl d-inline-flex align-items-center justify-content-center w-100">
-                      <span>
-                        <span className="text-1">Send Message</span>
-                        <span className="text-2">Send Message</span>
-                      </span>
-                    </button>
-                  </form>
+                  </div>
                 </div>
                 <div className="col-lg-6">
-                  <h2 style={{ fontSize: 'clamp(2.5rem, 5vw, 4rem)', fontWeight: 800 }}>Let&apos;s talk</h2>
-                  <p style={{ color: 'rgba(255,255,255,0.5)' }}>
-                    <span style={{ color: 'rgba(255,255,255,0.35)' }}>Tell us about your project</span> —whether it&apos;s a website, SEO, or marketing.
+                  <h2 className="contact-heading">Let&apos;s talk</h2>
+                  <p className="contact-desc">
+                    <span className="text-dim">Tell us about your project</span> —whether it&apos;s a website, SEO, or marketing.
                   </p>
                   
-                  <div className="row mt-8">
+                  <div className="row mt-4">
                     <div className="col-6">
-                      <h3 style={{ fontSize: '1.2rem', fontWeight: 700 }}>Quick response</h3>
-                      <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.85rem' }}>If you&apos;re ready create & collaborate we&apos;d love to hear from you.</p>
+                      <h3 className="contact-subheading">Quick response</h3>
+                      <p className="contact-subtext">If you&apos;re ready create & collaborate we&apos;d love to hear from you.</p>
                     </div>
                     <div className="col-6">
-                      <h3 style={{ fontSize: '1.2rem', fontWeight: 700 }}>Clear next steps</h3>
-                      <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.85rem' }}>If you&apos;re ready create & collaborate we&apos;d love to hear from you.</p>
+                      <h3 className="contact-subheading">Clear next steps</h3>
+                      <p className="contact-subtext">If you&apos;re ready create & collaborate we&apos;d love to hear from you.</p>
                     </div>
                   </div>
 
-                  <div className="d-flex align-items-start gap-4 mt-8">
-                    <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=160&h=178" alt="" style={{ width: 80, height: 90, borderRadius: 12, objectFit: 'cover' }} />
+                  <div className="bf-contact-author d-flex align-items-start gap-4 mt-4">
+                    <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=160&h=178" alt="" className="author-img" />
                     <div>
-                      <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase' }}>Team lead</span><br />
-                      <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.8rem' }}>at ManyRooms</span><br />
-                      <span style={{ fontWeight: 700, fontSize: '1.1rem' }}>Parvej Hossain</span><br />
-                      <a href="/contact" className="tp-btn-yellow-green green-solid btn-60 d-inline-flex mt-2">
+                      <span className="author-role">Team lead</span><br />
+                      <span className="author-company">at ManyRooms</span><br />
+                      <span className="author-name">Parvej Hossain</span><br />
+                      <Link href="/contact" className="tp-btn-yellow-green green-solid btn-60 d-inline-flex mt-2 tp-el-btn">
                         <span>
                           <span className="text-1">Let&apos;s Talk</span>
                           <span className="text-2">Let&apos;s Talk</span>
                         </span>
-                      </a>
+                      </Link>
                     </div>
                   </div>
                 </div>
@@ -485,69 +454,77 @@ export default function HomePage() {
             </div>
           </section>
 
-          {/* ============ INSTAGRAM SECTION ============ */}
-          <section className="bf-instagram-area bf-instagram-ptb text-center bg-dark">
-            <div className="bf-instagram-thumb-wrap p-relative">
-              <div className="row g-0">
-                {[...Array(7)].map((_, i) => (
-                  <div key={i} className="col" style={{ flex: '0 0 auto', width: '14.28%' }}>
-                    <img src={`https://images.unsplash.com/photo-${1554048612 + i}?auto=format&fit=crop&q=80&w=200`} alt="" style={{ width: '100%', aspectRatio: '1', objectFit: 'cover' }} />
+          {/* ============ INSTAGRAM ============ */}
+          <section className="instagram-section-dark" style={{ padding: 0, background: '#0f172a' }}>
+            <div className="bf-instagram-area bf-instagram-ptb text-center tp-el-section">
+              <div className="bf-instagram-thumb-wrap p-relative">
+                <div className="row g-0">
+                  {[...Array(7)].map((_, i) => (
+                    <div key={i} className="col">
+                      <img src={`https://images.unsplash.com/photo-${1554048612 + i}?auto=format&fit=crop&q=80&w=200`} alt="" className="w-full" />
+                    </div>
+                  ))}
+                  <div className="col instagram-icon-col">
+                    <span className="insta-icon-large">📸</span>
                   </div>
-                ))}
-                <div className="col" style={{ flex: '0 0 auto', width: '14.28%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--coral)' }}>
-                  <span style={{ fontSize: '2rem', color: '#fff' }}>📸</span>
                 </div>
-              </div>
-              
-              <div className="bf-instagram-content-wrap text-start" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', background: 'rgba(15,23,42,0.9)', backdropFilter: 'blur(20px)', padding: '2rem 3rem', borderRadius: 20 }}>
-                <span className="bf-instagram-subtitle" style={{ fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.2em', color: 'rgba(255,255,255,0.4)' }}>INSTAGRAM</span>
-                <h2 className="bf-instagram-title" style={{ fontSize: '2rem', fontWeight: 800, color: '#fff' }}>@ManyRooms</h2>
-                <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.85rem' }}>Become a part of our stories!<br />Join the adventure.</p>
-                <a href="#" className="tp-btn d-inline-flex align-items-center">
-                  <span>
-                    <span className="text-1">Follow Us</span>
-                    <span className="text-2">Follow Us</span>
-                  </span>
-                </a>
+                
+                <div className="bf-instagram-content-wrap text-start">
+                  <div className="bf-instagram-title-box">
+                    <span className="bf-instagram-subtitle tp-el-subtitle">INSTAGRAM</span>
+                    <h2 className="bf-instagram-title tp-el-title">@ManyRooms</h2>
+                  </div>
+                  <div className="bf-instagram-content">
+                    <p className="tp-el-desc">Become a part of our stories!<br />Join the adventure.</p>
+                    <Link href="#" className="tp-btn d-inline-flex align-items-center tp-el-btn">
+                      <span>
+                        <span className="text-1">Follow Us</span>
+                        <span className="text-2">Follow Us</span>
+                      </span>
+                    </Link>
+                  </div>
+                </div>
               </div>
             </div>
           </section>
 
           {/* ============ FOOTER ============ */}
-          <footer className="py-16 bg-dark text-white">
+          <footer className="footer-creative-dark" style={{ padding: '4rem 0 2rem', background: '#0f172a', color: '#fff' }}>
             <div className="container">
-              <div className="row pb-8 mb-8" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+              <div className="row pb-4 mb-4 border-bottom-light">
                 <div className="col-lg-6">
-                  <p style={{ fontSize: 'clamp(1.5rem, 3vw, 2.5rem)', fontWeight: 700 }}>
-                    Let&apos;s create <span style={{ color: 'rgba(255,255,255,0.45)' }}>something</span> together special
+                  <p className="footer-cta-text">
+                    Let&apos;s create <span className="text-dim">something</span> together special
                   </p>
                 </div>
                 <div className="col-lg-6 text-lg-end">
-                  <div className="d-flex gap-3 justify-content-lg-end">
-                    {['instagram', 'dribbble', 'behance', 'youtube'].map((social, i) => (
-                      <a key={i} href="#" className="social-link" style={{ width: 44, height: 44, borderRadius: '50%', border: '1px solid rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.5)' }}>
-                        {social[0].toUpperCase()}
-                      </a>
-                    ))}
+                  <div className="tp-footer-widget-social tp-el-footer-social d-flex gap-3 justify-content-lg-end">
+                    <a href="#" className="social-link"><span>📷</span></a>
+                    <a href="#" className="social-link"><span>🏀</span></a>
+                    <a href="#" className="social-link"><span>🅱️</span></a>
+                    <a href="#" className="social-link"><span>▶️</span></a>
                   </div>
                 </div>
               </div>
 
-              <div className="row pb-8 mb-8" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+              <div className="row pb-4 mb-4 border-bottom-light">
                 <div className="col-lg-4">
-                  <h3 style={{ fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)' }}>London</h3>
-                  <a href="#" style={{ color: 'rgba(255,255,255,0.5)', textDecoration: 'none' }}>Germany 785 15h Street<br />Office 478 Berlin</a>
+                  <h3 className="footer-label">London</h3>
+                  <a href="#" className="footer-link">Germany 785 15h Street<br />Office 478 Berlin</a>
                 </div>
                 <div className="col-lg-4">
-                  <h3 style={{ fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)' }}>Contact</h3>
-                  <a href="tel:+999236542654" style={{ color: 'rgba(255,255,255,0.5)', textDecoration: 'none', display: 'block' }}>+999 23654 2654</a>
-                  <a href="mailto:manyrooms@help.com" style={{ color: 'rgba(255,255,255,0.5)', textDecoration: 'none' }}>manyrooms@help.com</a>
+                  <h3 className="footer-label">Contact</h3>
+                  <a href="tel:+999236542654" className="footer-link d-block">+999 23654 2654</a>
+                  <a href="mailto:manyrooms@help.com" className="footer-link">manyrooms@help.com</a>
                 </div>
                 <div className="col-lg-4">
-                  <div style={{ display: 'flex', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '0.5rem' }}>
-                    <input type="email" placeholder="Enter your email" style={{ flex: 1, background: 'transparent', border: 'none', color: '#fff', fontSize: '0.95rem', outline: 'none' }} />
-                    <button style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.5)', cursor: 'pointer' }}>
-                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M1 8H15" stroke="currentColor" strokeWidth="1.5"/><path d="M8 1L15 8L8 15" stroke="currentColor" strokeWidth="1.5"/></svg>
+                  <div className="tp-footer-subscribe-form d-flex">
+                    <input type="email" placeholder="Enter your email" className="subscribe-input" />
+                    <button className="subscribe-btn">
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <path d="M1 8H15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M8 1L15 8L8 15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
                     </button>
                   </div>
                 </div>
@@ -555,10 +532,10 @@ export default function HomePage() {
 
               <div className="row">
                 <div className="col-6">
-                  <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.85rem' }}>© 2026 <strong style={{ color: 'rgba(255,255,255,0.6)' }}>ManyRooms</strong>. All rights reserved.</p>
+                  <p className="copyright-text">© 2026 <strong>ManyRooms</strong>. All rights reserved.</p>
                 </div>
                 <div className="col-6 text-end">
-                  <a href="#top" style={{ color: 'rgba(255,255,255,0.35)', textDecoration: 'none', fontSize: '0.85rem' }}>Scroll to top</a>
+                  <a href="#top" className="scroll-top-link">Scroll to top</a>
                 </div>
               </div>
             </div>
@@ -566,12 +543,586 @@ export default function HomePage() {
 
         </div>
       </div>
-
-      {/* Keep the Chatbot */}
-      <Chatbot />
     </>
   );
 }
+
+
+
+// // app/page.tsx
+// 'use client';
+
+// import { useEffect, useRef } from 'react';
+// import Script from 'next/script';
+// import Chatbot from '@/components/Chatbot';
+
+// export default function HomePage() {
+//   const preloaderRef = useRef<HTMLDivElement>(null);
+//   const cursorRef = useRef<HTMLDivElement>(null);
+//   const ballRef = useRef<HTMLDivElement>(null);
+
+//   useEffect(() => {
+//     // Preloader
+//     const loader = preloaderRef.current;
+//     if (loader) {
+//       let count = 0;
+//       const countText = loader.querySelector('.count__text');
+//       const interval = setInterval(() => {
+//         if (count < 100) {
+//           count += Math.floor(Math.random() * 10) + 1;
+//           if (count > 100) count = 100;
+//           if (countText) countText.textContent = count.toString();
+//         } else {
+//           clearInterval(interval);
+//           setTimeout(() => {
+//             loader.classList.add('loaded');
+//             setTimeout(() => {
+//               if (loader.parentNode) {
+//                 loader.parentNode.removeChild(loader);
+//               }
+//             }, 500);
+//           }, 300);
+//         }
+//       }, 50);
+//     }
+
+//     // Magic cursor
+//     const cursor = cursorRef.current;
+//     const ball = ballRef.current;
+//     if (cursor && ball) {
+//       const handleMouseMove = (e: MouseEvent) => {
+//         cursor.style.left = e.clientX + 'px';
+//         cursor.style.top = e.clientY + 'px';
+//         ball.style.left = e.clientX + 'px';
+//         ball.style.top = e.clientY + 'px';
+//       };
+//       document.addEventListener('mousemove', handleMouseMove);
+//       return () => document.removeEventListener('mousemove', handleMouseMove);
+//     }
+
+//     // Back to top
+//     const backToTop = document.getElementById('back_to_top');
+//     if (backToTop) {
+//       const handleScroll = () => {
+//         if (window.scrollY > 300) {
+//           backToTop.classList.add('show');
+//         } else {
+//           backToTop.classList.remove('show');
+//         }
+//       };
+//       const handleClick = () => {
+//         window.scrollTo({ top: 0, behavior: 'smooth' });
+//       };
+//       window.addEventListener('scroll', handleScroll);
+//       backToTop.addEventListener('click', handleClick);
+//       return () => {
+//         window.removeEventListener('scroll', handleScroll);
+//         backToTop.removeEventListener('click', handleClick);
+//       };
+//     }
+//   }, []);
+
+//   return (
+//     <>
+//       {/* Preloader */}
+//       <div ref={preloaderRef} id="loader" className="loader">
+//         <div className="loader__wrapper">
+//           <div className="loader__content">
+//             <div className="loader__count">
+//               <span className="count__text">0</span>
+//               <span className="count__percent">%</span>
+//             </div>
+//           </div>
+//           <span className="count__bdr"></span>
+//         </div>
+//       </div>
+
+//       {/* Magic Cursor */}
+//       <div ref={cursorRef} id="magic-cursor" className="cursor-white-bg">
+//         <div ref={ballRef} id="ball"></div>
+//       </div>
+
+//       {/* Back to Top */}
+//       <div className="back-to-top-wrapper">
+//         <button id="back_to_top" type="button" className="back-to-top-btn">
+//           <svg width="12" height="7" viewBox="0 0 12 7" fill="none" xmlns="http://www.w3.org/2000/svg">
+//             <path d="M11 6L6 1L1 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+//           </svg>
+//         </button>
+//       </div>
+
+//       <div className="px-blur-bottom"></div>
+
+//       {/* Header */}
+//       <header>
+//         <div className="tp-header-creative">
+//           <div className="px-header-area header-transparent px-header-ptb px-header-style-black">
+//             <div className="row align-items-center">
+//               <div className="col-lg-4 col-md-3 col-6">
+//                 <div className="px-header-logo tp-el-logo">
+//                   <a href="/">
+//                     <img src="/logo-orange.png" alt="ManyRooms" style={{ width: '90px' }} />
+//                   </a>
+//                 </div>
+//               </div>
+//               <div className="col-lg-8 col-md-9 col-6">
+//                 <div className="px-header-box d-flex justify-content-end align-items-center">
+//                   <div className="px-header-menu tp-header-dropdown dropdown-white-bg d-none d-xl-block">
+//                     <nav>
+//                       <ul>
+//                         <li className="has-dropdown">
+//                           <a href="/">Home</a>
+//                         </li>
+//                         <li className="has-dropdown">
+//                           <a href="#">Pages</a>
+//                           <ul className="tp-submenu">
+//                             <li><a href="/about">About</a></li>
+//                             <li><a href="/services">Services</a></li>
+//                             <li><a href="/team">Team</a></li>
+//                           </ul>
+//                         </li>
+//                         <li className="has-dropdown">
+//                           <a href="/spaces">Spaces</a>
+//                         </li>
+//                         <li className="has-dropdown">
+//                           <a href="/blog">Blog</a>
+//                         </li>
+//                         <li className="has-dropdown">
+//                           <a href="/contact">Contact</a>
+//                         </li>
+//                       </ul>
+//                     </nav>
+//                   </div>
+//                   <div className="px-header-action">
+//                     <button className="px-header-bar tp-offcanvas-open-btn">
+//                       <span></span>
+//                       <span></span>
+//                     </button>
+//                   </div>
+//                 </div>
+//               </div>
+//             </div>
+//           </div>
+//         </div>
+//       </header>
+
+//       {/* Smooth Scroll Wrapper */}
+//       <div id="smooth-wrapper">
+//         <div id="smooth-content">
+          
+//           {/* ============ HERO SECTION ============ */}
+//           <div className="bf-hero-area bf-hero-3-spacing bf-hero-anime-area">
+//             <div className="container">
+//               <div className="row">
+//                 <div className="col-12">
+//                   <div className="bf-hero-3-wrap">
+//                     <h2 className="bf-hero-3-title tp-el-title">
+//                       <span className="bf-item-anime-md marque d-inline-block">Craft</span>
+//                       <div className="bf-hero-3-title-video d-none d-xl-inline-block">
+//                         <video autoPlay loop muted playsInline>
+//                           <source src="https://videos.pexels.com/video-files/3196294/3196294-hd_1920_1080_25fps.mp4" type="video/mp4" />
+//                         </video>
+//                       </div>
+//                       <span className="bf-item-anime marque d-inline-block">CREATIVE</span>
+//                       <div className="spacing pr-140 d-inline-block p-relative">
+//                         <span className="bf-item-anime-md marque d-inline-block">experien­ces</span>
+//                         <img decoding="async" className="bf-hero-3-thumb d-none d-xl-inline-block" src="https://images.unsplash.com/photo-1554048612-b6a482bc67e5?auto=format&fit=crop&q=80&w=150" alt="" />
+//                       </div>
+//                       <span className="bf-item-anime marque d-inline-block">that</span>
+//                       <div className="spacing pr-35 d-inline-block p-relative">
+//                         <span className="bf-item-anime-md marque d-inline-block">Shape</span>
+//                         <img decoding="async" className="bf-hero-3-thumb-2 d-none d-xl-inline-block" src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&q=80&w=150" alt="" />
+//                       </div>
+//                       <span className="bf-item-anime marque d-inline-block">TOMMOROW.</span>
+//                     </h2>
+//                   </div>
+//                 </div>
+//                 <div className="col-lg-6 col-md-3">
+//                   <div className="bf-rounded-btn-wrap text-md-end mt-50 mr-185 mb-30">
+//                     <div className="btn_wrapper d-inline-block">
+//                       <a href="/spaces" className="bf-btn-rounded btn-item tp-el-btn">
+//                         Discover<br /> Work
+//                         <i className="bf-btn-circle-dot"></i>
+//                       </a>
+//                     </div>
+//                   </div>
+//                 </div>
+//                 <div className="col-lg-6 col-md-9">
+//                   <div className="bf-hero-3-dec mb-30">
+//                     <p className="tp-el-desc">
+//                       ManyRooms is a strategic design partner to bold<br /> digital brands. We join your team, co-build<br /> your thing, and help bring it to the world.
+//                     </p>
+//                   </div>
+//                 </div>
+//               </div>
+//             </div>
+//           </div>
+
+//           {/* Hero Video */}
+//           <div className="bf-hero-3-video-wrap">
+//             <video loop muted autoPlay playsInline>
+//               <source src="https://videos.pexels.com/video-files/3196294/3196294-hd_1920_1080_25fps.mp4" type="video/mp4" />
+//             </video>
+//           </div>
+
+//           {/* ============ ABOUT SECTION ============ */}
+//           <section className="py-20 md:py-28">
+//             <div className="container">
+//               <div className="row">
+//                 <div className="col-lg-4">
+//                   <span className="section-label">About us</span>
+//                 </div>
+//                 <div className="col-lg-8">
+//                   <h2 className="about-heading reveal-text">
+//                     An independent web design and branding agency in Manchester set up 2010 who care, build relationships, have industry experience, and win awards.
+//                   </h2>
+//                 </div>
+//               </div>
+
+//               <div className="row mt-14">
+//                 <div className="col-lg-3">
+//                   <img src="https://images.unsplash.com/photo-1554048612-b6a482bc67e5?auto=format&fit=crop&q=80&w=256" alt="" className="rounded-2xl w-full" />
+//                 </div>
+//                 <div className="col-lg-4">
+//                   <img src="https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&q=80&w=306&h=400" alt="" className="rounded-2xl w-full" />
+//                 </div>
+//                 <div className="col-lg-5">
+//                   <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=140&h=54" alt="" className="mb-4" />
+//                   <p className="text-muted mb-8">Driven by a passion for innovation, we specialize in delivering top-quality design solutions</p>
+//                   <div className="row">
+//                     <div className="col-6">
+//                       <div className="counter">
+//                         <span className="counter-number" data-target="98">0</span>%
+//                         <span className="counter-label">Clients Satisfied and Repeating</span>
+//                       </div>
+//                     </div>
+//                     <div className="col-6">
+//                       <div className="counter">
+//                         <span className="counter-number" data-target="125">0</span>+
+//                         <span className="counter-label">Projects Completed in 24 Countries</span>
+//                       </div>
+//                     </div>
+//                   </div>
+//                 </div>
+//               </div>
+//             </div>
+//           </section>
+
+//           {/* ============ SERVICES SECTION ============ */}
+//           <section className="services-section py-20 md:py-28">
+//             <div className="container">
+//               <div className="row mb-14">
+//                 <div className="col-lg-4">
+//                   <span className="section-label">OUR SERVICES</span>
+//                 </div>
+//                 <div className="col-lg-8">
+//                   <h2 className="services-main-title">Service we&apos;re<br />always provides</h2>
+//                   <p className="text-muted">ManyRooms power of our 8+ years of experience. We build excellence works. That will help you to grow your business products.</p>
+//                 </div>
+//               </div>
+
+//               {/* Service Items */}
+//               {[
+//                 { title: 'Development', img: 'https://images.unsplash.com/photo-1598653222000-6b7b7a552625?auto=format&fit=crop&q=80&w=400', tags: ['UX Design', 'User Testing', 'Product Prototype', 'Mobile UI', 'Web app design'] },
+//                 { title: 'Marketing', img: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=400', tags: ['SEO', 'Content Strategy', 'Social Media', 'Email Marketing', 'PPC'] },
+//                 { title: 'Graphics', img: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=400', tags: ['Branding', 'Illustration', 'Print Design', 'Packaging', 'Logo Design'] },
+//                 { title: 'Technology', img: 'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?auto=format&fit=crop&q=80&w=400', tags: ['Web Dev', 'App Dev', 'API', 'Cloud', 'DevOps'] },
+//               ].map((service, i) => (
+//                 <div key={i} className="bf-service-item-3 fix">
+//                   <div className="row gx-0">
+//                     <div className="col-lg-6">
+//                       <div className="bf-service-item-3-wrap d-flex align-items-center">
+//                         <div className="bf-service-item-3-thumb">
+//                           <a href="/services" className="common-underline">
+//                             <img src={service.img} alt={service.title} />
+//                           </a>
+//                         </div>
+//                         <div className="bf-service-item-3-text">
+//                           <h4 className="bf-service-item-3-title">
+//                             <a href="/services" className="common-underline">{service.title}</a>
+//                           </h4>
+//                         </div>
+//                       </div>
+//                     </div>
+//                     <div className="col-lg-6">
+//                       <div className="bf-service-item-3-wrapper p-relative fix">
+//                         <div className="bf-service-item-3-btn">
+//                           <a href="/services" className="common-underline">
+//                             <span>
+//                               <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+//                                 <path d="M1 13L13 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+//                                 <path d="M1 1H13V13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+//                               </svg>
+//                             </span>
+//                           </a>
+//                         </div>
+//                         <div className="bf-service-item-3-slider">
+//                           <div className="bf-service-item-3-tags">
+//                             {[...service.tags, ...service.tags, ...service.tags].map((tag, ti) => (
+//                               <span key={ti}>{tag}</span>
+//                             ))}
+//                           </div>
+//                         </div>
+//                       </div>
+//                     </div>
+//                   </div>
+//                 </div>
+//               ))}
+//             </div>
+//           </section>
+
+//           {/* ============ PORTFOLIO SECTION ============ */}
+//           <section className="py-20 md:py-28">
+//             <div className="container">
+//               <div className="row mb-16">
+//                 <div className="col-lg-8">
+//                   <h4 className="bf-portfolio-3-sectitle mb-45">
+//                     <span className="d-block text-end reveal-text">recent</span>
+//                     <span className="d-block reveal-text">work</span>
+//                   </h4>
+//                   <p>In the creative wilderness,<br />our work becomes the beacon<br />clients grow to love.</p>
+//                 </div>
+//                 <div className="col-lg-4 text-lg-end">
+//                   <a href="/spaces" className="tp-btn-yellow-green green-solid btn-60">
+//                     <span>
+//                       <span className="text-1">Explore Work</span>
+//                       <span className="text-2">Explore Work</span>
+//                     </span>
+//                   </a>
+//                 </div>
+//               </div>
+
+//               {[
+//                 { title: 'Skillvison', cat: 'Research, UX, UI Design', img: 'https://images.unsplash.com/photo-1598653222000-6b7b7a552625?auto=format&fit=crop&q=80&w=800' },
+//                 { title: 'Kashtech', cat: 'Research, UX, UI Design', img: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=800' },
+//                 { title: 'Rebrand', cat: 'Research, UX, UI Design', img: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=800' },
+//               ].map((item, i) => {
+//                 const isReversed = i % 2 === 1;
+//                 return (
+//                   <div key={i} className="bf-portfolio-3-item mb-80">
+//                     <div className="row align-items-center">
+//                       <div className={`col-xl-5 ${isReversed ? '' : 'order-xl-0 order-1'}`}>
+//                         <div className={`bf-portfolio-3-content ${isReversed ? 'pl-200' : ''}`}>
+//                           <h4 className="bf-portfolio-3-title">
+//                             <a href="#">{item.title}</a>
+//                           </h4>
+//                           <span className="mb-50">{item.cat}</span>
+//                           <a className="bf-btn bf-btn-border bf-btn-xl d-inline-flex align-items-center" href="#">
+//                             <span>
+//                               <span className="text-1">View project</span>
+//                               <span className="text-2">View project</span>
+//                             </span>
+//                           </a>
+//                         </div>
+//                       </div>
+//                       <div className={`col-xl-7 ${isReversed ? '' : 'order-xl-1 order-0'}`}>
+//                         <div className={`bf-portfolio-3-thumb ${isReversed ? 'item-2' : 'item-1 text-end'}`}>
+//                           <img src={item.img} alt={item.title} />
+//                         </div>
+//                       </div>
+//                     </div>
+//                   </div>
+//                 );
+//               })}
+//             </div>
+//           </section>
+
+//           {/* ============ TEXT SLIDER ============ */}
+//           <div className="tp-text-slider-area bf-text-slider-style">
+//             <div className="tp-text-slide-top">
+//               <div className="tp-text-slide-active">
+//                 <div className="slide-transtion" style={{ display: 'flex', animation: 'scrollRight 30s linear infinite' }}>
+//                   {[...Array(3)].map((_, i) => (
+//                     <span key={i} className="tp-top-slider" style={{ fontFamily: 'ThunderMed, sans-serif', fontSize: 'clamp(2rem, 5vw, 4rem)', fontWeight: 900, color: 'var(--yellow)', textTransform: 'uppercase', whiteSpace: 'nowrap', paddingRight: '2rem' }}>
+//                       Award & recognitions
+//                     </span>
+//                   ))}
+//                 </div>
+//               </div>
+//             </div>
+//             <div className="tp-text-slide-bottom">
+//               <div className="tp-text-slide-active" style={{ direction: 'rtl' }}>
+//                 <div className="slide-transtion" style={{ display: 'flex', animation: 'scrollLeft 30s linear infinite' }}>
+//                   {[...Array(3)].map((_, i) => (
+//                     <span key={i} className="tp-bottom-slider" style={{ fontFamily: 'ThunderMed, sans-serif', fontSize: 'clamp(2rem, 5vw, 4rem)', fontWeight: 900, color: 'var(--yellow)', textTransform: 'uppercase', whiteSpace: 'nowrap', paddingRight: '2rem' }}>
+//                       Award & recognitions
+//                     </span>
+//                   ))}
+//                 </div>
+//               </div>
+//             </div>
+//           </div>
+
+//           {/* ============ AWARDS SECTION ============ */}
+//           <section className="py-20 bg-dark">
+//             <div className="container">
+//               {[
+//                 { title: "A' Design Awards & competition", result: 'Silver Medal' },
+//                 { title: 'AWWWARDS', result: '2X - Honorable' },
+//                 { title: 'CSS Design Awards', result: '2X - Website of the day' },
+//                 { title: 'FWA', result: '2X - Website of the day' },
+//                 { title: 'CSS Reels', result: 'Featured of the day' },
+//                 { title: 'Web Gurus', result: '2X - Guru of the day' },
+//               ].map((award, i) => (
+//                 <div key={i} className="design-award-item hover-reveal-item p-relative" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.5rem 0', borderBottom: '1px solid rgba(255,255,255,0.06)', color: '#fff' }}>
+//                   <h4 style={{ fontSize: '1.25rem', fontWeight: 600 }}>{award.title}</h4>
+//                   <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.85rem' }}>{award.result}</span>
+//                 </div>
+//               ))}
+//             </div>
+//           </section>
+
+//           {/* ============ CONTACT SECTION ============ */}
+//           <section className="py-20 md:py-28 bg-dark text-white">
+//             <div className="container">
+//               <div className="row">
+//                 <div className="col-lg-6">
+//                   <span className="bf-contact-subtitle">ManyRooms@</span>
+//                   <h3 className="bf-contact-title mb-25">Leave a reply</h3>
+//                   <form className="tp-creative-contact-form">
+//                     <div className="tp-contact-form-input mb-15">
+//                       <label className="tp-label" htmlFor="name">Name *</label>
+//                       <input type="text" id="name" className="tp-input" />
+//                     </div>
+//                     <div className="tp-contact-form-input mb-15">
+//                       <label className="tp-label" htmlFor="email">Email *</label>
+//                       <input type="email" id="email" className="tp-input" />
+//                     </div>
+//                     <div className="tp-contact-form-input mb-15">
+//                       <label className="tp-label" htmlFor="message">Message *</label>
+//                       <textarea id="message" className="tp-input tp-textarea" rows={4}></textarea>
+//                     </div>
+//                     <button type="submit" className="tp-btn tp-btn-xl d-inline-flex align-items-center justify-content-center w-100">
+//                       <span>
+//                         <span className="text-1">Send Message</span>
+//                         <span className="text-2">Send Message</span>
+//                       </span>
+//                     </button>
+//                   </form>
+//                 </div>
+//                 <div className="col-lg-6">
+//                   <h2 style={{ fontSize: 'clamp(2.5rem, 5vw, 4rem)', fontWeight: 800 }}>Let&apos;s talk</h2>
+//                   <p style={{ color: 'rgba(255,255,255,0.5)' }}>
+//                     <span style={{ color: 'rgba(255,255,255,0.35)' }}>Tell us about your project</span> —whether it&apos;s a website, SEO, or marketing.
+//                   </p>
+                  
+//                   <div className="row mt-8">
+//                     <div className="col-6">
+//                       <h3 style={{ fontSize: '1.2rem', fontWeight: 700 }}>Quick response</h3>
+//                       <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.85rem' }}>If you&apos;re ready create & collaborate we&apos;d love to hear from you.</p>
+//                     </div>
+//                     <div className="col-6">
+//                       <h3 style={{ fontSize: '1.2rem', fontWeight: 700 }}>Clear next steps</h3>
+//                       <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.85rem' }}>If you&apos;re ready create & collaborate we&apos;d love to hear from you.</p>
+//                     </div>
+//                   </div>
+
+//                   <div className="d-flex align-items-start gap-4 mt-8">
+//                     <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=160&h=178" alt="" style={{ width: 80, height: 90, borderRadius: 12, objectFit: 'cover' }} />
+//                     <div>
+//                       <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase' }}>Team lead</span><br />
+//                       <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '0.8rem' }}>at ManyRooms</span><br />
+//                       <span style={{ fontWeight: 700, fontSize: '1.1rem' }}>Parvej Hossain</span><br />
+//                       <a href="/contact" className="tp-btn-yellow-green green-solid btn-60 d-inline-flex mt-2">
+//                         <span>
+//                           <span className="text-1">Let&apos;s Talk</span>
+//                           <span className="text-2">Let&apos;s Talk</span>
+//                         </span>
+//                       </a>
+//                     </div>
+//                   </div>
+//                 </div>
+//               </div>
+//             </div>
+//           </section>
+
+//           {/* ============ INSTAGRAM SECTION ============ */}
+//           <section className="bf-instagram-area bf-instagram-ptb text-center bg-dark">
+//             <div className="bf-instagram-thumb-wrap p-relative">
+//               <div className="row g-0">
+//                 {[...Array(7)].map((_, i) => (
+//                   <div key={i} className="col" style={{ flex: '0 0 auto', width: '14.28%' }}>
+//                     <img src={`https://images.unsplash.com/photo-${1554048612 + i}?auto=format&fit=crop&q=80&w=200`} alt="" style={{ width: '100%', aspectRatio: '1', objectFit: 'cover' }} />
+//                   </div>
+//                 ))}
+//                 <div className="col" style={{ flex: '0 0 auto', width: '14.28%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--coral)' }}>
+//                   <span style={{ fontSize: '2rem', color: '#fff' }}>📸</span>
+//                 </div>
+//               </div>
+              
+//               <div className="bf-instagram-content-wrap text-start" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', background: 'rgba(15,23,42,0.9)', backdropFilter: 'blur(20px)', padding: '2rem 3rem', borderRadius: 20 }}>
+//                 <span className="bf-instagram-subtitle" style={{ fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.2em', color: 'rgba(255,255,255,0.4)' }}>INSTAGRAM</span>
+//                 <h2 className="bf-instagram-title" style={{ fontSize: '2rem', fontWeight: 800, color: '#fff' }}>@ManyRooms</h2>
+//                 <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '0.85rem' }}>Become a part of our stories!<br />Join the adventure.</p>
+//                 <a href="#" className="tp-btn d-inline-flex align-items-center">
+//                   <span>
+//                     <span className="text-1">Follow Us</span>
+//                     <span className="text-2">Follow Us</span>
+//                   </span>
+//                 </a>
+//               </div>
+//             </div>
+//           </section>
+
+//           {/* ============ FOOTER ============ */}
+//           <footer className="py-16 bg-dark text-white">
+//             <div className="container">
+//               <div className="row pb-8 mb-8" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+//                 <div className="col-lg-6">
+//                   <p style={{ fontSize: 'clamp(1.5rem, 3vw, 2.5rem)', fontWeight: 700 }}>
+//                     Let&apos;s create <span style={{ color: 'rgba(255,255,255,0.45)' }}>something</span> together special
+//                   </p>
+//                 </div>
+//                 <div className="col-lg-6 text-lg-end">
+//                   <div className="d-flex gap-3 justify-content-lg-end">
+//                     {['instagram', 'dribbble', 'behance', 'youtube'].map((social, i) => (
+//                       <a key={i} href="#" className="social-link" style={{ width: 44, height: 44, borderRadius: '50%', border: '1px solid rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'rgba(255,255,255,0.5)' }}>
+//                         {social[0].toUpperCase()}
+//                       </a>
+//                     ))}
+//                   </div>
+//                 </div>
+//               </div>
+
+//               <div className="row pb-8 mb-8" style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+//                 <div className="col-lg-4">
+//                   <h3 style={{ fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)' }}>London</h3>
+//                   <a href="#" style={{ color: 'rgba(255,255,255,0.5)', textDecoration: 'none' }}>Germany 785 15h Street<br />Office 478 Berlin</a>
+//                 </div>
+//                 <div className="col-lg-4">
+//                   <h3 style={{ fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)' }}>Contact</h3>
+//                   <a href="tel:+999236542654" style={{ color: 'rgba(255,255,255,0.5)', textDecoration: 'none', display: 'block' }}>+999 23654 2654</a>
+//                   <a href="mailto:manyrooms@help.com" style={{ color: 'rgba(255,255,255,0.5)', textDecoration: 'none' }}>manyrooms@help.com</a>
+//                 </div>
+//                 <div className="col-lg-4">
+//                   <div style={{ display: 'flex', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '0.5rem' }}>
+//                     <input type="email" placeholder="Enter your email" style={{ flex: 1, background: 'transparent', border: 'none', color: '#fff', fontSize: '0.95rem', outline: 'none' }} />
+//                     <button style={{ background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.5)', cursor: 'pointer' }}>
+//                       <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M1 8H15" stroke="currentColor" strokeWidth="1.5"/><path d="M8 1L15 8L8 15" stroke="currentColor" strokeWidth="1.5"/></svg>
+//                     </button>
+//                   </div>
+//                 </div>
+//               </div>
+
+//               <div className="row">
+//                 <div className="col-6">
+//                   <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.85rem' }}>© 2026 <strong style={{ color: 'rgba(255,255,255,0.6)' }}>ManyRooms</strong>. All rights reserved.</p>
+//                 </div>
+//                 <div className="col-6 text-end">
+//                   <a href="#top" style={{ color: 'rgba(255,255,255,0.35)', textDecoration: 'none', fontSize: '0.85rem' }}>Scroll to top</a>
+//                 </div>
+//               </div>
+//             </div>
+//           </footer>
+
+//         </div>
+//       </div>
+
+//       {/* Keep the Chatbot */}
+//       <Chatbot />
+//     </>
+//   );
+// }
 
 
 
