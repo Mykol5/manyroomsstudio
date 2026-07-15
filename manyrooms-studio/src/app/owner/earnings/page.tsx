@@ -138,7 +138,7 @@ export default function EarningsPage() {
               {monthlyData.map((data) => (
                 <div key={data.month} className="flex flex-col items-center flex-1 group cursor-pointer">
                   <div className="w-full relative rounded-t-lg transition-all duration-300 hover:opacity-80"
-                    style={{ height: `${data.height * 2.5}px`, backgroundColor: data.month === 'MAR' || data.month === 'JUN' ? '#F1CB81' : '#3C291C'/10 }}>
+                    style={{ height: `${data.height * 2.5}px`, backgroundColor: data.month === 'MAR' || data.month === 'JUN' ? '#F1CB81' : 'rgba(60, 41, 28, 0.1)' }}>
                     <div className="absolute -top-8 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-[#3C291C] text-white text-[10px] px-2 py-1 rounded whitespace-nowrap">${data.amount.toLocaleString()}k</div>
                   </div>
                   <span className="mt-4 text-xs font-bold text-[#3C291C]/40">{data.month}</span>
@@ -151,7 +151,7 @@ export default function EarningsPage() {
           <div className="bg-white rounded-[2.5rem] p-8 shadow-sm border border-[#3C291C]/10 overflow-hidden relative">
             <div className="flex justify-between items-center mb-10">
               <h3 className="text-2xl font-extrabold text-[#3C291C]">Payout Volume</h3>
-              <select value={timeframe} onChange={(e) => setTimeframe(e.target.value as any)}
+              <select value={timeframe} onChange={(e) => setTimeframe(e.target.value as '6months' | 'year')}
                 className="bg-[#3C291C]/5 border-none rounded-full px-4 py-2 text-xs font-bold focus:ring-2 focus:ring-[#F1CB81] outline-none text-[#3C291C]">
                 <option value="6months">Last 6 Months</option>
                 <option value="year">Last Year</option>
