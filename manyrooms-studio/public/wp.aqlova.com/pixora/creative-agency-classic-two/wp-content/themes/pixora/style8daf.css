@@ -1,0 +1,45 @@
+/*!
+Theme Name: Pixora
+Theme URI: https://wp.aqlova.com/pixora/
+Author: AQLOVA
+Author URI: https://themeforest.net/user/aqlova/
+Description: Pixora - Digital Agency and Portfolio WordPress Theme
+Version: 1.1.4
+License: GNU General Public License v2 or later
+License URI: LICENSE
+Text Domain: pixora
+Tags: custom-background, custom-logo, custom-menu, featured-images, threaded-comments, translation-ready
+Tested up to: 6.9
+Requires PHP: 7.4
+This theme, like WordPress, is licensed under the GPL.
+Use it to make something cool, have fun, and share what you've learned with others.
+*/
+
+
+.product-quickview-wrapper>.product>div.strb-thumbnails-wrapper {
+	width: 40%;
+}
+
+.product-quickview-wrapper>.product>div.summary {
+	width: 60%;
+}
+
+.woocommerce-page .strb-product-quickview-modal,
+body[class*="elementor"] .strb-product-quickview-modal {
+	padding: 50px;
+}
+
+.woocommerce-page .strb-product-quickview-nav-slider div.slick-list .slick-slide,
+body[class*="elementor"] .strb-product-quickview-nav-slider div.slick-list .slick-slide {
+	margin: 0 7px;
+	padding: 0;
+}
+
+.tp-image-distortion-new {
+	background-size: cover;
+	background-repeat: no-repeat;
+}
+
+.tp-footer-copyright.text-center span {
+	color: #fff;
+}
