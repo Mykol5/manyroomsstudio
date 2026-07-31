@@ -85,14 +85,15 @@ img:is([sizes=auto i],[sizes^="auto," i]){contain-intrinsic-size:3000px 1500px}
 <link rel='stylesheet' id='pixora-el-project-css' href='../wp-content/plugins/pixora-core/include/elementor/project/projectf488.css?ver=1.1.0' media='all' />
 <link rel='stylesheet' id='elementor-post-7309-css' href='../wp-content/uploads/sites/27/elementor/css/post-7309bcb3.css?ver=1782802635' media='all' />
 
-<!-- ADDITIONAL CSS FOR THE REPLACEMENT SECTIONS -->
-<link rel='stylesheet' id='elementor-post-13340-css' href='../wp-content/uploads/sites/27/elementor/css/post-13340bcb3.css?ver=1782802635' media='all' />
+<!-- ============ CRITICAL CSS FOR THE ADDED SECTIONS ============ -->
 <style>
-/* Fallback styles for the replacement sections */
+/* ===== "We are The Creative" Section Styles ===== */
 .px-about-2-title {
-    font-size: clamp(3rem, 8vw, 6rem);
+    font-size: clamp(2.5rem, 8vw, 6rem);
     line-height: 1.1;
     font-weight: 700;
+    font-family: 'Poppins', 'Inter', sans-serif;
+    color: #1a1a1a;
 }
 .px-about-2-title i {
     font-style: italic;
@@ -104,8 +105,8 @@ img:is([sizes=auto i],[sizes^="auto," i]){contain-intrinsic-size:3000px 1500px}
     position: relative;
 }
 .px-about-2-title em img {
-    width: 80px;
-    height: 80px;
+    width: 70px;
+    height: 70px;
     border-radius: 50%;
     object-fit: cover;
     margin: 0 10px;
@@ -114,15 +115,39 @@ img:is([sizes=auto i],[sizes^="auto," i]){contain-intrinsic-size:3000px 1500px}
 .px-about-2-title c {
     display: inline-block;
 }
+.px-about-2-title .p-relative {
+    position: relative;
+}
 .px-about-2-title .text-effect {
     opacity: 1;
     transform: none;
+}
+.px-about-2-subtitle {
+    font-size: clamp(1.2rem, 2.5vw, 2.5rem);
+    font-weight: 700;
+    line-height: 1.2;
+    color: #E11010;
+    font-family: 'Poppins', 'Inter', sans-serif;
+}
+.px-award-style-2 {
+    margin-top: 20px;
+}
+.px-award-style-2 .px-award-content {
+    padding: 0;
+}
+.px-award-style-2 .px-award-content h2 {
+    margin-bottom: 0;
 }
 .px-btn-zikzak {
     display: inline-block;
     position: relative;
     width: 120px;
     height: 120px;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+.px-btn-zikzak:hover {
+    transform: scale(1.05);
 }
 .px-btn-zikzak .zikzak-bg {
     position: absolute;
@@ -131,6 +156,10 @@ img:is([sizes=auto i],[sizes^="auto," i]){contain-intrinsic-size:3000px 1500px}
     width: 100%;
     height: 100%;
     z-index: 1;
+    transition: transform 0.3s ease;
+}
+.px-btn-zikzak:hover .zikzak-bg {
+    transform: rotate(45deg);
 }
 .px-btn-zikzak .btn-text {
     position: relative;
@@ -145,12 +174,13 @@ img:is([sizes=auto i],[sizes^="auto," i]){contain-intrinsic-size:3000px 1500px}
     left: 50%;
     transform: translate(-50%, -50%);
 }
-.px-award-style-2 .px-about-2-subtitle {
-    font-size: clamp(1.5rem, 3vw, 2.5rem);
-    font-weight: 700;
-    line-height: 1.2;
+.px-btn-zikzak .zikzak-bg svg {
+    width: 100%;
+    height: 100%;
 }
 .mb-90 { margin-bottom: 90px; }
+.mb-45 { margin-bottom: 45px; }
+.mb-25 { margin-bottom: 25px; }
 .mb-30 { margin-bottom: 30px; }
 .pt-75 { padding-top: 75px; }
 .p-relative { position: relative; }
@@ -158,54 +188,174 @@ img:is([sizes=auto i],[sizes^="auto," i]){contain-intrinsic-size:3000px 1500px}
 .d-flex { display: flex; }
 .align-items-center { align-items: center; }
 .justify-content-between { justify-content: space-between; }
-.fs-300 { font-size: clamp(2.5rem, 6vw, 4rem); }
-.px-portfolio-item .px-portfolio-thumb img {
+.fs-300 { 
+    font-size: clamp(2.5rem, 6vw, 4rem); 
+}
+.ff-thunder {
+    font-family: 'Poppins', 'Inter', sans-serif;
+    font-weight: 700;
+}
+.e-con-full {
     width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+.e-con-boxed {
+    padding-left: 20px;
+    padding-right: 20px;
+}
+.e-con-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+}
+.e-con.e-parent {
+    position: relative;
+}
+.e-con.e-child {
+    position: relative;
+}
+.elementor-element {
+    position: relative;
+}
+.elementor-widget {
+    position: relative;
+}
+.elementor-widget-container {
+    position: relative;
+}
+
+/* ===== Portfolio Section Styles ===== */
+.px-portfolio-area {
+    padding: 60px 0;
+}
+.px-portfolio-wrap {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 30px;
+}
+.px-portfolio-item {
+    background: #fff;
     border-radius: 16px;
+    overflow: hidden;
+    transition: all 0.4s ease;
 }
-.px-portfolio-content .px-portfolio-title {
-    font-size: clamp(1.2rem, 2vw, 1.8rem);
-    font-weight: 600;
-    margin-top: 15px;
+.px-portfolio-item:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
 }
-.px-portfolio-content .px-portfolio-title a {
-    text-decoration: none;
-    color: inherit;
+.px-portfolio-thumb {
+    overflow: hidden;
+    border-radius: 16px 16px 0 0;
 }
-.px-portfolio-content .px-portfolio-title a:hover {
-    color: #E11010;
+.px-portfolio-thumb img {
+    width: 100%;
+    height: 280px;
+    object-fit: cover;
+    transition: transform 0.6s ease;
+}
+.px-portfolio-item:hover .px-portfolio-thumb img {
+    transform: scale(1.05);
+}
+.ripple-image {
+    position: relative;
+    overflow: hidden;
+}
+.ripple-image::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(225, 16, 16, 0.1);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+.ripple-image:hover::after {
+    opacity: 1;
 }
 .px-portfolio-category {
     display: flex;
-    gap: 10px;
-    margin-top: 10px;
+    gap: 8px;
+    padding: 12px 16px 0;
     flex-wrap: wrap;
 }
 .px-portfolio-category span {
-    font-size: 14px;
+    font-size: 13px;
     color: #666;
     background: #f5f5f5;
-    padding: 4px 12px;
+    padding: 4px 14px;
     border-radius: 20px;
+    font-weight: 500;
+}
+.px-portfolio-category.portfolio-meta {
+    padding: 4px 16px 8px;
 }
 .px-portfolio-category.portfolio-meta span {
     background: transparent;
+    color: #999;
     padding: 0;
+    font-size: 13px;
 }
-.ripple-image {
-    overflow: hidden;
-    border-radius: 16px;
+.px-portfolio-content {
+    padding: 12px 16px 24px;
 }
-.ripple-image img {
-    transition: transform 0.6s ease;
+.px-portfolio-title {
+    font-size: clamp(1.1rem, 1.5vw, 1.6rem);
+    font-weight: 600;
+    margin: 0;
+    font-family: 'Poppins', 'Inter', sans-serif;
 }
-.ripple-image:hover img {
-    transform: scale(1.05);
+.px-portfolio-title a {
+    text-decoration: none;
+    color: #1a1a1a;
+    transition: color 0.3s ease;
 }
+.px-portfolio-title a:hover {
+    color: #E11010;
+}
+.container-fluid {
+    padding-left: 30px;
+    padding-right: 30px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* ===== Elementor Container Styles ===== */
+.elementor-element-cbbf3d0 {
+    padding: 60px 0 40px;
+}
+.elementor-element-a558240 {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
+}
+.elementor-element-bb8ecb7 {
+    flex: 1;
+    min-width: 300px;
+}
+.elementor-element-4640d65 {
+    flex: 1;
+    min-width: 200px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+.elementor-element-a951eb9 {
+    padding: 0 0 60px;
+}
+
+/* ===== Responsive ===== */
 @media (max-width: 768px) {
+    .px-about-2-title {
+        font-size: clamp(2rem, 6vw, 3.5rem);
+    }
     .px-about-2-title em img {
-        width: 50px;
-        height: 50px;
+        width: 45px;
+        height: 45px;
+        margin: 0 6px;
     }
     .px-btn-zikzak {
         width: 80px;
@@ -214,6 +364,40 @@ img:is([sizes=auto i],[sizes^="auto," i]){contain-intrinsic-size:3000px 1500px}
     .px-btn-zikzak .zikzak-bg svg {
         width: 80px;
         height: 80px;
+    }
+    .px-btn-zikzak .btn-text {
+        font-size: 11px;
+    }
+    .px-portfolio-wrap {
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+    .container-fluid {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+    .elementor-element-bb8ecb7,
+    .elementor-element-4640d65 {
+        flex: 1 1 100%;
+        min-width: auto;
+    }
+    .px-about-2-subtitle {
+        font-size: 1.2rem;
+    }
+    .mb-90 {
+        margin-bottom: 40px;
+    }
+    .e-con-boxed {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+}
+@media (max-width: 480px) {
+    .px-portfolio-wrap {
+        grid-template-columns: 1fr;
+    }
+    .px-portfolio-thumb img {
+        height: 200px;
     }
 }
 </style>
@@ -694,29 +878,29 @@ color: rgba(0, 0, 0, 0.6);
 		</div>
 
 <!-- ============ REPLACEMENT SECTION 1: "We are The Creative design studio" ============ -->
-<section class="elementor-element elementor-element-cbbf3d0 e-flex e-con-boxed e-con e-parent" data-id="cbbf3d0" data-element_type="container">
-    <div class="e-con-inner">
-        <div class="elementor-element elementor-element-a558240 e-con-full e-flex e-con e-child" data-id="a558240">
-            <div class="elementor-element elementor-element-bb8ecb7 e-con-full e-flex e-con e-child" data-id="bb8ecb7">
+<div class="elementor-element elementor-element-cbbf3d0 e-flex e-con-boxed e-con e-parent" data-id="cbbf3d0" data-element_type="container" style="padding: 60px 20px 40px;">
+    <div class="e-con-inner" style="max-width: 1200px; margin: 0 auto; width: 100%;">
+        <div class="elementor-element elementor-element-a558240 e-con-full e-flex e-con e-child" data-id="a558240" style="display: flex; flex-wrap: wrap; gap: 30px; width: 100%;">
+            <div class="elementor-element elementor-element-bb8ecb7 e-con-full e-flex e-con e-child" data-id="bb8ecb7" style="flex: 1; min-width: 300px;">
                 <div class="elementor-element elementor-element-467f15f elementor-widget" data-id="467f15f" data-element_type="widget" data-widget_type="tp-section-heading.default">
                     <div class="elementor-widget-container">
-                        <h2 class="px-about-2-title fs-300 tp-el-title tp-el-img tp-el-alignment">
-                            <c class="text-effect">We are</c> <i>The Creative</i> <br>
-                            <em class="text-effect">
-                                <img decoding="async" src="../wp-content/uploads/sites/27/2025/09/hero-2-2.jpg" alt="">
+                        <h2 class="px-about-2-title fs-300 tp-el-title tp-el-img tp-el-alignment" style="font-size: clamp(2.5rem, 8vw, 6rem); line-height: 1.1; font-weight: 700; font-family: 'Poppins', 'Inter', sans-serif; color: #1a1a1a;">
+                            <c class="text-effect">We are</c> <i style="font-style: italic; color: #E11010;">The Creative</i> <br>
+                            <em class="text-effect" style="font-style: normal; display: inline-block; position: relative;">
+                                <img decoding="async" src="../wp-content/uploads/sites/27/2025/09/hero-2-2.jpg" alt="" style="width: 70px; height: 70px; border-radius: 50%; object-fit: cover; margin: 0 10px; vertical-align: middle;">
                                 design
                             </em> <br>
-                            <c class="p-relative text-effect">studio</c>
+                            <c class="p-relative text-effect" style="display: inline-block; position: relative;">studio</c>
                         </h2>
                     </div>
                 </div>
             </div>
-            <div class="elementor-element elementor-element-4640d65 e-con-full e-flex e-con e-child" data-id="4640d65">
+            <div class="elementor-element elementor-element-4640d65 e-con-full e-flex e-con e-child" data-id="4640d65" style="flex: 1; min-width: 200px; display: flex; flex-direction: column; align-items: flex-start;">
                 <div class="elementor-element elementor-element-5f06c9d elementor-widget" data-id="5f06c9d" data-element_type="widget" data-widget_type="tp-classic-button.default">
                     <div class="elementor-widget-container">
-                        <a class="px-btn-zikzak text-center p-relative mb-90 tp-el-btn" href="/about">
-                            <span class="btn-text text-pos-1">About us</span>
-                            <i class="zikzak-bg">
+                        <a class="px-btn-zikzak text-center p-relative mb-90 tp-el-btn" href="/about" style="display: inline-block; position: relative; width: 120px; height: 120px; cursor: pointer; text-decoration: none; margin-bottom: 40px;">
+                            <span class="btn-text text-pos-1" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 2; font-size: 14px; font-weight: 600; color: #fff;">About us</span>
+                            <i class="zikzak-bg" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; transition: transform 0.3s ease;">
                                 <svg width="120" height="120" viewBox="0 0 120 120" fill="none">
                                     <path d="M60 0C50.3904 0 42.6 7.7904 42.6 17.4V17.9928L42.1812 17.5734C35.3856 10.7784 24.369 10.7784 17.5734 17.5734C10.7784 24.3684 10.7784 35.3856 17.5734 42.1812L17.9928 42.6H17.4C7.7904 42.6 0 50.3904 0 60C0 69.6096 7.7904 77.4 17.4 77.4H17.9928L17.5734 77.8188C10.7784 84.6144 10.7784 95.631 17.5734 102.427C24.3684 109.222 35.3856 109.222 42.1812 102.427L42.6 102.007V102.6C42.6 112.21 50.3904 120 60 120C69.6096 120 77.4 112.21 77.4 102.6V102.007L77.8194 102.427C84.6144 109.222 95.631 109.222 102.427 102.427C109.222 95.631 109.222 84.6144 102.427 77.8194L102.007 77.4H102.6C112.21 77.4 120 69.6096 120 60C120 50.3904 112.21 42.6 102.6 42.6H102.007L102.427 42.1812C109.222 35.3856 109.222 24.3684 102.427 17.5734C95.631 10.7784 84.6144 10.7784 77.8194 17.5734L77.4 17.9928V17.4C77.4 7.7904 69.6096 0 60 0Z" fill="#E11010"/>
                                 </svg>
@@ -726,10 +910,10 @@ color: rgba(0, 0, 0, 0.6);
                 </div>
                 <div class="elementor-element elementor-element-7da88db elementor-widget" data-id="7da88db" data-element_type="widget" data-widget_type="tp-section-heading.default">
                     <div class="elementor-widget-container">
-                        <div class="px-award-style-2">
+                        <div class="px-award-style-2" style="margin-top: 20px;">
                             <div class="px-award-content">
-                                <h2 class="px-section-title ff-thunder mb-0 text-effect tp-el-title tp-el-alignment">
-                                    <span class="px-about-2-subtitle text-effect">/ FROM <br> LONDON</span>
+                                <h2 class="px-section-title ff-thunder mb-0 text-effect tp-el-title tp-el-alignment" style="font-family: 'Poppins', 'Inter', sans-serif; font-weight: 700; margin-bottom: 0;">
+                                    <span class="px-about-2-subtitle text-effect" style="font-size: clamp(1.2rem, 2.5vw, 2.5rem); font-weight: 700; line-height: 1.2; color: #E11010;">/ FROM <br> LONDON</span>
                                 </h2>
                             </div>
                         </div>
@@ -738,69 +922,69 @@ color: rgba(0, 0, 0, 0.6);
             </div>
         </div>
     </div>
-</section>
+</div>
 
 <!-- ============ REPLACEMENT SECTION 2: Portfolio Cards ============ -->
-<div class="elementor-element elementor-element-a951eb9 e-con-full e-flex e-con e-parent" data-id="a951eb9" data-element_type="container">
+<div class="elementor-element elementor-element-a951eb9 e-con-full e-flex e-con e-parent" data-id="a951eb9" data-element_type="container" style="padding: 0 0 60px;">
     <div class="elementor-element elementor-element-ceacd0b elementor-widget" data-id="ceacd0b" data-element_type="widget" data-widget_type="tp-portfolio-pin.default">
         <div class="elementor-widget-container">
-            <div class="px-portfolio-area pt-75 tp-el-section">
-                <div class="container-fluid">
-                    <div class="px-portfolio-wrap">
+            <div class="px-portfolio-area pt-75 tp-el-section" style="padding: 60px 0;">
+                <div class="container-fluid" style="padding-left: 30px; padding-right: 30px; max-width: 1400px; margin: 0 auto;">
+                    <div class="px-portfolio-wrap" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 30px;">
                         
-                        <div class="px-portfolio-item px-portfolio-panel p-relative mb-30">
-                            <a href="/spaces">
-                                <div class="px-portfolio-thumb p-relative ripple-image">
-                                    <img decoding="async" src="../wp-content/uploads/sites/27/2025/09/project-2-1.jpg" alt="">
+                        <div class="px-portfolio-item px-portfolio-panel p-relative mb-30" style="background: #fff; border-radius: 16px; overflow: hidden; transition: all 0.4s ease; margin-bottom: 30px;">
+                            <a href="/spaces" style="text-decoration: none;">
+                                <div class="px-portfolio-thumb p-relative ripple-image" style="overflow: hidden; border-radius: 16px 16px 0 0; position: relative;">
+                                    <img decoding="async" src="../wp-content/uploads/sites/27/2025/09/project-2-1.jpg" alt="" style="width: 100%; height: 280px; object-fit: cover; transition: transform 0.6s ease;">
                                 </div>
-                                <div class="px-portfolio-category tp-el-cat"><span>Web Design</span><span>Web Development</span></div>
-                                <div class="px-portfolio-category portfolio-meta"><span class="tp-el-meta">2025</span></div>
+                                <div class="px-portfolio-category tp-el-cat" style="display: flex; gap: 8px; padding: 12px 16px 0; flex-wrap: wrap;"><span style="font-size: 13px; color: #666; background: #f5f5f5; padding: 4px 14px; border-radius: 20px; font-weight: 500;">Web Design</span><span style="font-size: 13px; color: #666; background: #f5f5f5; padding: 4px 14px; border-radius: 20px; font-weight: 500;">Web Development</span></div>
+                                <div class="px-portfolio-category portfolio-meta" style="display: flex; gap: 8px; padding: 4px 16px 8px; flex-wrap: wrap;"><span class="tp-el-meta" style="font-size: 13px; color: #999; background: transparent; padding: 0;">2025</span></div>
                             </a>
-                            <div class="px-portfolio-content"><h2 class="px-portfolio-title tp-el-title"><a href="/spaces">Electro Hub</a></h2></div>
+                            <div class="px-portfolio-content" style="padding: 12px 16px 24px;"><h2 class="px-portfolio-title tp-el-title" style="font-size: clamp(1.1rem, 1.5vw, 1.6rem); font-weight: 600; margin: 0; font-family: 'Poppins', 'Inter', sans-serif;"><a href="/spaces" style="text-decoration: none; color: #1a1a1a;">Electro Hub</a></h2></div>
                         </div>
                         
-                        <div class="px-portfolio-item px-portfolio-panel p-relative mb-30">
-                            <a href="/spaces">
-                                <div class="px-portfolio-thumb p-relative ripple-image">
-                                    <img decoding="async" src="../wp-content/uploads/sites/27/2025/10/project-2-2-1-1.jpg" alt="">
+                        <div class="px-portfolio-item px-portfolio-panel p-relative mb-30" style="background: #fff; border-radius: 16px; overflow: hidden; transition: all 0.4s ease; margin-bottom: 30px;">
+                            <a href="/spaces" style="text-decoration: none;">
+                                <div class="px-portfolio-thumb p-relative ripple-image" style="overflow: hidden; border-radius: 16px 16px 0 0; position: relative;">
+                                    <img decoding="async" src="../wp-content/uploads/sites/27/2025/10/project-2-2-1-1.jpg" alt="" style="width: 100%; height: 280px; object-fit: cover; transition: transform 0.6s ease;">
                                 </div>
-                                <div class="px-portfolio-category tp-el-cat"><span>Web Design</span><span>Web Development</span></div>
-                                <div class="px-portfolio-category portfolio-meta"><span class="tp-el-meta">2025</span></div>
+                                <div class="px-portfolio-category tp-el-cat" style="display: flex; gap: 8px; padding: 12px 16px 0; flex-wrap: wrap;"><span style="font-size: 13px; color: #666; background: #f5f5f5; padding: 4px 14px; border-radius: 20px; font-weight: 500;">Web Design</span><span style="font-size: 13px; color: #666; background: #f5f5f5; padding: 4px 14px; border-radius: 20px; font-weight: 500;">Web Development</span></div>
+                                <div class="px-portfolio-category portfolio-meta" style="display: flex; gap: 8px; padding: 4px 16px 8px; flex-wrap: wrap;"><span class="tp-el-meta" style="font-size: 13px; color: #999; background: transparent; padding: 0;">2025</span></div>
                             </a>
-                            <div class="px-portfolio-content"><h2 class="px-portfolio-title tp-el-title"><a href="/spaces">Energy Grid</a></h2></div>
+                            <div class="px-portfolio-content" style="padding: 12px 16px 24px;"><h2 class="px-portfolio-title tp-el-title" style="font-size: clamp(1.1rem, 1.5vw, 1.6rem); font-weight: 600; margin: 0; font-family: 'Poppins', 'Inter', sans-serif;"><a href="/spaces" style="text-decoration: none; color: #1a1a1a;">Energy Grid</a></h2></div>
                         </div>
                         
-                        <div class="px-portfolio-item px-portfolio-panel p-relative mb-30">
-                            <a href="/spaces">
-                                <div class="px-portfolio-thumb p-relative ripple-image">
-                                    <img decoding="async" src="../wp-content/uploads/sites/27/2025/10/project-2-3.jpg" alt="">
+                        <div class="px-portfolio-item px-portfolio-panel p-relative mb-30" style="background: #fff; border-radius: 16px; overflow: hidden; transition: all 0.4s ease; margin-bottom: 30px;">
+                            <a href="/spaces" style="text-decoration: none;">
+                                <div class="px-portfolio-thumb p-relative ripple-image" style="overflow: hidden; border-radius: 16px 16px 0 0; position: relative;">
+                                    <img decoding="async" src="../wp-content/uploads/sites/27/2025/10/project-2-3.jpg" alt="" style="width: 100%; height: 280px; object-fit: cover; transition: transform 0.6s ease;">
                                 </div>
-                                <div class="px-portfolio-category tp-el-cat"><span>Web Design</span><span>Web Development</span></div>
-                                <div class="px-portfolio-category portfolio-meta"><span class="tp-el-meta">2025</span></div>
+                                <div class="px-portfolio-category tp-el-cat" style="display: flex; gap: 8px; padding: 12px 16px 0; flex-wrap: wrap;"><span style="font-size: 13px; color: #666; background: #f5f5f5; padding: 4px 14px; border-radius: 20px; font-weight: 500;">Web Design</span><span style="font-size: 13px; color: #666; background: #f5f5f5; padding: 4px 14px; border-radius: 20px; font-weight: 500;">Web Development</span></div>
+                                <div class="px-portfolio-category portfolio-meta" style="display: flex; gap: 8px; padding: 4px 16px 8px; flex-wrap: wrap;"><span class="tp-el-meta" style="font-size: 13px; color: #999; background: transparent; padding: 0;">2025</span></div>
                             </a>
-                            <div class="px-portfolio-content"><h2 class="px-portfolio-title tp-el-title"><a href="/spaces">Circuit Core</a></h2></div>
+                            <div class="px-portfolio-content" style="padding: 12px 16px 24px;"><h2 class="px-portfolio-title tp-el-title" style="font-size: clamp(1.1rem, 1.5vw, 1.6rem); font-weight: 600; margin: 0; font-family: 'Poppins', 'Inter', sans-serif;"><a href="/spaces" style="text-decoration: none; color: #1a1a1a;">Circuit Core</a></h2></div>
                         </div>
                         
-                        <div class="px-portfolio-item px-portfolio-panel p-relative mb-30">
-                            <a href="/spaces">
-                                <div class="px-portfolio-thumb p-relative ripple-image">
-                                    <img decoding="async" src="../wp-content/uploads/sites/27/2025/10/project-2-4.jpg" alt="">
+                        <div class="px-portfolio-item px-portfolio-panel p-relative mb-30" style="background: #fff; border-radius: 16px; overflow: hidden; transition: all 0.4s ease; margin-bottom: 30px;">
+                            <a href="/spaces" style="text-decoration: none;">
+                                <div class="px-portfolio-thumb p-relative ripple-image" style="overflow: hidden; border-radius: 16px 16px 0 0; position: relative;">
+                                    <img decoding="async" src="../wp-content/uploads/sites/27/2025/10/project-2-4.jpg" alt="" style="width: 100%; height: 280px; object-fit: cover; transition: transform 0.6s ease;">
                                 </div>
-                                <div class="px-portfolio-category tp-el-cat"><span>Web Design</span><span>Web Development</span></div>
-                                <div class="px-portfolio-category portfolio-meta"><span class="tp-el-meta">2025</span></div>
+                                <div class="px-portfolio-category tp-el-cat" style="display: flex; gap: 8px; padding: 12px 16px 0; flex-wrap: wrap;"><span style="font-size: 13px; color: #666; background: #f5f5f5; padding: 4px 14px; border-radius: 20px; font-weight: 500;">Web Design</span><span style="font-size: 13px; color: #666; background: #f5f5f5; padding: 4px 14px; border-radius: 20px; font-weight: 500;">Web Development</span></div>
+                                <div class="px-portfolio-category portfolio-meta" style="display: flex; gap: 8px; padding: 4px 16px 8px; flex-wrap: wrap;"><span class="tp-el-meta" style="font-size: 13px; color: #999; background: transparent; padding: 0;">2025</span></div>
                             </a>
-                            <div class="px-portfolio-content"><h2 class="px-portfolio-title tp-el-title"><a href="/spaces">Volt Zone</a></h2></div>
+                            <div class="px-portfolio-content" style="padding: 12px 16px 24px;"><h2 class="px-portfolio-title tp-el-title" style="font-size: clamp(1.1rem, 1.5vw, 1.6rem); font-weight: 600; margin: 0; font-family: 'Poppins', 'Inter', sans-serif;"><a href="/spaces" style="text-decoration: none; color: #1a1a1a;">Volt Zone</a></h2></div>
                         </div>
                         
-                        <div class="px-portfolio-item px-portfolio-panel p-relative mb-30">
-                            <a href="/spaces">
-                                <div class="px-portfolio-thumb p-relative ripple-image">
-                                    <img decoding="async" src="../wp-content/uploads/sites/27/2025/10/project-2-2-1.jpg" alt="">
+                        <div class="px-portfolio-item px-portfolio-panel p-relative mb-30" style="background: #fff; border-radius: 16px; overflow: hidden; transition: all 0.4s ease; margin-bottom: 30px;">
+                            <a href="/spaces" style="text-decoration: none;">
+                                <div class="px-portfolio-thumb p-relative ripple-image" style="overflow: hidden; border-radius: 16px 16px 0 0; position: relative;">
+                                    <img decoding="async" src="../wp-content/uploads/sites/27/2025/10/project-2-2-1.jpg" alt="" style="width: 100%; height: 280px; object-fit: cover; transition: transform 0.6s ease;">
                                 </div>
-                                <div class="px-portfolio-category tp-el-cat"><span>Web Design</span><span>Web Development</span></div>
-                                <div class="px-portfolio-category portfolio-meta"><span class="tp-el-meta">2025</span></div>
+                                <div class="px-portfolio-category tp-el-cat" style="display: flex; gap: 8px; padding: 12px 16px 0; flex-wrap: wrap;"><span style="font-size: 13px; color: #666; background: #f5f5f5; padding: 4px 14px; border-radius: 20px; font-weight: 500;">Web Design</span><span style="font-size: 13px; color: #666; background: #f5f5f5; padding: 4px 14px; border-radius: 20px; font-weight: 500;">Web Development</span></div>
+                                <div class="px-portfolio-category portfolio-meta" style="display: flex; gap: 8px; padding: 4px 16px 8px; flex-wrap: wrap;"><span class="tp-el-meta" style="font-size: 13px; color: #999; background: transparent; padding: 0;">2025</span></div>
                             </a>
-                            <div class="px-portfolio-content"><h2 class="px-portfolio-title tp-el-title"><a href="/spaces">Power Nexus</a></h2></div>
+                            <div class="px-portfolio-content" style="padding: 12px 16px 24px;"><h2 class="px-portfolio-title tp-el-title" style="font-size: clamp(1.1rem, 1.5vw, 1.6rem); font-weight: 600; margin: 0; font-family: 'Poppins', 'Inter', sans-serif;"><a href="/spaces" style="text-decoration: none; color: #1a1a1a;">Power Nexus</a></h2></div>
                         </div>
                         
                     </div>
