@@ -49,6 +49,7 @@
 <link rel='stylesheet' id='pixora-el-about-css' href='../../creative-agency-classic-two/wp-content/plugins/pixora-core/include/elementor/about/aboutf488.css?ver=1.1.0' media='all' />
 <link rel='stylesheet' id='pixora-el-project-css' href='../../creative-agency-classic-two/wp-content/plugins/pixora-core/include/elementor/project/projectf488.css?ver=1.1.0' media='all' />
 <link rel='stylesheet' id='elementor-post-7309-css' href='../../creative-agency-classic-two/wp-content/uploads/sites/27/elementor/css/post-7309bcb3.css?ver=1782802635' media='all' />
+
 <style>
 .video-showcase-section { padding: 60px 0 40px; background: #fff; }
 .video-showcase-grid { display: flex; gap: 16px; overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding: 0 20px 10px; }
@@ -58,7 +59,34 @@
 .video-showcase-item .video-wrapper video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
 @media (max-width: 992px) { .video-showcase-item { flex: 0 0 calc(50% - 8px); min-width: calc(50% - 8px); } }
 @media (max-width: 576px) { .video-showcase-item { flex: 0 0 85%; min-width: 85%; } }
+
+/* Brands Scrolling */
+.brands-scroll-section { padding: 40px 0; background: #fff; overflow: hidden; }
+.brands-scroll-track { display: flex; gap: 60px; animation: scrollBrands 30s linear infinite; white-space: nowrap; }
+.brands-scroll-track span { font-size: 1.1rem; font-weight: 600; color: #94a3b8; letter-spacing: 0.05em; text-transform: uppercase; font-family: 'Inter', sans-serif; }
+@keyframes scrollBrands { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+/* Reviews Section */
+.reviews-section { padding: 60px 0; background: #f8f9fb; }
+.reviews-section-title { text-align: center; margin-bottom: 40px; }
+.reviews-section-title h3 { font-size: 1.5rem; font-weight: 700; color: #0f172a; font-family: 'Poppins', sans-serif; }
+.reviews-grid { display: flex; gap: 24px; overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding: 0 20px 10px; }
+.reviews-grid::-webkit-scrollbar { display: none; }
+.review-card { flex: 0 0 380px; min-width: 380px; scroll-snap-align: start; background: #fff; border-radius: 20px; padding: 30px; box-shadow: 0 2px 16px rgba(0,0,0,0.04); }
+.review-card .review-stars { display: flex; gap: 4px; margin-bottom: 16px; }
+.review-card .review-stars svg { width: 16px; height: 16px; }
+.review-card .review-text { font-size: 0.95rem; color: #475569; line-height: 1.7; margin-bottom: 20px; font-family: 'Inter', sans-serif; min-height: 80px; }
+.review-card .review-author { display: flex; align-items: center; gap: 14px; }
+.review-card .review-author img { width: 48px; height: 48px; border-radius: 10px; object-fit: cover; }
+.review-card .review-author-info h4 { font-size: 0.9rem; font-weight: 600; color: #0f172a; margin: 0 0 2px; font-family: 'Poppins', sans-serif; }
+.review-card .review-author-info p { font-size: 0.8rem; color: #94a3b8; margin: 0; font-family: 'Inter', sans-serif; }
+@media (max-width: 576px) { .review-card { flex: 0 0 85vw; min-width: 85vw; } }
+
+/* Typewriter cursor */
+.typewriter-text { display: inline; border-right: 2px solid #0f172a; animation: blink 0.8s step-end infinite; }
+@keyframes blink { 50% { border-color: transparent; } }
 </style>
+
 <script id="jquery-core-js" src="../wp-includes/js/jquery/jquery.minf43b.js?ver=3.7.1"></script>
 <script id="jquery-migrate-js" src="../wp-includes/js/jquery/jquery-migrate.min5589.js?ver=3.4.1"></script>
 <link rel="icon" href="../wp-content/uploads/sites/27/2025/10/favicon-1.png" sizes="32x32" />
@@ -110,6 +138,79 @@
             </form>
         </div>
 
+        {/* ===== BRANDS SCROLLING (Right to Left) ===== */}
+        <div class="brands-scroll-section">
+            <div style="display:flex; overflow:hidden;">
+                <div class="brands-scroll-track">
+                    <span>Adobe</span><span>Figma</span><span>Canon</span><span>Sony</span><span>Nikon</span><span>Spotify</span><span>Netflix</span><span>Apple</span><span>Google</span><span>Meta</span>
+                    <span>Adobe</span><span>Figma</span><span>Canon</span><span>Sony</span><span>Nikon</span><span>Spotify</span><span>Netflix</span><span>Apple</span><span>Google</span><span>Meta</span>
+                </div>
+            </div>
+        </div>
+
+        {/* ===== REVIEWS SECTION ===== */}
+        <div class="reviews-section">
+            <div class="reviews-section-title"><h3>What our clients say</h3></div>
+            <div class="reviews-grid">
+                <div class="review-card">
+                    <div class="review-stars">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                    </div>
+                    <div class="review-text"><span class="typewriter-text">The studio space was absolutely perfect for our shoot. Everything was set up exactly as promised. Will definitely book again!</span></div>
+                    <div class="review-author">
+                        <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=100&h=100" alt="">
+                        <div class="review-author-info"><h4>Sarah Johnson</h4><p>Creative Director</p></div>
+                    </div>
+                </div>
+                <div class="review-card">
+                    <div class="review-stars">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                    </div>
+                    <div class="review-text"><span class="typewriter-text">Seamless booking experience and incredible natural lighting. ManyRooms made our production day stress-free and efficient.</span></div>
+                    <div class="review-author">
+                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=100&h=100" alt="">
+                        <div class="review-author-info"><h4>Marcus Chen</h4><p>Photographer</p></div>
+                    </div>
+                </div>
+                <div class="review-card">
+                    <div class="review-stars">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                    </div>
+                    <div class="review-text"><span class="typewriter-text">Best studio marketplace in London! The variety of spaces and the quality of service is unmatched. Highly recommended for any production.</span></div>
+                    <div class="review-author">
+                        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=100&h=100" alt="">
+                        <div class="review-author-info"><h4>Emily Richards</h4><p>Film Producer</p></div>
+                    </div>
+                </div>
+                <div class="review-card">
+                    <div class="review-stars">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                    </div>
+                    <div class="review-text"><span class="typewriter-text">From the seamless booking to the stunning space, everything exceeded expectations. ManyRooms is now our go-to for all shoots.</span></div>
+                    <div class="review-author">
+                        <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=100&h=100" alt="">
+                        <div class="review-author-info"><h4>David Kim</h4><p>Content Creator</p></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         {/* ===== VIDEO SHOWCASE ===== */}
         <div class="video-showcase-section">
             <div class="video-showcase-grid">
@@ -140,31 +241,21 @@
             <div class="e-con-inner">
                 <div class="elementor-element elementor-element-2df53b0d e-con-full e-flex e-con e-child" data-id="2df53b0d" data-element_type="container" data-e-type="container">
                     <div class="elementor-element elementor-element-6df2a0de e-con-full e-flex e-con e-child" data-id="6df2a0de" data-element_type="container" data-e-type="container">
-                        <div class="elementor-element elementor-element-5504614b elementor-widget elementor-widget-heading" data-id="5504614b" data-element_type="widget" data-e-type="widget" data-widget_type="heading.default">
-                            <span class="elementor-heading-title elementor-size-default">About us</span>
-                        </div>
+                        <div class="elementor-element elementor-element-5504614b elementor-widget elementor-widget-heading" data-id="5504614b" data-element_type="widget" data-e-type="widget" data-widget_type="heading.default"><span class="elementor-heading-title elementor-size-default">About us</span></div>
                     </div>
                     <div class="elementor-element elementor-element-1e0cde85 e-con-full e-flex e-con e-child" data-id="1e0cde85" data-element_type="container" data-e-type="container">
-                        <div class="elementor-element elementor-element-b92fbfc elementor-widget elementor-widget-px-heading-animated" data-id="b92fbfc" data-element_type="widget" data-e-type="widget" data-widget_type="px-heading-animated.default">
-                            <div class="elementor-widget-container"><div class="tp-el-alignment">
-                                <h2 class="tp-section-tittle mb-50 tp-el-title reveal-text tp-el-title-ani" style="font-family:'Poppins',sans-serif;">An independent studio marketplace built in London — we vet every space, support every shoot, and help creators book with confidence.</h2>
-                            </div></div>
-                        </div>
+                        <div class="elementor-element elementor-element-b92fbfc elementor-widget elementor-widget-px-heading-animated" data-id="b92fbfc" data-element_type="widget" data-e-type="widget" data-widget_type="px-heading-animated.default"><div class="elementor-widget-container"><div class="tp-el-alignment"><h2 class="tp-section-tittle mb-50 tp-el-title reveal-text tp-el-title-ani" style="font-family:'Poppins',sans-serif;">An independent studio marketplace built in London — we vet every space, support every shoot, and help creators book with confidence.</h2></div></div></div>
                     </div>
                 </div>
                 <div class="elementor-element elementor-element-7f647426 e-con-full e-flex e-con e-child" data-id="7f647426" data-element_type="container" data-e-type="container">
-                    <div class="elementor-element elementor-element-7b090991 e-con-full e-flex e-con e-child" data-id="7b090991" data-element_type="container" data-e-type="container">
-                        <div class="elementor-element elementor-element-390e7eb7 elementor-widget elementor-widget-image" data-id="390e7eb7" data-element_type="widget" data-e-type="widget" data-widget_type="image.default"><img loading="lazy" decoding="async" width="256" height="266" src="../wp-content/uploads/sites/27/2025/11/thumb-4-1.jpg" class="attachment-full size-full wp-image-16401" alt="" /></div>
-                    </div>
-                    <div class="elementor-element elementor-element-fa08f9 e-con-full e-flex e-con e-child" data-id="fa08f9" data-element_type="container" data-e-type="container">
-                        <div class="elementor-element elementor-element-4f667cf7 elementor-widget elementor-widget-image" data-id="4f667cf7" data-element_type="widget" data-e-type="widget" data-widget_type="image.default"><img loading="lazy" decoding="async" width="306" height="400" src="../wp-content/uploads/sites/27/2025/11/thumb-2-1.jpg" class="attachment-full size-full wp-image-16402" alt="" /></div>
-                    </div>
+                    <div class="elementor-element elementor-element-7b090991 e-con-full e-flex e-con e-child" data-id="7b090991" data-element_type="container" data-e-type="container"><div class="elementor-element elementor-element-390e7eb7 elementor-widget elementor-widget-image" data-id="390e7eb7" data-element_type="widget" data-e-type="widget" data-widget_type="image.default"><img loading="lazy" decoding="async" width="256" height="266" src="../wp-content/uploads/sites/27/2025/11/thumb-4-1.jpg" class="attachment-full size-full wp-image-16401" alt="" /></div></div>
+                    <div class="elementor-element elementor-element-fa08f9 e-con-full e-flex e-con e-child" data-id="fa08f9" data-element_type="container" data-e-type="container"><div class="elementor-element elementor-element-4f667cf7 elementor-widget elementor-widget-image" data-id="4f667cf7" data-element_type="widget" data-e-type="widget" data-widget_type="image.default"><img loading="lazy" decoding="async" width="306" height="400" src="../wp-content/uploads/sites/27/2025/11/thumb-2-1.jpg" class="attachment-full size-full wp-image-16402" alt="" /></div></div>
                     <div class="elementor-element elementor-element-3c1fef4e e-con-full e-flex e-con e-child" data-id="3c1fef4e" data-element_type="container" data-e-type="container">
                         <div class="elementor-element elementor-element-62584d95 elementor-widget elementor-widget-image" data-id="62584d95" data-element_type="widget" data-e-type="widget" data-widget_type="image.default"><img loading="lazy" decoding="async" width="140" height="54" src="../wp-content/uploads/sites/27/2025/11/avatar.png" class="attachment-full size-full wp-image-16403" alt="" /></div>
                         <div class="elementor-element elementor-element-6fd04480 elementor-widget-tablet__width-initial elementor-widget-mobile_extra__width-inherit elementor-widget elementor-widget-heading" data-id="6fd04480" data-element_type="widget" data-e-type="widget" data-widget_type="heading.default"><p class="elementor-heading-title elementor-size-default">Driven by a passion for innovation, we specialize in delivering top-quality spaces for your creative shoots</p></div>
                         <div class="elementor-element elementor-element-3ef8a093 e-con-full e-flex e-con e-child" data-id="3ef8a093" data-element_type="container" data-e-type="container">
-                            <div class="elementor-element elementor-element-5b1af467 elementor-widget__width-initial elementor-widget-mobile__width-inherit elementor-widget elementor-widget-counter" data-id="5b1af467" data-element_type="widget" data-e-type="widget" data-widget_type="counter.default"><div class="elementor-counter"><div class="elementor-counter-title">Clients Satisfied and Repeating</div><div class="elementor-counter-number-wrapper"><span class="elementor-counter-number-prefix"></span><span class="elementor-counter-number" data-duration="2000" data-to-value="98" data-from-value="0" data-delimiter=",">0</span><span class="elementor-counter-number-suffix">%</span></div></div></div>
-                            <div class="elementor-element elementor-element-43f754dc elementor-widget__width-initial elementor-widget-mobile__width-inherit elementor-widget elementor-widget-counter" data-id="43f754dc" data-element_type="widget" data-e-type="widget" data-widget_type="counter.default"><div class="elementor-counter"><div class="elementor-counter-title">Shoots Booked Across the Network</div><div class="elementor-counter-number-wrapper"><span class="elementor-counter-number-prefix"></span><span class="elementor-counter-number" data-duration="2000" data-to-value="2500" data-from-value="0" data-delimiter=",">0</span><span class="elementor-counter-number-suffix">+</span></div></div></div>
+                            <div class="elementor-element elementor-element-5b1af467 elementor-widget__width-initial elementor-widget-mobile__width-inherit elementor-widget elementor-widget-counter" data-id="5b1af467" data-element_type="widget" data-e-type="widget" data-widget_type="counter.default"><div class="elementor-counter"><div class="elementor-counter-title">Clients Satisfied and Repeating</div><div class="elementor-counter-number-wrapper"><span class="elementor-counter-number" data-duration="2000" data-to-value="98">0</span><span class="elementor-counter-number-suffix">%</span></div></div></div>
+                            <div class="elementor-element elementor-element-43f754dc elementor-widget__width-initial elementor-widget-mobile__width-inherit elementor-widget elementor-widget-counter" data-id="43f754dc" data-element_type="widget" data-e-type="widget" data-widget_type="counter.default"><div class="elementor-counter"><div class="elementor-counter-title">Shoots Booked Across the Network</div><div class="elementor-counter-number-wrapper"><span class="elementor-counter-number" data-duration="2000" data-to-value="2500">0</span><span class="elementor-counter-number-suffix">+</span></div></div></div>
                         </div>
                     </div>
                 </div>
