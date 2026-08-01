@@ -60,31 +60,106 @@
 @media (max-width: 992px) { .video-showcase-item { flex: 0 0 calc(50% - 8px); min-width: calc(50% - 8px); } }
 @media (max-width: 576px) { .video-showcase-item { flex: 0 0 85%; min-width: 85%; } }
 
-/* Brands Scrolling */
+/* Brands Scrolling - Left to Right */
 .brands-scroll-section { padding: 40px 0; background: #fff; overflow: hidden; }
 .brands-scroll-track { display: flex; gap: 60px; animation: scrollBrands 30s linear infinite; white-space: nowrap; }
 .brands-scroll-track span { font-size: 1.1rem; font-weight: 600; color: #94a3b8; letter-spacing: 0.05em; text-transform: uppercase; font-family: 'Inter', sans-serif; }
 @keyframes scrollBrands { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 
-/* Reviews Section */
-.reviews-section { padding: 60px 0; background: #f8f9fb; }
+/* Reviews Section - UPDATED */
+.reviews-section { padding: 60px 0 40px; background: #f8f9fb; overflow: hidden; }
 .reviews-section-title { text-align: center; margin-bottom: 40px; }
 .reviews-section-title h3 { font-size: 1.5rem; font-weight: 700; color: #0f172a; font-family: 'Poppins', sans-serif; }
-.reviews-grid { display: flex; gap: 24px; overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding: 0 20px 10px; }
-.reviews-grid::-webkit-scrollbar { display: none; }
-.review-card { flex: 0 0 380px; min-width: 380px; scroll-snap-align: start; background: #fff; border-radius: 20px; padding: 30px; box-shadow: 0 2px 16px rgba(0,0,0,0.04); }
-.review-card .review-stars { display: flex; gap: 4px; margin-bottom: 16px; }
-.review-card .review-stars svg { width: 16px; height: 16px; }
-.review-card .review-text { font-size: 0.95rem; color: #475569; line-height: 1.7; margin-bottom: 20px; font-family: 'Inter', sans-serif; min-height: 80px; }
-.review-card .review-author { display: flex; align-items: center; gap: 14px; }
-.review-card .review-author img { width: 48px; height: 48px; border-radius: 10px; object-fit: cover; }
-.review-card .review-author-info h4 { font-size: 0.9rem; font-weight: 600; color: #0f172a; margin: 0 0 2px; font-family: 'Poppins', sans-serif; }
-.review-card .review-author-info p { font-size: 0.8rem; color: #94a3b8; margin: 0; font-family: 'Inter', sans-serif; }
-@media (max-width: 576px) { .review-card { flex: 0 0 85vw; min-width: 85vw; } }
+
+/* Reviews Scrolling - Right to Left (slower) */
+.reviews-scroll-wrapper { overflow: hidden; }
+.reviews-scroll-track { display: flex; gap: 24px; animation: scrollReviews 45s linear infinite; white-space: nowrap; }
+
+.review-card { 
+    flex: 0 0 420px; 
+    min-width: 420px; 
+    background: #fff; 
+    border-radius: 16px; 
+    padding: 20px 24px; 
+    box-shadow: 0 2px 12px rgba(0,0,0,0.04); 
+    display: flex; 
+    align-items: center; 
+    gap: 18px;
+    height: 110px;
+}
+
+.review-card .review-left { 
+    flex: 0 0 auto; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    gap: 6px; 
+}
+.review-card .review-left img { 
+    width: 48px; 
+    height: 48px; 
+    border-radius: 50%; 
+    object-fit: cover; 
+}
+.review-card .review-left .review-author-name { 
+    font-size: 0.75rem; 
+    font-weight: 600; 
+    color: #0f172a; 
+    font-family: 'Poppins', sans-serif; 
+    text-align: center; 
+    white-space: normal;
+    line-height: 1.2;
+}
+.review-card .review-left .review-author-role { 
+    font-size: 0.65rem; 
+    color: #94a3b8; 
+    font-family: 'Inter', sans-serif; 
+    white-space: normal;
+    text-align: center;
+    line-height: 1.2;
+}
+
+.review-card .review-right { 
+    flex: 1; 
+    min-width: 0; 
+    display: flex; 
+    flex-direction: column; 
+    gap: 6px; 
+}
+.review-card .review-right .review-stars { 
+    display: flex; 
+    gap: 2px; 
+}
+.review-card .review-right .review-stars svg { 
+    width: 14px; 
+    height: 14px; 
+}
+.review-card .review-right .review-text { 
+    font-size: 0.85rem; 
+    color: #475569; 
+    line-height: 1.5; 
+    font-family: 'Inter', sans-serif; 
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    white-space: normal;
+}
+
+@keyframes scrollReviews { 
+    0% { transform: translateX(0); } 
+    100% { transform: translateX(-50%); } 
+}
 
 /* Typewriter cursor */
 .typewriter-text { display: inline; border-right: 2px solid #0f172a; animation: blink 0.8s step-end infinite; }
 @keyframes blink { 50% { border-color: transparent; } }
+
+@media (max-width: 576px) { 
+    .review-card { flex: 0 0 85vw; min-width: 85vw; height: 130px; padding: 16px; }
+    .review-card .review-left img { width: 40px; height: 40px; }
+    .review-card .review-right .review-text { font-size: 0.8rem; -webkit-line-clamp: 3; }
+}
 </style>
 
 <script id="jquery-core-js" src="../wp-includes/js/jquery/jquery.minf43b.js?ver=3.7.1"></script>
@@ -107,7 +182,7 @@
     <div id="smooth-wrapper"><div id="smooth-content">
     <div data-elementor-type="wp-page" data-elementor-id="16393" class="elementor elementor-16393">
 
-        {/* ===== HERO ===== */}
+        <!-- Hero -->
         <div class="elementor-element elementor-element-575c634a e-con-full e-flex e-con e-parent" data-id="575c634a" data-element_type="container" data-e-type="container">
             <div class="elementor-element elementor-element-11759bc2 elementor-widget elementor-widget-tp-creative-hero" data-id="11759bc2" data-element_type="widget" data-e-type="widget" data-widget_type="tp-creative-hero.default">
                 <div class="elementor-widget-container">
@@ -126,7 +201,7 @@
             </div>
         </div>
 
-        {/* ===== SEARCH BAR ===== */}
+        <!-- Search Bar -->
         <div style="max-width:650px;margin:30px auto 0;padding:0 20px;position:relative;z-index:10;">
             <form action="/spaces" method="GET" style="display:flex;align-items:center;background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:50px;padding:4px;box-shadow:0 4px 24px rgba(0,0,0,0.06);">
                 <div style="display:flex;align-items:center;padding:0 16px;flex:2;min-width:0;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-right:8px;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg><input type="text" name="q" placeholder="Search mood or aesthetic" style="width:100%;background:transparent;border:none;color:#0f172a;font-size:0.85rem;outline:none;font-family:'Inter',sans-serif;"/></div>
@@ -138,7 +213,7 @@
             </form>
         </div>
 
-        {/* ===== BRANDS SCROLLING (Right to Left) ===== */}
+       <!-- Brand Scroll -->
         <div class="brands-scroll-section">
             <div style="display:flex; overflow:hidden;">
                 <div class="brands-scroll-track">
@@ -148,70 +223,128 @@
             </div>
         </div>
 
-        {/* ===== REVIEWS SECTION ===== */}
+        <!-- Reviews -->
         <div class="reviews-section">
             <div class="reviews-section-title"><h3>What our clients say</h3></div>
-            <div class="reviews-grid">
-                <div class="review-card">
-                    <div class="review-stars">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            <div class="reviews-scroll-wrapper">
+                <div class="reviews-scroll-track">
+                    <!-- Review 1 -->
+                    <div class="review-card">
+                        <div class="review-left">
+                            <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=100&h=100" alt="">
+                            <span class="review-author-name">Sarah Johnson</span>
+                            <span class="review-author-role">Creative Director</span>
+                        </div>
+                        <div class="review-right">
+                            <div class="review-stars">
+                                <svg viewBox="0 0 24 24" fill="#0f172a" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                                <svg viewBox="0 0 24 24" fill="#0f172a" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                                <svg viewBox="0 0 24 24" fill="#0f172a" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                                <svg viewBox="0 0 24 24" fill="#0f172a" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                                <svg viewBox="0 0 24 24" fill="#0f172a" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                            </div>
+                            <div class="review-text"><span class="typewriter-text">The studio space was absolutely perfect for our shoot. Everything was set up exactly as promised.</span></div>
+                        </div>
                     </div>
-                    <div class="review-text"><span class="typewriter-text">The studio space was absolutely perfect for our shoot. Everything was set up exactly as promised. Will definitely book again!</span></div>
-                    <div class="review-author">
-                        <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=100&h=100" alt="">
-                        <div class="review-author-info"><h4>Sarah Johnson</h4><p>Creative Director</p></div>
+
+                    <!-- Review 2 -->
+                    <div class="review-card">
+                        <div class="review-left">
+                            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=100&h=100" alt="">
+                            <span class="review-author-name">Marcus Chen</span>
+                            <span class="review-author-role">Photographer</span>
+                        </div>
+                        <div class="review-right">
+                            <div class="review-stars">
+                                <svg viewBox="0 0 24 24" fill="#0f172a" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                                <svg viewBox="0 0 24 24" fill="#0f172a" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                                <svg viewBox="0 0 24 24" fill="#0f172a" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                                <svg viewBox="0 0 24 24" fill="#0f172a" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                                <svg viewBox="0 0 24 24" fill="#0f172a" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                            </div>
+                            <div class="review-text"><span class="typewriter-text">Seamless booking experience and incredible natural lighting. ManyRooms made our production day stress-free.</span></div>
+                        </div>
                     </div>
-                </div>
-                <div class="review-card">
-                    <div class="review-stars">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+
+                    <!-- Review 3 -->
+                    <div class="review-card">
+                        <div class="review-left">
+                            <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=100&h=100" alt="">
+                            <span class="review-author-name">Emily Richards</span>
+                            <span class="review-author-role">Film Producer</span>
+                        </div>
+                        <div class="review-right">
+                            <div class="review-stars">
+                                <svg viewBox="0 0 24 24" fill="#0f172a" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                                <svg viewBox="0 0 24 24" fill="#0f172a" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                                <svg viewBox="0 0 24 24" fill="#0f172a" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                                <svg viewBox="0 0 24 24" fill="#0f172a" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                                <svg viewBox="0 0 24 24" fill="#0f172a" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                            </div>
+                            <div class="review-text"><span class="typewriter-text">Best studio marketplace in London! The variety of spaces and quality of service is unmatched.</span></div>
+                        </div>
                     </div>
-                    <div class="review-text"><span class="typewriter-text">Seamless booking experience and incredible natural lighting. ManyRooms made our production day stress-free and efficient.</span></div>
-                    <div class="review-author">
-                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=100&h=100" alt="">
-                        <div class="review-author-info"><h4>Marcus Chen</h4><p>Photographer</p></div>
+
+                    <!-- Review 4 -->
+                    <div class="review-card">
+                        <div class="review-left">
+                            <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=100&h=100" alt="">
+                            <span class="review-author-name">David Kim</span>
+                            <span class="review-author-role">Content Creator</span>
+                        </div>
+                        <div class="review-right">
+                            <div class="review-stars">
+                                <svg viewBox="0 0 24 24" fill="#0f172a" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                                <svg viewBox="0 0 24 24" fill="#0f172a" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                                <svg viewBox="0 0 24 24" fill="#0f172a" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                                <svg viewBox="0 0 24 24" fill="#0f172a" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                                <svg viewBox="0 0 24 24" fill="#0f172a" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                            </div>
+                            <div class="review-text"><span class="typewriter-text">From seamless booking to stunning spaces, everything exceeded expectations. ManyRooms is now our go-to.</span></div>
+                        </div>
                     </div>
-                </div>
-                <div class="review-card">
-                    <div class="review-stars">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+
+                    <!-- DUPLICATES for seamless looping -->
+                    <div class="review-card">
+                        <div class="review-left">
+                            <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=100&h=100" alt="">
+                            <span class="review-author-name">Sarah Johnson</span>
+                            <span class="review-author-role">Creative Director</span>
+                        </div>
+                        <div class="review-right">
+                            <div class="review-stars">
+                                <svg viewBox="0 0 24 24" fill="#0f172a" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                                <svg viewBox="0 0 24 24" fill="#0f172a" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                                <svg viewBox="0 0 24 24" fill="#0f172a" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                                <svg viewBox="0 0 24 24" fill="#0f172a" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                                <svg viewBox="0 0 24 24" fill="#0f172a" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                            </div>
+                            <div class="review-text"><span class="typewriter-text">The studio space was absolutely perfect for our shoot. Everything was set up exactly as promised.</span></div>
+                        </div>
                     </div>
-                    <div class="review-text"><span class="typewriter-text">Best studio marketplace in London! The variety of spaces and the quality of service is unmatched. Highly recommended for any production.</span></div>
-                    <div class="review-author">
-                        <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=100&h=100" alt="">
-                        <div class="review-author-info"><h4>Emily Richards</h4><p>Film Producer</p></div>
-                    </div>
-                </div>
-                <div class="review-card">
-                    <div class="review-stars">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                        <svg viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                    </div>
-                    <div class="review-text"><span class="typewriter-text">From the seamless booking to the stunning space, everything exceeded expectations. ManyRooms is now our go-to for all shoots.</span></div>
-                    <div class="review-author">
-                        <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=100&h=100" alt="">
-                        <div class="review-author-info"><h4>David Kim</h4><p>Content Creator</p></div>
+
+                    <div class="review-card">
+                        <div class="review-left">
+                            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=100&h=100" alt="">
+                            <span class="review-author-name">Marcus Chen</span>
+                            <span class="review-author-role">Photographer</span>
+                        </div>
+                        <div class="review-right">
+                            <div class="review-stars">
+                                <svg viewBox="0 0 24 24" fill="#0f172a" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                                <svg viewBox="0 0 24 24" fill="#0f172a" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                                <svg viewBox="0 0 24 24" fill="#0f172a" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                                <svg viewBox="0 0 24 24" fill="#0f172a" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                                <svg viewBox="0 0 24 24" fill="#0f172a" stroke="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                            </div>
+                            <div class="review-text"><span class="typewriter-text">Seamless booking experience and incredible natural lighting. ManyRooms made our production day stress-free.</span></div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        {/* ===== VIDEO SHOWCASE ===== */}
+        <!-- Video showcase -->
         <div class="video-showcase-section">
             <div class="video-showcase-grid">
                 <div class="video-showcase-item"><div class="video-wrapper"><video autoplay loop muted playsinline><source src="https://html.aqlova.com/videos/bfolio/video-3.mp4" type="video/mp4"></video></div></div>
@@ -221,7 +354,7 @@
             </div>
         </div>
 
-        {/* ===== PORTFOLIO CARDS ===== */}
+        <!-- Portfolio Cards -->
         <div class="elementor-element elementor-element-a951eb9 e-con-full e-flex e-con e-parent" data-id="a951eb9" data-element_type="container" data-e-type="container" style="padding:4rem 0 2rem;">
             <div class="elementor-element elementor-element-ceacd0b elementor-widget" data-id="ceacd0b" data-element_type="widget" data-widget_type="tp-portfolio-pin.default">
                 <div class="elementor-widget-container">
@@ -236,7 +369,7 @@
             </div>
         </div>
 
-        {/* ===== ABOUT ===== */}
+        <!-- About -->
         <div class="elementor-element elementor-element-76e3dd75 e-flex e-con-boxed e-con e-parent" data-id="76e3dd75" data-element_type="container" data-e-type="container">
             <div class="e-con-inner">
                 <div class="elementor-element elementor-element-2df53b0d e-con-full e-flex e-con e-child" data-id="2df53b0d" data-element_type="container" data-e-type="container">
@@ -262,7 +395,7 @@
             </div>
         </div>
 
-        {/* ===== TEXT SLIDER ===== */}
+       <!-- Text Slider -->
         <div class="elementor-element elementor-element-4045a863 e-con-full e-flex e-con e-parent" data-id="4045a863" data-element_type="container" data-e-type="container">
             <div class="elementor-element elementor-element-95d0ad3 elementor-widget elementor-widget-tp-creative-text-slider" data-id="95d0ad3" data-element_type="widget" data-e-type="widget" data-widget_type="tp-creative-text-slider.default">
                 <div class="elementor-widget-container">
@@ -274,7 +407,7 @@
             </div>
         </div>
 
-        {/* ===== AWARDS ===== */}
+        <!-- Awards -->
         <div class="elementor-element elementor-element-14625b71 e-con-full e-flex e-con e-parent" data-id="14625b71" data-element_type="container" data-e-type="container" data-settings='{"background_background":"classic"}'>
             <div class="elementor-element elementor-element-7880f643 e-flex e-con-boxed e-con e-child" data-id="7880f643" data-element_type="container" data-e-type="container"><div class="e-con-inner">
                 <div class="elementor-element elementor-element-5801558 elementor-widget elementor-widget-tp-award" data-id="5801558" data-element_type="widget" data-e-type="widget" data-widget_type="tp-award.default"><div class="elementor-widget-container">
@@ -290,7 +423,7 @@
             </div></div>
         </div>
 
-        {/* ===== CONTACT ===== */}
+        <!-- Contact -->
         <div class="elementor-element elementor-element-277beda4 e-flex e-con-boxed e-con e-parent" data-id="277beda4" data-element_type="container" data-e-type="container" data-settings='{"background_background":"classic"}'>
             <div class="e-con-inner">
                 <div class="elementor-element elementor-element-7103b69e e-con-full e-flex e-con e-child" data-id="7103b69e" data-element_type="container" data-e-type="container">
@@ -335,7 +468,7 @@
             </div>
         </div>
 
-        {/* ===== INSTAGRAM (CORRECTED) ===== */}
+        <!-- Instagram -->
         <div class="elementor-element elementor-element-13953ca8 e-con-full e-flex e-con e-parent" data-id="13953ca8" data-element_type="container" data-e-type="container">
             <div class="elementor-element elementor-element-500b3fcb elementor-widget elementor-widget-tp-creative-instagram" data-id="500b3fcb" data-element_type="widget" data-e-type="widget" data-widget_type="tp-creative-instagram.default">
                 <div class="elementor-widget-container">
@@ -367,7 +500,7 @@
             </div>
         </div>
 
-        {/* ===== FOOTER (CORRECTED) ===== */}
+       <!-- Footer -->
         <div data-elementor-type="wp-post" data-elementor-id="16555" class="elementor elementor-16555">
             <div class="elementor-element elementor-element-329e3021 e-con-full e-flex e-con e-parent" data-id="329e3021" data-element_type="container" data-e-type="container">
                 <div class="elementor-element elementor-element-6084c5aa e-flex e-con-boxed e-con e-child" data-id="6084c5aa" data-element_type="container" data-e-type="container" data-settings='{"background_background":"classic"}'>
@@ -424,7 +557,7 @@
 
     </div></div></div>
 
-    {/* ===== ALL JS SCRIPTS ===== */}
+    <!-- JS ALL -->
     <script src="../wp-includes/js/jquery/jquery.minf43b.js"></script>
     <script src="../wp-includes/js/jquery/jquery-migrate.min5589.js"></script>
     <script src="../wp-includes/js/imagesloaded.minbb93.js"></script>
