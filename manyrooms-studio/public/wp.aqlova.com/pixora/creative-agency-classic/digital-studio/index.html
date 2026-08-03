@@ -61,7 +61,7 @@
 @media (max-width: 576px) { .video-showcase-item { flex: 0 0 85%; min-width: 85%; } }
 
 /* Brands Scrolling - Left to Right */
-.brands-scroll-section { padding: 40px 0; background: #fff; overflow: hidden; }
+.brands-scroll-section { padding: 40px 0; background: #fff; overflow: hidden; margin-top: 60px; }
 .brands-scroll-track { display: flex; gap: 60px; animation: scrollBrands 30s linear infinite; white-space: nowrap; }
 .brands-scroll-track span { font-size: 1.1rem; font-weight: 600; color: #94a3b8; letter-spacing: 0.05em; text-transform: uppercase; font-family: 'Inter', sans-serif; }
 @keyframes scrollBrands { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
@@ -155,6 +155,38 @@
 .typewriter-text { display: inline; border-right: 2px solid #0f172a; animation: blink 0.8s step-end infinite; }
 @keyframes blink { 50% { border-color: transparent; } }
 
+/* Search Bar - UPDATED */
+.search-bar-wrapper { max-width: 780px; margin: 30px auto 0; padding: 0 20px; position: relative; z-index: 10; }
+.search-bar-wrapper .search-form { display: flex; align-items: center; background: #fff; border: 1px solid rgba(0,0,0,0.08); border-radius: 50px; padding: 4px; box-shadow: 0 4px 24px rgba(0,0,0,0.06); }
+.search-bar-wrapper .search-form .search-input-group { display: flex; align-items: center; padding: 0 16px; flex: 2; min-width: 0; }
+.search-bar-wrapper .search-form .search-input-group svg { flex-shrink: 0; margin-right: 8px; }
+.search-bar-wrapper .search-form .search-input-group input { width: 100%; background: transparent; border: none; color: #0f172a; font-size: 0.85rem; outline: none; font-family: 'Inter', sans-serif; }
+.search-bar-wrapper .search-form .search-divider { width: 1px; height: 24px; background: #e2e8f0; flex-shrink: 0; }
+.search-bar-wrapper .search-form .search-date-group { display: flex; align-items: center; padding: 0 14px; flex: 1; min-width: 0; }
+.search-bar-wrapper .search-form .search-date-group svg { flex-shrink: 0; margin-right: 6px; }
+.search-bar-wrapper .search-form .search-date-group input { width: 100%; background: transparent; border: none; color: #475569; font-size: 0.85rem; outline: none; font-family: 'Inter', sans-serif; }
+.search-bar-wrapper .search-form .search-location-group { display: flex; align-items: center; padding: 0 14px; flex: 1; min-width: 0; }
+.search-bar-wrapper .search-form .search-location-group svg { flex-shrink: 0; margin-right: 6px; }
+.search-bar-wrapper .search-form .search-location-group input { width: 100%; background: transparent; border: none; color: #0f172a; font-size: 0.85rem; outline: none; font-family: 'Inter', sans-serif; }
+.search-bar-wrapper .search-form .search-submit-btn { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 12px 28px; background: #0f172a; color: #fff; border: none; border-radius: 50px; font-weight: 600; font-size: 0.8rem; cursor: pointer; white-space: nowrap; font-family: 'Inter', sans-serif; margin: 2px; transition: all 0.3s ease; }
+.search-bar-wrapper .search-form .search-submit-btn:hover { background: #F1CB81; color: #0f172a; }
+.search-bar-wrapper .search-form .search-submit-btn svg { width: 14px; height: 14px; }
+
+@media (max-width: 768px) { 
+    .search-bar-wrapper { max-width: 100%; padding: 0 15px; }
+    .search-bar-wrapper .search-form { flex-wrap: wrap; border-radius: 20px; padding: 8px; }
+    .search-bar-wrapper .search-form .search-input-group { flex: 1 1 100%; padding: 6px 14px; }
+    .search-bar-wrapper .search-form .search-divider { display: none; }
+    .search-bar-wrapper .search-form .search-date-group { flex: 1 1 50%; padding: 6px 14px; }
+    .search-bar-wrapper .search-form .search-location-group { flex: 1 1 50%; padding: 6px 14px; }
+    .search-bar-wrapper .search-form .search-submit-btn { flex: 1 1 100%; padding: 14px; margin-top: 4px; border-radius: 30px; }
+}
+
+@media (max-width: 480px) { 
+    .search-bar-wrapper .search-form .search-date-group { flex: 1 1 100%; }
+    .search-bar-wrapper .search-form .search-location-group { flex: 1 1 100%; }
+}
+
 @media (max-width: 576px) { 
     .review-card { flex: 0 0 85vw; min-width: 85vw; height: 130px; padding: 16px; }
     .review-card .review-left img { width: 40px; height: 40px; }
@@ -171,18 +203,24 @@
 
 <body class="wp-singular page-template-default page page-id-16393 wp-embed-responsive wp-theme-pixora tp-magic-cursor no-sidebar elementor-default elementor-template-full-width elementor-kit-7032 elementor-page elementor-page-16393">
 
+    <!-- Magic Cursor -->
     <div id="magic-cursor" class="cursor-white-bg"><div id="ball" data-text-color="#000" style="background-color:#000" data-small-cursor="#000" data-big-cursor="#fff"></div></div>
+    
+    <!-- Preloader -->
     <div id="loader" class="loader"><div class="loader__wrapper"><div class="loader__content"><div class="loader__count"><span class="count__text">0</span><span class="count__percent">%</span></div></div><span class="count__bdr"></span></div></div>
+    
+    <!-- Back to Top -->
     <div class="back-to-top-wrapper"><button id="back_to_top" type="button" class="back-to-top-btn"><svg width="12" height="7" viewBox="0 0 12 7" fill="none"><path d="M11 6L6 1L1 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
     <div class="px-blur-bottom"></div>
 
-    <!-- HEADER -->
+    <!-- ===== HEADER START ===== -->
     <div data-elementor-type="wp-post" data-elementor-id="16883" class="elementor elementor-16883"><div class="elementor-element elementor-element-6f9b317 e-flex e-con-boxed e-con e-parent" data-id="6f9b317" data-element_type="container" data-e-type="container"><div class="e-con-inner"><div class="elementor-element elementor-element-d911cd3 elementor-widget elementor-widget-tp-px-header-01" data-id="d911cd3" data-element_type="widget" data-e-type="widget" data-widget_type="tp-px-header-01.default"><div class="elementor-widget-container"><div class="tp-header-creative"><header><div class="px-header-area header-transparent px-header-ptb px-header-style-black"><div class="row align-items-center"><div class="col-lg-4 col-md-3 col-6"><div class="px-header-logo tp-el-logo"><a href="/"><img data-width="90" src="../wp-content/uploads/sites/27/2025/10/logo-orange.png" alt="ManyRooms"></a></div></div><div class="col-lg-8 col-md-9 col-6"><div class="px-header-box d-flex justify-content-end align-items-center"><div class="px-header-menu tp-header-dropdown dropdown-white-bg d-none d-xl-block"><nav class="tp-mobile-menu-active"><ul class="tp-nav-menu"><li class="menu-item current-menu-item nav-item"><a title="Home" href="/" class="nav-links">Home</a></li><li class="menu-item nav-item"><a title="Spaces" href="/spaces" class="nav-links">Spaces</a></li><li class="menu-item nav-item"><a title="About" href="/about" class="nav-links">About</a></li><li class="menu-item nav-item"><a title="Contact" href="/contact" class="nav-links">Contact</a></li></ul></nav></div><div class="px-header-action tp-el-block"><button class="px-header-bar tp-offcanvas-open-btn"><span></span><span></span></button></div></div></div></div></div></header></div></div></div></div></div></div>
+    <!-- ===== HEADER END ===== -->
 
     <div id="smooth-wrapper"><div id="smooth-content">
     <div data-elementor-type="wp-page" data-elementor-id="16393" class="elementor elementor-16393">
 
-        <!-- Hero -->
+        <!-- ===== HERO SECTION START ===== -->
         <div class="elementor-element elementor-element-575c634a e-con-full e-flex e-con e-parent" data-id="575c634a" data-element_type="container" data-e-type="container">
             <div class="elementor-element elementor-element-11759bc2 elementor-widget elementor-widget-tp-creative-hero" data-id="11759bc2" data-element_type="widget" data-e-type="widget" data-widget_type="tp-creative-hero.default">
                 <div class="elementor-widget-container">
@@ -200,20 +238,34 @@
                 </div>
             </div>
         </div>
+        <!-- ===== HERO SECTION END ===== -->
 
-        <!-- Search Bar -->
-        <div style="max-width:650px;margin:30px auto 0;padding:0 20px;position:relative;z-index:10;">
-            <form action="/spaces" method="GET" style="display:flex;align-items:center;background:#fff;border:1px solid rgba(0,0,0,0.08);border-radius:50px;padding:4px;box-shadow:0 4px 24px rgba(0,0,0,0.06);">
-                <div style="display:flex;align-items:center;padding:0 16px;flex:2;min-width:0;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-right:8px;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg><input type="text" name="q" placeholder="Search mood or aesthetic" style="width:100%;background:transparent;border:none;color:#0f172a;font-size:0.85rem;outline:none;font-family:'Inter',sans-serif;"/></div>
-                <div style="width:1px;height:24px;background:#e2e8f0;flex-shrink:0;"></div>
-                <div style="display:flex;align-items:center;padding:0 14px;flex:1;min-width:0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-right:6px;"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><input type="date" name="date" style="width:100%;background:transparent;border:none;color:#475569;font-size:0.85rem;outline:none;font-family:'Inter',sans-serif;"/></div>
-                <div style="width:1px;height:24px;background:#e2e8f0;flex-shrink:0;"></div>
-                <div style="display:flex;align-items:center;padding:0 14px;flex:1;min-width:0;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-right:6px;"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg><input type="text" name="location" placeholder="Location" style="width:100%;background:transparent;border:none;color:#0f172a;font-size:0.85rem;outline:none;font-family:'Inter',sans-serif;"/></div>
-                <button type="submit" style="display:flex;align-items:center;justify-content:center;gap:6px;padding:12px 22px;background:#0f172a;color:#fff;border:none;border-radius:50px;font-weight:600;font-size:0.8rem;cursor:pointer;white-space:nowrap;font-family:'Inter',sans-serif;margin:2px;" onmouseover="this.style.background='#F1CB81';this.style.color='#0f172a'" onmouseout="this.style.background='#0f172a';this.style.color='#fff'"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>Search</button>
+        <!-- ===== SEARCH BAR START ===== -->
+        <div class="search-bar-wrapper">
+            <form action="/spaces" method="GET" class="search-form">
+                <div class="search-input-group">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                    <input type="text" name="q" placeholder="Search mood or aesthetic">
+                </div>
+                <div class="search-divider"></div>
+                <div class="search-date-group">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    <input type="date" name="date">
+                </div>
+                <div class="search-divider"></div>
+                <div class="search-location-group">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                    <input type="text" name="location" placeholder="Location">
+                </div>
+                <button type="submit" class="search-submit-btn">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                    Search
+                </button>
             </form>
         </div>
+        <!-- ===== SEARCH BAR END ===== -->
 
-       <!-- Brand Scroll -->
+        <!-- ===== BRANDS SCROLL SECTION START ===== -->
         <div class="brands-scroll-section">
             <div style="display:flex; overflow:hidden;">
                 <div class="brands-scroll-track">
@@ -222,8 +274,9 @@
                 </div>
             </div>
         </div>
+        <!-- ===== BRANDS SCROLL SECTION END ===== -->
 
-        <!-- Reviews -->
+        <!-- ===== REVIEWS SECTION START ===== -->
         <div class="reviews-section">
             <div class="reviews-section-title"><h3>What our clients say</h3></div>
             <div class="reviews-scroll-wrapper">
@@ -343,8 +396,9 @@
                 </div>
             </div>
         </div>
+        <!-- ===== REVIEWS SECTION END ===== -->
 
-        <!-- Video showcase -->
+        <!-- ===== VIDEO SHOWCASE SECTION START ===== -->
         <div class="video-showcase-section">
             <div class="video-showcase-grid">
                 <div class="video-showcase-item"><div class="video-wrapper"><video autoplay loop muted playsinline><source src="https://html.aqlova.com/videos/bfolio/video-3.mp4" type="video/mp4"></video></div></div>
@@ -353,8 +407,9 @@
                 <div class="video-showcase-item"><div class="video-wrapper"><video autoplay loop muted playsinline><source src="https://html.aqlova.com/videos/bfolio/video-3.mp4" type="video/mp4"></video></div></div>
             </div>
         </div>
+        <!-- ===== VIDEO SHOWCASE SECTION END ===== -->
 
-        <!-- Portfolio Cards -->
+        <!-- ===== PORTFOLIO CARDS SECTION START ===== -->
         <div class="elementor-element elementor-element-a951eb9 e-con-full e-flex e-con e-parent" data-id="a951eb9" data-element_type="container" data-e-type="container" style="padding:4rem 0 2rem;">
             <div class="elementor-element elementor-element-ceacd0b elementor-widget" data-id="ceacd0b" data-element_type="widget" data-widget_type="tp-portfolio-pin.default">
                 <div class="elementor-widget-container">
@@ -368,8 +423,9 @@
                 </div>
             </div>
         </div>
+        <!-- ===== PORTFOLIO CARDS SECTION END ===== -->
 
-        <!-- About -->
+        <!-- ===== ABOUT SECTION START ===== -->
         <div class="elementor-element elementor-element-76e3dd75 e-flex e-con-boxed e-con e-parent" data-id="76e3dd75" data-element_type="container" data-e-type="container">
             <div class="e-con-inner">
                 <div class="elementor-element elementor-element-2df53b0d e-con-full e-flex e-con e-child" data-id="2df53b0d" data-element_type="container" data-e-type="container">
@@ -394,8 +450,9 @@
                 </div>
             </div>
         </div>
+        <!-- ===== ABOUT SECTION END ===== -->
 
-       <!-- Text Slider -->
+        <!-- ===== TEXT SLIDER SECTION START ===== -->
         <div class="elementor-element elementor-element-4045a863 e-con-full e-flex e-con e-parent" data-id="4045a863" data-element_type="container" data-e-type="container">
             <div class="elementor-element elementor-element-95d0ad3 elementor-widget elementor-widget-tp-creative-text-slider" data-id="95d0ad3" data-element_type="widget" data-e-type="widget" data-widget_type="tp-creative-text-slider.default">
                 <div class="elementor-widget-container">
@@ -406,8 +463,9 @@
                 </div>
             </div>
         </div>
+        <!-- ===== TEXT SLIDER SECTION END ===== -->
 
-        <!-- Awards -->
+        <!-- ===== AWARDS SECTION START ===== -->
         <div class="elementor-element elementor-element-14625b71 e-con-full e-flex e-con e-parent" data-id="14625b71" data-element_type="container" data-e-type="container" data-settings='{"background_background":"classic"}'>
             <div class="elementor-element elementor-element-7880f643 e-flex e-con-boxed e-con e-child" data-id="7880f643" data-element_type="container" data-e-type="container"><div class="e-con-inner">
                 <div class="elementor-element elementor-element-5801558 elementor-widget elementor-widget-tp-award" data-id="5801558" data-element_type="widget" data-e-type="widget" data-widget_type="tp-award.default"><div class="elementor-widget-container">
@@ -422,8 +480,9 @@
                 </div></div>
             </div></div>
         </div>
+        <!-- ===== AWARDS SECTION END ===== -->
 
-        <!-- Contact -->
+        <!-- ===== CONTACT SECTION START ===== -->
         <div class="elementor-element elementor-element-277beda4 e-flex e-con-boxed e-con e-parent" data-id="277beda4" data-element_type="container" data-e-type="container" data-settings='{"background_background":"classic"}'>
             <div class="e-con-inner">
                 <div class="elementor-element elementor-element-7103b69e e-con-full e-flex e-con e-child" data-id="7103b69e" data-element_type="container" data-e-type="container">
@@ -467,8 +526,9 @@
                 </div>
             </div>
         </div>
+        <!-- ===== CONTACT SECTION END ===== -->
 
-        <!-- Instagram -->
+        <!-- ===== INSTAGRAM SECTION START ===== -->
         <div class="elementor-element elementor-element-13953ca8 e-con-full e-flex e-con e-parent" data-id="13953ca8" data-element_type="container" data-e-type="container">
             <div class="elementor-element elementor-element-500b3fcb elementor-widget elementor-widget-tp-creative-instagram" data-id="500b3fcb" data-element_type="widget" data-e-type="widget" data-widget_type="tp-creative-instagram.default">
                 <div class="elementor-widget-container">
@@ -499,8 +559,9 @@
                 </div>
             </div>
         </div>
+        <!-- ===== INSTAGRAM SECTION END ===== -->
 
-       <!-- Footer -->
+        <!-- ===== FOOTER SECTION START ===== -->
         <div data-elementor-type="wp-post" data-elementor-id="16555" class="elementor elementor-16555">
             <div class="elementor-element elementor-element-329e3021 e-con-full e-flex e-con e-parent" data-id="329e3021" data-element_type="container" data-e-type="container">
                 <div class="elementor-element elementor-element-6084c5aa e-flex e-con-boxed e-con e-child" data-id="6084c5aa" data-element_type="container" data-e-type="container" data-settings='{"background_background":"classic"}'>
@@ -554,10 +615,11 @@
                 </div>
             </div>
         </div>
+        <!-- ===== FOOTER SECTION END ===== -->
 
     </div></div></div>
 
-    <!-- JS ALL -->
+    <!-- ===== ALL JS SCRIPTS ===== -->
     <script src="../wp-includes/js/jquery/jquery.minf43b.js"></script>
     <script src="../wp-includes/js/jquery/jquery-migrate.min5589.js"></script>
     <script src="../wp-includes/js/imagesloaded.minbb93.js"></script>
