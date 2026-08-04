@@ -266,15 +266,118 @@
         <!-- ===== SEARCH BAR END ===== -->
 
         <!-- ===== BRANDS SCROLL SECTION START ===== -->
-        <div class="brands-scroll-section">
+        <!-- <div class="brands-scroll-section">
             <div style="display:flex; overflow:hidden;">
                 <div class="brands-scroll-track">
                     <span>Adobe</span><span>Figma</span><span>Canon</span><span>Sony</span><span>Nikon</span><span>Spotify</span><span>Netflix</span><span>Apple</span><span>Google</span><span>Meta</span>
                     <span>Adobe</span><span>Figma</span><span>Canon</span><span>Sony</span><span>Nikon</span><span>Spotify</span><span>Netflix</span><span>Apple</span><span>Google</span><span>Meta</span>
                 </div>
             </div>
-        </div>
+        </div> -->
         <!-- ===== BRANDS SCROLL SECTION END ===== -->
+
+        <!-- ===== BRANDS SCROLL SECTION START (Pure Black Logos, Infinite Scroll) ===== -->
+<style>
+    /* Remove default styles from the span tags */
+    .brands-scroll-section span {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 48px; /* Space between each logo */
+        flex-shrink: 0;
+    }
+
+    /* Standardize SVG size to avoid jumping */
+    .brands-scroll-section svg {
+        height: 28px; /* Perfect height for clean brand bars */
+        width: auto;
+        fill: #000000; /* Forces pure black */
+        display: block;
+    }
+
+    /* The infinite scroll animation wrapper */
+    .brands-scroll-wrapper {
+        display: flex;
+        overflow: hidden;
+        width: 100%;
+        padding: 40px 0; /* Generous vertical breathing room */
+        background: #ffffff;
+        border-top: 1px solid #e5e7eb;
+        border-bottom: 1px solid #e5e7eb;
+        position: relative;
+    }
+
+    /* The sliding track */
+    .brands-scroll-track {
+        display: flex;
+        align-items: center;
+        white-space: nowrap;
+        animation: scrollBrands 30s linear infinite; /* Smooth, constant speed */
+    }
+
+    /* The actual animation keyframe */
+    @keyframes scrollBrands {
+        0% {
+            transform: translateX(0);
+        }
+        100% {
+            transform: translateX(-50%);
+        }
+    }
+
+    /* Optional: Fade on edges for a premium look */
+    .brands-scroll-wrapper::before,
+    .brands-scroll-wrapper::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 60px;
+        z-index: 2;
+        pointer-events: none;
+    }
+    .brands-scroll-wrapper::before {
+        left: 0;
+        background: linear-gradient(to right, #ffffff, transparent);
+    }
+    .brands-scroll-wrapper::after {
+        right: 0;
+        background: linear-gradient(to left, #ffffff, transparent);
+    }
+</style>
+
+<div class="brands-scroll-section">
+    <div class="brands-scroll-wrapper">
+        <div class="brands-scroll-track">
+            
+            <!-- ===== FIRST SET ===== -->
+            <span><!-- Adobe --><svg viewBox="0 0 24 24"><path d="M0 0v24h24V0H0zm14.7 19.5l-1.4-3.5H8.4l-1.4 3.5H4.5L10 5.3h3.2l5.5 14.2h-4zM12.2 13.8l-1.8-5-1.8 5h3.6z"/></svg></span>
+            <span><!-- Figma --><svg viewBox="0 0 24 24"><path d="M10.8 19.2a2.4 2.4 0 0 0 0-4.8H8.4v2.4a2.4 2.4 0 0 0 2.4 2.4zM8.4 9.6h2.4a2.4 2.4 0 1 0 0-4.8H8.4v4.8zm0 4.8h4.8a2.4 2.4 0 1 0 0-4.8H8.4v4.8zm0-9.6a2.4 2.4 0 0 0-2.4 2.4v12a2.4 2.4 0 0 0 4.8 0V14.4a2.4 2.4 0 0 0 2.4-4.8 2.4 2.4 0 0 0 0-4.8H8.4z"/></svg></span>
+            <span><!-- Canon --><svg viewBox="0 0 24 24"><path d="M0 12c0 6.6 5.4 12 12 12s12-5.4 12-12S18.6 0 12 0 0 5.4 0 12zm1.2 0c0-6 4.8-10.8 10.8-10.8S22.8 6 22.8 12 18 22.8 12 22.8 1.2 18 1.2 12z"/><circle cx="12" cy="12" r="6"/></svg></span>
+            <span><!-- Sony --><svg viewBox="0 0 24 24"><path d="M0 7.8v8.4h6v-1.8H2.4V9.6H6V7.8H0zm7.2 0v8.4h2.4v-8.4H7.2zm3.6 0v8.4h2.4v-6.6h2.4V7.8h-4.8zm6 0v8.4h6v-1.8h-3.6V9.6h3.6V7.8h-6z"/></svg></span>
+            <span><!-- Nikon --><svg viewBox="0 0 24 24"><path d="M0 4.8h4.8l4.8 9.6V4.8h2.4v14.4H7.2L2.4 9.6v9.6H0V4.8zM14.4 4.8h2.4v14.4h-2.4V4.8zm4.8 0h2.4v7.2l2.4-7.2h2.4l-3.6 10.8v3.6h-2.4v-3.6L19.2 4.8z"/></svg></span>
+            <span><!-- Spotify --><svg viewBox="0 0 24 24"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.6 0 12 0zm5.4 17.4c-.6.6-1.2.6-1.8 0-1.8-1.2-4.2-1.8-6.6-1.2-.6.6-1.2.6-1.8 0s-.6-1.2 0-1.8c3-1.2 6.6-.6 9 1.2.6.6.6 1.2 0 1.8zm1.8-3.6c-.6.6-1.8.6-2.4 0-2.4-1.8-5.4-2.4-8.4-1.2-.6.6-1.8.6-2.4 0s-.6-1.8 0-2.4c3.6-1.8 7.8-1.2 10.8 1.2.6.6.6 1.8 0 2.4zm1.8-3.6c-.6.6-1.8.6-2.4 0-3-2.4-7.2-3-10.8-1.2-.6.6-1.8.6-2.4 0s-.6-1.8 0-2.4c4.2-2.4 9.6-1.8 13.2 1.2.6.6.6 1.8 0 2.4z"/></svg></span>
+            <span><!-- Netflix --><svg viewBox="0 0 24 24"><path d="M6.6 0L12 16.2L17.4 0H24v24h-4.8V7.2L13.8 24H10.2L4.8 7.2V24H0V0h6.6z"/></svg></span>
+            <span><!-- Apple --><svg viewBox="0 0 24 24"><path d="M18.6 18c-1.2 1.8-2.4 3.6-4.2 3.6-1.8 0-2.4-1.2-4.8-1.2s-3 1.2-4.8 1.2c-1.8 0-3-1.8-4.2-3.6-1.8-3-3-8.4-1.2-12C.6 3.6 2.4 2.4 4.2 2.4c1.8 0 3 1.2 4.8 1.2s3.6-1.2 5.4-1.2c1.8 0 3.6.6 4.8 1.8-4.2 2.4-3.6 7.8.6 9.6-.6 1.8-1.2 3-1.2 4.2zm-4.8-15c1.2-1.2 2.4-2.4 2.4-4.2-2.4.6-4.2 1.8-4.8 3.6-.6 1.2-.6 2.4 0 3.6 1.2-.6 2.4-1.8 2.4-3z"/></svg></span>
+            <span><!-- Google --><svg viewBox="0 0 24 24"><path d="M12 4.8c2.4 0 4.2 1.2 5.4 2.4l3.6-3.6C18.6 1.2 15.6 0 12 0 7.2 0 3 3 1.2 7.2L5.4 10.8C6.6 7.2 9 4.8 12 4.8z"/><path d="M12 24c3.6 0 6.6-1.2 9-3.6l-4.2-4.2c-1.2 1.2-3 1.8-4.8 1.8-3.6 0-6.6-2.4-7.8-6L.6 16.2C2.4 20.4 6.6 24 12 24z"/><path d="M12 19.2v-6.6H0v6.6h12z"/></svg></span>
+            <span><!-- Meta --><svg viewBox="0 0 24 24"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.6 0 12 0zm3 14.4l-3-3.6-3 3.6-3.6-4.8 3.6-4.8 3 3.6 3-3.6 3.6 4.8-3.6 4.8z"/></svg></span>
+
+            <!-- ===== SECOND SET (Duplicated for Infinite Loop) ===== -->
+            <span><!-- Adobe --><svg viewBox="0 0 24 24"><path d="M0 0v24h24V0H0zm14.7 19.5l-1.4-3.5H8.4l-1.4 3.5H4.5L10 5.3h3.2l5.5 14.2h-4zM12.2 13.8l-1.8-5-1.8 5h3.6z"/></svg></span>
+            <span><!-- Figma --><svg viewBox="0 0 24 24"><path d="M10.8 19.2a2.4 2.4 0 0 0 0-4.8H8.4v2.4a2.4 2.4 0 0 0 2.4 2.4zM8.4 9.6h2.4a2.4 2.4 0 1 0 0-4.8H8.4v4.8zm0 4.8h4.8a2.4 2.4 0 1 0 0-4.8H8.4v4.8zm0-9.6a2.4 2.4 0 0 0-2.4 2.4v12a2.4 2.4 0 0 0 4.8 0V14.4a2.4 2.4 0 0 0 2.4-4.8 2.4 2.4 0 0 0 0-4.8H8.4z"/></svg></span>
+            <span><!-- Canon --><svg viewBox="0 0 24 24"><path d="M0 12c0 6.6 5.4 12 12 12s12-5.4 12-12S18.6 0 12 0 0 5.4 0 12zm1.2 0c0-6 4.8-10.8 10.8-10.8S22.8 6 22.8 12 18 22.8 12 22.8 1.2 18 1.2 12z"/><circle cx="12" cy="12" r="6"/></svg></span>
+            <span><!-- Sony --><svg viewBox="0 0 24 24"><path d="M0 7.8v8.4h6v-1.8H2.4V9.6H6V7.8H0zm7.2 0v8.4h2.4v-8.4H7.2zm3.6 0v8.4h2.4v-6.6h2.4V7.8h-4.8zm6 0v8.4h6v-1.8h-3.6V9.6h3.6V7.8h-6z"/></svg></span>
+            <span><!-- Nikon --><svg viewBox="0 0 24 24"><path d="M0 4.8h4.8l4.8 9.6V4.8h2.4v14.4H7.2L2.4 9.6v9.6H0V4.8zM14.4 4.8h2.4v14.4h-2.4V4.8zm4.8 0h2.4v7.2l2.4-7.2h2.4l-3.6 10.8v3.6h-2.4v-3.6L19.2 4.8z"/></svg></span>
+            <span><!-- Spotify --><svg viewBox="0 0 24 24"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.6 0 12 0zm5.4 17.4c-.6.6-1.2.6-1.8 0-1.8-1.2-4.2-1.8-6.6-1.2-.6.6-1.2.6-1.8 0s-.6-1.2 0-1.8c3-1.2 6.6-.6 9 1.2.6.6.6 1.2 0 1.8zm1.8-3.6c-.6.6-1.8.6-2.4 0-2.4-1.8-5.4-2.4-8.4-1.2-.6.6-1.8.6-2.4 0s-.6-1.8 0-2.4c3.6-1.8 7.8-1.2 10.8 1.2.6.6.6 1.8 0 2.4zm1.8-3.6c-.6.6-1.8.6-2.4 0-3-2.4-7.2-3-10.8-1.2-.6.6-1.8.6-2.4 0s-.6-1.8 0-2.4c4.2-2.4 9.6-1.8 13.2 1.2.6.6.6 1.8 0 2.4z"/></svg></span>
+            <span><!-- Netflix --><svg viewBox="0 0 24 24"><path d="M6.6 0L12 16.2L17.4 0H24v24h-4.8V7.2L13.8 24H10.2L4.8 7.2V24H0V0h6.6z"/></svg></span>
+            <span><!-- Apple --><svg viewBox="0 0 24 24"><path d="M18.6 18c-1.2 1.8-2.4 3.6-4.2 3.6-1.8 0-2.4-1.2-4.8-1.2s-3 1.2-4.8 1.2c-1.8 0-3-1.8-4.2-3.6-1.8-3-3-8.4-1.2-12C.6 3.6 2.4 2.4 4.2 2.4c1.8 0 3 1.2 4.8 1.2s3.6-1.2 5.4-1.2c1.8 0 3.6.6 4.8 1.8-4.2 2.4-3.6 7.8.6 9.6-.6 1.8-1.2 3-1.2 4.2zm-4.8-15c1.2-1.2 2.4-2.4 2.4-4.2-2.4.6-4.2 1.8-4.8 3.6-.6 1.2-.6 2.4 0 3.6 1.2-.6 2.4-1.8 2.4-3z"/></svg></span>
+            <span><!-- Google --><svg viewBox="0 0 24 24"><path d="M12 4.8c2.4 0 4.2 1.2 5.4 2.4l3.6-3.6C18.6 1.2 15.6 0 12 0 7.2 0 3 3 1.2 7.2L5.4 10.8C6.6 7.2 9 4.8 12 4.8z"/><path d="M12 24c3.6 0 6.6-1.2 9-3.6l-4.2-4.2c-1.2 1.2-3 1.8-4.8 1.8-3.6 0-6.6-2.4-7.8-6L.6 16.2C2.4 20.4 6.6 24 12 24z"/><path d="M12 19.2v-6.6H0v6.6h12z"/></svg></span>
+            <span><!-- Meta --><svg viewBox="0 0 24 24"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.6 0 12 0zm3 14.4l-3-3.6-3 3.6-3.6-4.8 3.6-4.8 3 3.6 3-3.6 3.6 4.8-3.6 4.8z"/></svg></span>
+            
+        </div>
+    </div>
+</div>
+<!-- ===== BRANDS SCROLL SECTION END ===== -->
 
         <!-- ===== REVIEWS SECTION START ===== -->
         <!-- <div class="reviews-section">
