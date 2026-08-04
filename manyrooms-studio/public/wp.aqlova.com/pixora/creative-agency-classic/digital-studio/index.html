@@ -149,8 +149,10 @@
 .reviews-section-title h3 { font-size: 1.5rem; font-weight: 700; color: #0f172a; font-family: 'Poppins', sans-serif; }
 
 /* Reviews Scrolling - Right to Left (slower) */
-.reviews-scroll-wrapper { overflow: hidden; }
-.reviews-scroll-track { display: flex; gap: 24px; animation: scrollReviews 45s linear infinite; white-space: nowrap; }
+.reviews-scroll-wrapper { overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+.reviews-scroll-track { display: flex; gap: 24px; white-space: nowrap; width: max-content; }
+/* .reviews-scroll-wrapper { overflow: hidden; }
+.reviews-scroll-track { display: flex; gap: 24px; animation: scrollReviews 45s linear infinite; white-space: nowrap; } */
 
 .review-card { 
     flex: 0 0 420px; 
