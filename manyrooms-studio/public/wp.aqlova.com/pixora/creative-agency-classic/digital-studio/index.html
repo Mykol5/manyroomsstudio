@@ -400,89 +400,110 @@
 
 
         <!-- ===== REVIEWS SECTION START ===== -->
-        <div class="reviews-section">
+        <div class="reviews-section" style="padding: 60px 0 40px; background: #f8f9fb; overflow: hidden;">
             <div class="reviews-section-title" style="text-align: center; margin-bottom: 30px;">
                 <span style="font-size: 0.85rem; color: #94a3b8; font-family: 'Inter', sans-serif; letter-spacing: 0.05em; text-transform: uppercase; font-weight: 500;">Used by 1M+ creators, marketers & brands</span>
                 <h3 style="font-size: 1.8rem; font-weight: 700; color: #0f172a; font-family: 'Poppins', sans-serif; margin-top: 8px;">What our clients say</h3>
             </div>
-            <div class="reviews-scroll-wrapper" style="overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: thin; padding: 10px 20px 30px;">
-                <div class="reviews-scroll-track" style="display: flex; gap: 40px; white-space: normal;">
+            
+            <!-- Manual Scroll Wrapper -->
+            <div class="reviews-scroll-wrapper" style="overflow-x: auto; overflow-y: visible; -webkit-overflow-scrolling: touch; scrollbar-width: thin; padding: 10px 20px 30px; cursor: grab; scroll-snap-type: x mandatory;">
+                <div class="reviews-scroll-track" style="display: flex; gap: 30px; white-space: normal; padding: 0 10px;">
                     
                     <!-- Review 1 - Cassie Schoonover -->
-                    <div class="review-card" style="flex: 0 0 420px; min-width: 420px; background: #fff; border-radius: 16px; padding: 32px 30px; box-shadow: 0 2px 12px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.04);">
-                        <div class="review-author" style="margin-bottom: 8px;">
-                            <span class="review-author-name" style="font-size: 1.2rem; font-weight: 700; color: #0f172a; font-family: 'Inter', sans-serif; letter-spacing: 0.02em;">CASSIE SCHOONOVER</span>
+                    <div class="review-card" style="flex: 0 0 500px; min-width: 500px; max-width: 500px; background: #fff; border-radius: 20px; padding: 32px 30px; box-shadow: 0 2px 16px rgba(0,0,0,0.06); border: 1px solid rgba(0,0,0,0.04); scroll-snap-align: start;">
+                        <div class="review-header" style="display: flex; align-items: center; gap: 16px; margin-bottom: 14px;">
+                            <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=100&h=100" alt="" style="width: 56px; height: 56px; border-radius: 50%; object-fit: cover; flex-shrink: 0;">
+                            <div>
+                                <div class="review-author-name" style="font-size: 1.1rem; font-weight: 700; color: #0f172a; font-family: 'Inter', sans-serif; letter-spacing: 0.02em;">CASSIE SCHOONOVER</div>
+                                <div class="review-followers" style="font-size: 0.8rem; font-weight: 600; color: #475569; font-family: 'Inter', sans-serif; letter-spacing: 0.03em;">504K FOLLOWERS</div>
+                            </div>
                         </div>
-                        <div class="review-followers" style="margin-bottom: 14px;">
-                            <span style="font-size: 0.85rem; font-weight: 600; color: #475569; font-family: 'Inter', sans-serif; letter-spacing: 0.03em;">504K FOLLOWERS</span>
-                        </div>
-                        <div class="review-text" style="font-size: 0.95rem; color: #0f172a; line-height: 1.7; font-family: 'Inter', sans-serif; font-weight: 600; font-style: italic; margin-bottom: 16px;">
+                        <div class="review-text" style="font-size: 0.95rem; color: #0f172a; line-height: 1.7; font-family: 'Inter', sans-serif; font-weight: 600; font-style: italic; margin-bottom: 16px; min-height: 80px;">
                             "THIS IS A 10 OUT OF 10. THE FUNCTIONALITY, THE CREATIVITY, THE ABILITY TO CREATE THE FLOWS..."
                         </div>
                         <a href="#" class="review-learn-more" style="font-size: 0.8rem; font-weight: 700; color: #0f172a; text-decoration: none; font-family: 'Inter', sans-serif; display: inline-flex; align-items: center; gap: 8px; letter-spacing: 0.03em; transition: all 0.3s ease;">
                             LEARN MORE →
-                            <span style="transition: transform 0.3s ease; display: inline-block;">→</span>
                         </a>
                     </div>
 
                     <!-- Review 2 - Michelle Hansen -->
-                    <div class="review-card" style="flex: 0 0 420px; min-width: 420px; background: #fff; border-radius: 16px; padding: 32px 30px; box-shadow: 0 2px 12px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.04);">
-                        <div class="review-author" style="margin-bottom: 8px;">
-                            <span class="review-author-name" style="font-size: 1.2rem; font-weight: 700; color: #0f172a; font-family: 'Inter', sans-serif; letter-spacing: 0.02em;">MICHELLE HANSEN</span>
+                    <div class="review-card" style="flex: 0 0 500px; min-width: 500px; max-width: 500px; background: #fff; border-radius: 20px; padding: 32px 30px; box-shadow: 0 2px 16px rgba(0,0,0,0.06); border: 1px solid rgba(0,0,0,0.04); scroll-snap-align: start;">
+                        <div class="review-header" style="display: flex; align-items: center; gap: 16px; margin-bottom: 14px;">
+                            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=100&h=100" alt="" style="width: 56px; height: 56px; border-radius: 50%; object-fit: cover; flex-shrink: 0;">
+                            <div>
+                                <div class="review-author-name" style="font-size: 1.1rem; font-weight: 700; color: #0f172a; font-family: 'Inter', sans-serif; letter-spacing: 0.02em;">MICHELLE HANSEN</div>
+                                <div class="review-followers" style="font-size: 0.8rem; font-weight: 600; color: #475569; font-family: 'Inter', sans-serif; letter-spacing: 0.03em;">82K FOLLOWERS</div>
+                            </div>
                         </div>
-                        <div class="review-followers" style="margin-bottom: 14px;">
-                            <span style="font-size: 0.85rem; font-weight: 600; color: #475569; font-family: 'Inter', sans-serif; letter-spacing: 0.03em;">82K FOLLOWERS</span>
-                        </div>
-                        <div class="review-text" style="font-size: 0.95rem; color: #0f172a; line-height: 1.7; font-family: 'Inter', sans-serif; font-weight: 600; font-style: italic; margin-bottom: 16px;">
+                        <div class="review-text" style="font-size: 0.95rem; color: #0f172a; line-height: 1.7; font-family: 'Inter', sans-serif; font-weight: 600; font-style: italic; margin-bottom: 16px; min-height: 80px;">
                             "I'VE HAD OVER 3 MILLION VIEWS ON MY CONTENT USING THIS STUDIO SPACE. IT'S A GAME CHANGER."
                         </div>
                         <a href="#" class="review-learn-more" style="font-size: 0.8rem; font-weight: 700; color: #0f172a; text-decoration: none; font-family: 'Inter', sans-serif; display: inline-flex; align-items: center; gap: 8px; letter-spacing: 0.03em; transition: all 0.3s ease;">
                             LEARN MORE →
-                            <span style="transition: transform 0.3s ease; display: inline-block;">→</span>
                         </a>
                     </div>
 
                     <!-- Review 3 -->
-                    <div class="review-card" style="flex: 0 0 420px; min-width: 420px; background: #fff; border-radius: 16px; padding: 32px 30px; box-shadow: 0 2px 12px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.04);">
-                        <div class="review-author" style="margin-bottom: 8px;">
-                            <span class="review-author-name" style="font-size: 1.2rem; font-weight: 700; color: #0f172a; font-family: 'Inter', sans-serif; letter-spacing: 0.02em;">JAMES ANDERSON</span>
+                    <div class="review-card" style="flex: 0 0 500px; min-width: 500px; max-width: 500px; background: #fff; border-radius: 20px; padding: 32px 30px; box-shadow: 0 2px 16px rgba(0,0,0,0.06); border: 1px solid rgba(0,0,0,0.04); scroll-snap-align: start;">
+                        <div class="review-header" style="display: flex; align-items: center; gap: 16px; margin-bottom: 14px;">
+                            <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=100&h=100" alt="" style="width: 56px; height: 56px; border-radius: 50%; object-fit: cover; flex-shrink: 0;">
+                            <div>
+                                <div class="review-author-name" style="font-size: 1.1rem; font-weight: 700; color: #0f172a; font-family: 'Inter', sans-serif; letter-spacing: 0.02em;">EMILY RICHARDS</div>
+                                <div class="review-followers" style="font-size: 0.8rem; font-weight: 600; color: #475569; font-family: 'Inter', sans-serif; letter-spacing: 0.03em;">210K FOLLOWERS</div>
+                            </div>
                         </div>
-                        <div class="review-followers" style="margin-bottom: 14px;">
-                            <span style="font-size: 0.85rem; font-weight: 600; color: #475569; font-family: 'Inter', sans-serif; letter-spacing: 0.03em;">210K FOLLOWERS</span>
-                        </div>
-                        <div class="review-text" style="font-size: 0.95rem; color: #0f172a; line-height: 1.7; font-family: 'Inter', sans-serif; font-weight: 600; font-style: italic; margin-bottom: 16px;">
+                        <div class="review-text" style="font-size: 0.95rem; color: #0f172a; line-height: 1.7; font-family: 'Inter', sans-serif; font-weight: 600; font-style: italic; margin-bottom: 16px; min-height: 80px;">
                             "THE BEST DECISION I MADE FOR MY PRODUCTION. THE SPACE IS INCREDIBLE AND THE TEAM IS AMAZING."
                         </div>
                         <a href="#" class="review-learn-more" style="font-size: 0.8rem; font-weight: 700; color: #0f172a; text-decoration: none; font-family: 'Inter', sans-serif; display: inline-flex; align-items: center; gap: 8px; letter-spacing: 0.03em; transition: all 0.3s ease;">
                             LEARN MORE →
-                            <span style="transition: transform 0.3s ease; display: inline-block;">→</span>
                         </a>
                     </div>
 
                     <!-- Review 4 -->
-                    <div class="review-card" style="flex: 0 0 420px; min-width: 420px; background: #fff; border-radius: 16px; padding: 32px 30px; box-shadow: 0 2px 12px rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.04);">
-                        <div class="review-author" style="margin-bottom: 8px;">
-                            <span class="review-author-name" style="font-size: 1.2rem; font-weight: 700; color: #0f172a; font-family: 'Inter', sans-serif; letter-spacing: 0.02em;">RACHEL WONG</span>
+                    <div class="review-card" style="flex: 0 0 500px; min-width: 500px; max-width: 500px; background: #fff; border-radius: 20px; padding: 32px 30px; box-shadow: 0 2px 16px rgba(0,0,0,0.06); border: 1px solid rgba(0,0,0,0.04); scroll-snap-align: start;">
+                        <div class="review-header" style="display: flex; align-items: center; gap: 16px; margin-bottom: 14px;">
+                            <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=100&h=100" alt="" style="width: 56px; height: 56px; border-radius: 50%; object-fit: cover; flex-shrink: 0;">
+                            <div>
+                                <div class="review-author-name" style="font-size: 1.1rem; font-weight: 700; color: #0f172a; font-family: 'Inter', sans-serif; letter-spacing: 0.02em;">DAVID KIM</div>
+                                <div class="review-followers" style="font-size: 0.8rem; font-weight: 600; color: #475569; font-family: 'Inter', sans-serif; letter-spacing: 0.03em;">156K FOLLOWERS</div>
+                            </div>
                         </div>
-                        <div class="review-followers" style="margin-bottom: 14px;">
-                            <span style="font-size: 0.85rem; font-weight: 600; color: #475569; font-family: 'Inter', sans-serif; letter-spacing: 0.03em;">156K FOLLOWERS</span>
-                        </div>
-                        <div class="review-text" style="font-size: 0.95rem; color: #0f172a; line-height: 1.7; font-family: 'Inter', sans-serif; font-weight: 600; font-style: italic; margin-bottom: 16px;">
+                        <div class="review-text" style="font-size: 0.95rem; color: #0f172a; line-height: 1.7; font-family: 'Inter', sans-serif; font-weight: 600; font-style: italic; margin-bottom: 16px; min-height: 80px;">
                             "MANYROOMS HAS REVOLUTIONIZED HOW I FIND STUDIO SPACES. BOOKING IS SO EASY AND THE QUALITY IS TOP NOTCH."
                         </div>
                         <a href="#" class="review-learn-more" style="font-size: 0.8rem; font-weight: 700; color: #0f172a; text-decoration: none; font-family: 'Inter', sans-serif; display: inline-flex; align-items: center; gap: 8px; letter-spacing: 0.03em; transition: all 0.3s ease;">
                             LEARN MORE →
-                            <span style="transition: transform 0.3s ease; display: inline-block;">→</span>
+                        </a>
+                    </div>
+
+                    <!-- Review 5 - Extra for more scroll -->
+                    <div class="review-card" style="flex: 0 0 500px; min-width: 500px; max-width: 500px; background: #fff; border-radius: 20px; padding: 32px 30px; box-shadow: 0 2px 16px rgba(0,0,0,0.06); border: 1px solid rgba(0,0,0,0.04); scroll-snap-align: start;">
+                        <div class="review-header" style="display: flex; align-items: center; gap: 16px; margin-bottom: 14px;">
+                            <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=100&h=100" alt="" style="width: 56px; height: 56px; border-radius: 50%; object-fit: cover; flex-shrink: 0;">
+                            <div>
+                                <div class="review-author-name" style="font-size: 1.1rem; font-weight: 700; color: #0f172a; font-family: 'Inter', sans-serif; letter-spacing: 0.02em;">SARAH JOHNSON</div>
+                                <div class="review-followers" style="font-size: 0.8rem; font-weight: 600; color: #475569; font-family: 'Inter', sans-serif; letter-spacing: 0.03em;">98K FOLLOWERS</div>
+                            </div>
+                        </div>
+                        <div class="review-text" style="font-size: 0.95rem; color: #0f172a; line-height: 1.7; font-family: 'Inter', sans-serif; font-weight: 600; font-style: italic; margin-bottom: 16px; min-height: 80px;">
+                            "THE STUDIO SPACE WAS ABSOLUTELY PERFECT FOR OUR SHOOT. EVERYTHING WAS SET UP EXACTLY AS PROMISED."
+                        </div>
+                        <a href="#" class="review-learn-more" style="font-size: 0.8rem; font-weight: 700; color: #0f172a; text-decoration: none; font-family: 'Inter', sans-serif; display: inline-flex; align-items: center; gap: 8px; letter-spacing: 0.03em; transition: all 0.3s ease;">
+                            LEARN MORE →
                         </a>
                     </div>
 
                 </div>
             </div>
+            
+            <!-- Scroll Hint -->
+            <div style="text-align: center; margin-top: 10px;">
+                <span style="font-size: 0.75rem; color: #94a3b8; font-family: 'Inter', sans-serif; letter-spacing: 0.05em;">← Scroll to see more →</span>
+            </div>
         </div>
         <!-- ===== REVIEWS SECTION END ===== -->
-
-
-
     
 
 
