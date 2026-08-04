@@ -398,13 +398,13 @@
         </div> -->
         <!-- ===== REVIEWS SECTION END ===== -->
 
-<!-- ===== REVIEWS SECTION START (Mirrors reference image exactly) ===== -->
+<!-- ===== REVIEWS SECTION START (Strict Grid Layout) ===== -->
 <div class="reviews-section" style="background: #ffffff; border-top: 1px solid #e5e7eb; border-bottom: 1px solid #e5e7eb; overflow: hidden; font-family: 'Helvetica Neue', Arial, sans-serif;">
     
     <!-- Scroll Wrapper -->
-    <div class="reviews-scroll-wrapper" style="overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; scrollbar-width: none; cursor: grab; padding: 24px 0; display: flex;">
+    <div class="reviews-scroll-wrapper" style="overflow-x: auto; overflow-y: hidden; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding: 24px 0; display: flex;">
         
-        <!-- Scroll Track (flex row) -->
+        <!-- Scroll Track -->
         <div class="reviews-scroll-track" style="display: flex; align-items: stretch; width: max-content; gap: 0;">
 
             <!-- 1. STICKY INTRO BLOCK (Left) -->
@@ -415,77 +415,96 @@
             </div>
 
             <!-- 2. REVIEW CARD - NATASHA WILLIS -->
-            <div class="review-card" style="flex: 0 0 480px; min-width: 480px; max-width: 480px; padding: 0 36px; border-right: 1px solid #e5e7eb; display: flex; flex-direction: column; justify-content: center;">
-                <!-- Top Row -->
-                <div class="review-top-row" style="display: flex; align-items: center; gap: 16px; margin-bottom: 12px;">
-                    <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=100&h=100" alt="Natasha" style="width: 56px; height: 56px; border-radius: 50%; object-fit: cover; flex-shrink: 0;">
-                    <div style="display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 8px;">
-                        <span class="review-author-name" style="font-size: 14px; font-weight: 600; color: #0f172a; letter-spacing: 0.5px; text-transform: uppercase;">NATASHA WILLIS</span>
-                        <span class="review-followers" style="font-size: 12px; font-weight: 500; color: #94a3b8; letter-spacing: 0.5px; text-transform: uppercase;">27.3K FOLLOWERS</span>
+            <div class="review-card" style="flex: 0 0 500px; min-width: 500px; max-width: 500px; padding: 8px 36px 8px 0; border-right: 1px solid #e5e7eb; display: flex; align-items: stretch; box-sizing: border-box;">
+                
+                <!-- Left Side: Square Image (Full height of the card's row) -->
+                <div style="flex: 0 0 80px; display: flex; align-items: stretch;">
+                    <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=100&h=100" alt="Natasha" style="width: 80px; height: 80px; object-fit: cover; flex-shrink: 0;">
+                </div>
+
+                <!-- Right Side: Text Content (Stacked vertically) -->
+                <div style="flex: 1; padding-left: 18px; display: flex; flex-direction: column; justify-content: center; min-width: 0;">
+                    
+                    <!-- Row 1: Name + Followers -->
+                    <div style="display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 10px; margin-bottom: 6px;">
+                        <span style="font-size: 14px; font-weight: 600; color: #0f172a; letter-spacing: 0.5px; text-transform: uppercase; white-space: nowrap;">NATASHA WILLIS</span>
+                        <span style="font-size: 12px; font-weight: 500; color: #94a3b8; letter-spacing: 0.5px; text-transform: uppercase; white-space: nowrap;">27.3K FOLLOWERS</span>
                     </div>
+
+                    <!-- Row 2: Comment (Truncated with '...' - prevents overflow) -->
+                    <div style="font-size: 15px; color: #0f172a; line-height: 1.4; font-weight: 400; margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                        “WE'VE USED MANYCHAT TO GENERATE OVER $65 MILLION IN SALES...”
+                    </div>
+
+                    <!-- Row 3: Learn More -->
+                    <a href="#" style="font-size: 13px; font-weight: 700; color: #0f172a; text-decoration: none; display: inline-block; letter-spacing: 0.3px; text-transform: uppercase;">
+                        LEARN MORE &rarr;
+                    </a>
+
                 </div>
-                <!-- Quote Text -->
-                <div class="review-text" style="font-size: 15px; color: #0f172a; line-height: 1.5; font-weight: 400; margin-bottom: 12px; letter-spacing: 0.2px;">
-                    “WE'VE USED MANYCHAT TO GENERATE OVER $65 MILLION IN SALES...”
-                </div>
-                <!-- Learn More Link -->
-                <a href="#" class="review-learn-more" style="font-size: 13px; font-weight: 700; color: #0f172a; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; letter-spacing: 0.3px; text-transform: uppercase; transition: opacity 0.2s;">
-                    LEARN MORE &rarr;
-                </a>
             </div>
 
             <!-- 3. REVIEW CARD - GIOVANNI BEGOSSI -->
-            <div class="review-card" style="flex: 0 0 480px; min-width: 480px; max-width: 480px; padding: 0 36px; border-right: 1px solid #e5e7eb; display: flex; flex-direction: column; justify-content: center;">
-                <!-- Top Row -->
-                <div class="review-top-row" style="display: flex; align-items: center; gap: 16px; margin-bottom: 12px;">
-                    <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=80&w=100&h=100" alt="Giovanni" style="width: 56px; height: 56px; border-radius: 50%; object-fit: cover; flex-shrink: 0;">
-                    <div style="display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 8px;">
-                        <span class="review-author-name" style="font-size: 14px; font-weight: 600; color: #0f172a; letter-spacing: 0.5px; text-transform: uppercase;">GIOVANNI BEGOSSI</span>
-                        <span class="review-followers" style="font-size: 12px; font-weight: 500; color: #94a3b8; letter-spacing: 0.5px; text-transform: uppercase;">2M FOLLOWERS</span>
+            <div class="review-card" style="flex: 0 0 500px; min-width: 500px; max-width: 500px; padding: 8px 36px 8px 0; border-right: 1px solid #e5e7eb; display: flex; align-items: stretch; box-sizing: border-box;">
+                
+                <div style="flex: 0 0 80px; display: flex; align-items: stretch;">
+                    <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=80&w=100&h=100" alt="Giovanni" style="width: 80px; height: 80px; object-fit: cover; flex-shrink: 0;">
+                </div>
+
+                <div style="flex: 1; padding-left: 18px; display: flex; flex-direction: column; justify-content: center; min-width: 0;">
+                    <div style="display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 10px; margin-bottom: 6px;">
+                        <span style="font-size: 14px; font-weight: 600; color: #0f172a; letter-spacing: 0.5px; text-transform: uppercase; white-space: nowrap;">GIOVANNI BEGOSSI</span>
+                        <span style="font-size: 12px; font-weight: 500; color: #94a3b8; letter-spacing: 0.5px; text-transform: uppercase; white-space: nowrap;">2M FOLLOWERS</span>
                     </div>
+                    <div style="font-size: 15px; color: #0f172a; line-height: 1.4; font-weight: 400; margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                        “MY INSTAGRAM ACCOUNT GAINED OVER 1 MILLION FOLLOWERS...”
+                    </div>
+                    <a href="#" style="font-size: 13px; font-weight: 700; color: #0f172a; text-decoration: none; display: inline-block; letter-spacing: 0.3px; text-transform: uppercase;">
+                        LEARN MORE &rarr;
+                    </a>
                 </div>
-                <!-- Quote Text -->
-                <div class="review-text" style="font-size: 15px; color: #0f172a; line-height: 1.5; font-weight: 400; margin-bottom: 12px; letter-spacing: 0.2px;">
-                    “MY INSTAGRAM ACCOUNT GAINED OVER 1 MILLION FOLLOWER”
-                </div>
-                <!-- Learn More Link -->
-                <a href="#" class="review-learn-more" style="font-size: 13px; font-weight: 700; color: #0f172a; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; letter-spacing: 0.3px; text-transform: uppercase; transition: opacity 0.2s;">
-                    LEARN MORE &rarr;
-                </a>
             </div>
 
-            <!-- 4. REVIEW CARD - MICHELLE HANSEN (Placeholder) -->
-            <div class="review-card" style="flex: 0 0 480px; min-width: 480px; max-width: 480px; padding: 0 36px; border-right: 1px solid #e5e7eb; display: flex; flex-direction: column; justify-content: center;">
-                <div class="review-top-row" style="display: flex; align-items: center; gap: 16px; margin-bottom: 12px;">
-                    <img src="https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?auto=format&fit=crop&q=80&w=100&h=100" alt="Michelle" style="width: 56px; height: 56px; border-radius: 50%; object-fit: cover; flex-shrink: 0;">
-                    <div style="display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 8px;">
-                        <span class="review-author-name" style="font-size: 14px; font-weight: 600; color: #0f172a; letter-spacing: 0.5px; text-transform: uppercase;">MICHELLE HANSEN</span>
-                        <span class="review-followers" style="font-size: 12px; font-weight: 500; color: #94a3b8; letter-spacing: 0.5px; text-transform: uppercase;">214K FOLLOWERS</span>
+            <!-- 4. REVIEW CARD - MICHELLE HANSEN -->
+            <div class="review-card" style="flex: 0 0 500px; min-width: 500px; max-width: 500px; padding: 8px 36px 8px 0; border-right: 1px solid #e5e7eb; display: flex; align-items: stretch; box-sizing: border-box;">
+                
+                <div style="flex: 0 0 80px; display: flex; align-items: stretch;">
+                    <img src="https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?auto=format&fit=crop&q=80&w=100&h=100" alt="Michelle" style="width: 80px; height: 80px; object-fit: cover; flex-shrink: 0;">
+                </div>
+
+                <div style="flex: 1; padding-left: 18px; display: flex; flex-direction: column; justify-content: center; min-width: 0;">
+                    <div style="display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 10px; margin-bottom: 6px;">
+                        <span style="font-size: 14px; font-weight: 600; color: #0f172a; letter-spacing: 0.5px; text-transform: uppercase; white-space: nowrap;">MICHELLE HANSEN</span>
+                        <span style="font-size: 12px; font-weight: 500; color: #94a3b8; letter-spacing: 0.5px; text-transform: uppercase; white-space: nowrap;">214K FOLLOWERS</span>
                     </div>
+                    <div style="font-size: 15px; color: #0f172a; line-height: 1.4; font-weight: 400; margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                        “I'VE HAD OVER 3 MILLION NEW VIEWS TO MY ACCOUNT...”
+                    </div>
+                    <a href="#" style="font-size: 13px; font-weight: 700; color: #0f172a; text-decoration: none; display: inline-block; letter-spacing: 0.3px; text-transform: uppercase;">
+                        LEARN MORE &rarr;
+                    </a>
                 </div>
-                <div class="review-text" style="font-size: 15px; color: #0f172a; line-height: 1.5; font-weight: 400; margin-bottom: 12px; letter-spacing: 0.2px;">
-                    “I'VE HAD OVER 3 MILLION NEW VIEWS TO MY ACCOUNT IN THE LAST 30 DAYS.”
-                </div>
-                <a href="#" class="review-learn-more" style="font-size: 13px; font-weight: 700; color: #0f172a; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; letter-spacing: 0.3px; text-transform: uppercase; transition: opacity 0.2s;">
-                    LEARN MORE &rarr;
-                </a>
             </div>
 
-            <!-- 5. REVIEW CARD - CASSIE SCHOONOVER (Placeholder) -->
-            <div class="review-card" style="flex: 0 0 480px; min-width: 480px; max-width: 480px; padding: 0 36px; border-right: 1px solid #e5e7eb; display: flex; flex-direction: column; justify-content: center;">
-                <div class="review-top-row" style="display: flex; align-items: center; gap: 16px; margin-bottom: 12px;">
-                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=100&h=100" alt="Cassie" style="width: 56px; height: 56px; border-radius: 50%; object-fit: cover; flex-shrink: 0;">
-                    <div style="display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 8px;">
-                        <span class="review-author-name" style="font-size: 14px; font-weight: 600; color: #0f172a; letter-spacing: 0.5px; text-transform: uppercase;">CASSIE SCHOONOVER</span>
-                        <span class="review-followers" style="font-size: 12px; font-weight: 500; color: #94a3b8; letter-spacing: 0.5px; text-transform: uppercase;">504K FOLLOWERS</span>
+            <!-- 5. REVIEW CARD - CASSIE SCHOONOVER -->
+            <div class="review-card" style="flex: 0 0 500px; min-width: 500px; max-width: 500px; padding: 8px 36px 8px 0; border-right: 1px solid #e5e7eb; display: flex; align-items: stretch; box-sizing: border-box;">
+                
+                <div style="flex: 0 0 80px; display: flex; align-items: stretch;">
+                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=100&h=100" alt="Cassie" style="width: 80px; height: 80px; object-fit: cover; flex-shrink: 0;">
+                </div>
+
+                <div style="flex: 1; padding-left: 18px; display: flex; flex-direction: column; justify-content: center; min-width: 0;">
+                    <div style="display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 10px; margin-bottom: 6px;">
+                        <span style="font-size: 14px; font-weight: 600; color: #0f172a; letter-spacing: 0.5px; text-transform: uppercase; white-space: nowrap;">CASSIE SCHOONOVER</span>
+                        <span style="font-size: 12px; font-weight: 500; color: #94a3b8; letter-spacing: 0.5px; text-transform: uppercase; white-space: nowrap;">504K FOLLOWERS</span>
                     </div>
+                    <div style="font-size: 15px; color: #0f172a; line-height: 1.4; font-weight: 400; margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                        “THIS IS A 10 OUT OF 10. THE FUNCTIONALITY, THE CREATIVITY...”
+                    </div>
+                    <a href="#" style="font-size: 13px; font-weight: 700; color: #0f172a; text-decoration: none; display: inline-block; letter-spacing: 0.3px; text-transform: uppercase;">
+                        LEARN MORE &rarr;
+                    </a>
                 </div>
-                <div class="review-text" style="font-size: 15px; color: #0f172a; line-height: 1.5; font-weight: 400; margin-bottom: 12px; letter-spacing: 0.2px;">
-                    “THIS IS A 10 OUT OF 10. THE FUNCTIONALITY, THE CREATIVITY...”
-                </div>
-                <a href="#" class="review-learn-more" style="font-size: 13px; font-weight: 700; color: #0f172a; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; letter-spacing: 0.3px; text-transform: uppercase; transition: opacity 0.2s;">
-                    LEARN MORE &rarr;
-                </a>
             </div>
 
         </div>
