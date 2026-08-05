@@ -361,7 +361,7 @@
         <!-- ===== HERO SECTION END ===== -->
 
         <!-- ===== SEARCH BAR START ===== -->
-        <div class="search-bar-wrapper">
+        <!-- <div class="search-bar-wrapper">
             <form action="/spaces" method="GET" class="search-form">
                 <div class="search-input-group">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
@@ -382,7 +382,7 @@
                     Search
                 </button>
             </form>
-        </div>
+        </div> -->
         <!-- ===== SEARCH BAR END ===== -->
 
         <!-- ===== BRANDS SCROLL SECTION START ===== -->
@@ -396,77 +396,102 @@
         </div> -->
         <!-- ===== BRANDS SCROLL SECTION END ===== -->
 
+        <!-- ===== SEARCH BAR START ===== -->
+        <div class="search-bar-wrapper" style="background: #f8f9fb; padding: 40px 0 20px;">
+            <form action="/spaces" method="GET" class="search-form" style="max-width: 780px; margin: 0 auto; display: flex; align-items: center; background: #fff; border: 1px solid rgba(0,0,0,0.08); border-radius: 50px; padding: 4px; box-shadow: 0 4px 24px rgba(0,0,0,0.06);">
+                <div class="search-input-group" style="display: flex; align-items: center; padding: 0 16px; flex: 2; min-width: 0;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                    <input type="text" name="q" placeholder="Search mood or aesthetic" style="width: 100%; background: transparent; border: none; color: #0f172a; font-size: 0.85rem; outline: none; font-family: 'Inter', sans-serif;">
+                </div>
+                <div class="search-divider" style="width: 1px; height: 24px; background: #e2e8f0; flex-shrink: 0;"></div>
+                <div class="search-date-group" style="display: flex; align-items: center; padding: 0 14px; flex: 1; min-width: 0;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    <input type="date" name="date" style="width: 100%; background: transparent; border: none; color: #475569; font-size: 0.85rem; outline: none; font-family: 'Inter', sans-serif;">
+                </div>
+                <div class="search-divider" style="width: 1px; height: 24px; background: #e2e8f0; flex-shrink: 0;"></div>
+                <div class="search-location-group" style="display: flex; align-items: center; padding: 0 14px; flex: 1; min-width: 0;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                    <input type="text" name="location" placeholder="Location" style="width: 100%; background: transparent; border: none; color: #0f172a; font-size: 0.85rem; outline: none; font-family: 'Inter', sans-serif;">
+                </div>
+                <button type="submit" class="search-submit-btn" style="display: flex; align-items: center; justify-content: center; gap: 6px; padding: 12px 28px; background: #0f172a; color: #fff; border: none; border-radius: 50px; font-weight: 600; font-size: 0.8rem; cursor: pointer; white-space: nowrap; font-family: 'Inter', sans-serif; margin: 2px; transition: all 0.3s ease;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                    Search
+                </button>
+            </form>
+        </div>
+        <!-- ===== SEARCH BAR END ===== -->
+
         <!-- ===== BRANDS SCROLL SECTION START ===== -->
-        <div class="brands-scroll-section" style="padding: 40px 0; background: #ffffff; overflow: hidden; border-top: 1px solid #e5e7eb; border-bottom: 1px solid #e5e7eb;">
+        <div class="brands-scroll-section" style="padding: 20px 0 40px; background: #f8f9fb; overflow: hidden;">
             <div class="brands-scroll-wrapper" style="overflow: hidden; position: relative;">
-                <div class="brands-scroll-track" style="display: flex; align-items: center; gap: 50px; animation: scrollBrands 25s linear infinite; white-space: nowrap; width: max-content; padding: 0 20px;">
+                <div class="brands-scroll-track" style="display: flex; align-items: center; gap: 30px; animation: scrollBrands 25s linear infinite; white-space: nowrap; width: max-content; padding: 0 20px;">
                     
-                    <!-- Brand 1 - TikTok -->
-                    <span style="display: flex; align-items: center; gap: 10px; flex-shrink: 0;">
-                        <svg viewBox="0 0 24 24" style="width: 28px; height: 28px; fill: #0f172a;"><path d="M19.59 6.69a4.83 4.83 0 0 0-3.77-4.25c-2.19-.38-6.32.02-6.32.02s-4.13-.4-6.32-.02A4.83 4.83 0 0 0 .41 6.69c-.43 4.72.07 9.97.07 9.97s.5 5.45 1.29 6.85c1.19 2.13 3.33 2.2 5.79 2.2h4.88c2.46 0 4.6-.07 5.79-2.2.79-1.4 1.29-6.85 1.29-6.85s.5-5.25.07-9.97zM9.5 14.5v-5l4.4 2.5-4.4 2.5z"/></svg>
-                        <span class="brand-label" style="font-size: 0.8rem; font-weight: 600; color: #0f172a; font-family: 'Inter', sans-serif; letter-spacing: 0.05em; text-transform: uppercase;">TikTok</span>
+                    <!-- Brand 1 - TikTok (Logo behind text) -->
+                    <span style="display: inline-flex; align-items: center; gap: 8px; flex-shrink: 0; position: relative;">
+                        <span class="brand-label" style="font-size: 0.85rem; font-weight: 600; color: #0f172a; font-family: 'Inter', sans-serif; letter-spacing: 0.05em; text-transform: uppercase; position: relative; z-index: 1;">TikTok</span>
+                        <svg viewBox="0 0 24 24" style="width: 24px; height: 24px; fill: #0f172a; opacity: 0.15; position: absolute; left: -4px; top: 50%; transform: translateY(-50%);"><path d="M19.59 6.69a4.83 4.83 0 0 0-3.77-4.25c-2.19-.38-6.32.02-6.32.02s-4.13-.4-6.32-.02A4.83 4.83 0 0 0 .41 6.69c-.43 4.72.07 9.97.07 9.97s.5 5.45 1.29 6.85c1.19 2.13 3.33 2.2 5.79 2.2h4.88c2.46 0 4.6-.07 5.79-2.2.79-1.4 1.29-6.85 1.29-6.85s.5-5.25.07-9.97zM9.5 14.5v-5l4.4 2.5-4.4 2.5z"/></svg>
                     </span>
 
                     <!-- Brand 2 - Meta Business -->
-                    <span style="display: flex; align-items: center; gap: 10px; flex-shrink: 0;">
-                        <svg viewBox="0 0 24 24" style="width: 28px; height: 28px; fill: #0f172a;"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.6 0 12 0zm3 14.4l-3-3.6-3 3.6-3.6-4.8 3.6-4.8 3 3.6 3-3.6 3.6 4.8-3.6 4.8z"/></svg>
-                        <span class="brand-label" style="font-size: 0.8rem; font-weight: 600; color: #0f172a; font-family: 'Inter', sans-serif; letter-spacing: 0.05em; text-transform: uppercase;">Meta Business</span>
+                    <span style="display: inline-flex; align-items: center; gap: 8px; flex-shrink: 0; position: relative;">
+                        <span class="brand-label" style="font-size: 0.85rem; font-weight: 600; color: #0f172a; font-family: 'Inter', sans-serif; letter-spacing: 0.05em; text-transform: uppercase; position: relative; z-index: 1;">Meta Business</span>
+                        <svg viewBox="0 0 24 24" style="width: 24px; height: 24px; fill: #0f172a; opacity: 0.15; position: absolute; left: -4px; top: 50%; transform: translateY(-50%);"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.6 0 12 0zm3 14.4l-3-3.6-3 3.6-3.6-4.8 3.6-4.8 3 3.6 3-3.6 3.6 4.8-3.6 4.8z"/></svg>
                     </span>
 
                     <!-- Brand 3 - Google -->
-                    <span style="display: flex; align-items: center; gap: 10px; flex-shrink: 0;">
-                        <svg viewBox="0 0 24 24" style="width: 28px; height: 28px; fill: #0f172a;"><path d="M12 4.8c2.4 0 4.2 1.2 5.4 2.4l3.6-3.6C18.6 1.2 15.6 0 12 0 7.2 0 3 3 1.2 7.2L5.4 10.8C6.6 7.2 9 4.8 12 4.8z"/><path d="M12 24c3.6 0 6.6-1.2 9-3.6l-4.2-4.2c-1.2 1.2-3 1.8-4.8 1.8-3.6 0-6.6-2.4-7.8-6L.6 16.2C2.4 20.4 6.6 24 12 24z"/><path d="M12 19.2v-6.6H0v6.6h12z"/></svg>
-                        <span class="brand-label" style="font-size: 0.8rem; font-weight: 600; color: #0f172a; font-family: 'Inter', sans-serif; letter-spacing: 0.05em; text-transform: uppercase;">Google</span>
+                    <span style="display: inline-flex; align-items: center; gap: 8px; flex-shrink: 0; position: relative;">
+                        <span class="brand-label" style="font-size: 0.85rem; font-weight: 600; color: #0f172a; font-family: 'Inter', sans-serif; letter-spacing: 0.05em; text-transform: uppercase; position: relative; z-index: 1;">Google</span>
+                        <svg viewBox="0 0 24 24" style="width: 24px; height: 24px; fill: #0f172a; opacity: 0.15; position: absolute; left: -4px; top: 50%; transform: translateY(-50%);"><path d="M12 4.8c2.4 0 4.2 1.2 5.4 2.4l3.6-3.6C18.6 1.2 15.6 0 12 0 7.2 0 3 3 1.2 7.2L5.4 10.8C6.6 7.2 9 4.8 12 4.8z"/><path d="M12 24c3.6 0 6.6-1.2 9-3.6l-4.2-4.2c-1.2 1.2-3 1.8-4.8 1.8-3.6 0-6.6-2.4-7.8-6L.6 16.2C2.4 20.4 6.6 24 12 24z"/><path d="M12 19.2v-6.6H0v6.6h12z"/></svg>
                     </span>
 
                     <!-- Brand 4 - Spotify -->
-                    <span style="display: flex; align-items: center; gap: 10px; flex-shrink: 0;">
-                        <svg viewBox="0 0 24 24" style="width: 28px; height: 28px; fill: #0f172a;"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.6 0 12 0zm5.4 17.4c-.6.6-1.2.6-1.8 0-1.8-1.2-4.2-1.8-6.6-1.2-.6.6-1.2.6-1.8 0s-.6-1.2 0-1.8c3-1.2 6.6-.6 9 1.2.6.6.6 1.2 0 1.8zm1.8-3.6c-.6.6-1.8.6-2.4 0-2.4-1.8-5.4-2.4-8.4-1.2-.6.6-1.8.6-2.4 0s-.6-1.8 0-2.4c3.6-1.8 7.8-1.2 10.8 1.2.6.6.6 1.8 0 2.4zm1.8-3.6c-.6.6-1.8.6-2.4 0-3-2.4-7.2-3-10.8-1.2-.6.6-1.8.6-2.4 0s-.6-1.8 0-2.4c4.2-2.4 9.6-1.8 13.2 1.2.6.6.6 1.8 0 2.4z"/></svg>
-                        <span class="brand-label" style="font-size: 0.8rem; font-weight: 600; color: #0f172a; font-family: 'Inter', sans-serif; letter-spacing: 0.05em; text-transform: uppercase;">Spotify</span>
+                    <span style="display: inline-flex; align-items: center; gap: 8px; flex-shrink: 0; position: relative;">
+                        <span class="brand-label" style="font-size: 0.85rem; font-weight: 600; color: #0f172a; font-family: 'Inter', sans-serif; letter-spacing: 0.05em; text-transform: uppercase; position: relative; z-index: 1;">Spotify</span>
+                        <svg viewBox="0 0 24 24" style="width: 24px; height: 24px; fill: #0f172a; opacity: 0.15; position: absolute; left: -4px; top: 50%; transform: translateY(-50%);"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.6 0 12 0zm5.4 17.4c-.6.6-1.2.6-1.8 0-1.8-1.2-4.2-1.8-6.6-1.2-.6.6-1.2.6-1.8 0s-.6-1.2 0-1.8c3-1.2 6.6-.6 9 1.2.6.6.6 1.2 0 1.8zm1.8-3.6c-.6.6-1.8.6-2.4 0-2.4-1.8-5.4-2.4-8.4-1.2-.6.6-1.8.6-2.4 0s-.6-1.8 0-2.4c3.6-1.8 7.8-1.2 10.8 1.2.6.6.6 1.8 0 2.4zm1.8-3.6c-.6.6-1.8.6-2.4 0-3-2.4-7.2-3-10.8-1.2-.6.6-1.8.6-2.4 0s-.6-1.8 0-2.4c4.2-2.4 9.6-1.8 13.2 1.2.6.6.6 1.8 0 2.4z"/></svg>
                     </span>
 
                     <!-- Brand 5 - Facebook -->
-                    <span style="display: flex; align-items: center; gap: 10px; flex-shrink: 0;">
-                        <svg viewBox="0 0 24 24" style="width: 28px; height: 28px; fill: #0f172a;"><path d="M22.5 0H1.5C.7 0 0 .7 0 1.5v21c0 .8.7 1.5 1.5 1.5h21c.8 0 1.5-.7 1.5-1.5v-21c0-.8-.7-1.5-1.5-1.5zm-5.8 17.4l-.7.9c-.2.3-.5.3-.8.1l-2.1-1.6c-2.1.8-4.4.7-6.5-.6l-2.4 1.7c-.3.2-.6.1-.8-.2l-.6-1c-.2-.3-.1-.6.2-.8l2.1-1.6c-1.2-1.6-1.5-3.6-1-5.6l-2.1-1.6c-.3-.2-.4-.5-.2-.8l.7-.9c.2-.3.5-.3.8-.1l2.1 1.6c2.1-.8 4.4-.7 6.5.6l2.4-1.7c.3-.2.6-.1.8.2l.6 1c.2.3.1.6-.2.8l-2.1 1.6c1.2 1.6 1.5 3.6 1 5.6l2.1 1.6c.3.2.4.5.2.8z"/></svg>
-                        <span class="brand-label" style="font-size: 0.8rem; font-weight: 600; color: #0f172a; font-family: 'Inter', sans-serif; letter-spacing: 0.05em; text-transform: uppercase;">Facebook</span>
+                    <span style="display: inline-flex; align-items: center; gap: 8px; flex-shrink: 0; position: relative;">
+                        <span class="brand-label" style="font-size: 0.85rem; font-weight: 600; color: #0f172a; font-family: 'Inter', sans-serif; letter-spacing: 0.05em; text-transform: uppercase; position: relative; z-index: 1;">Facebook</span>
+                        <svg viewBox="0 0 24 24" style="width: 24px; height: 24px; fill: #0f172a; opacity: 0.15; position: absolute; left: -4px; top: 50%; transform: translateY(-50%);"><path d="M22.5 0H1.5C.7 0 0 .7 0 1.5v21c0 .8.7 1.5 1.5 1.5h21c.8 0 1.5-.7 1.5-1.5v-21c0-.8-.7-1.5-1.5-1.5zm-5.8 17.4l-.7.9c-.2.3-.5.3-.8.1l-2.1-1.6c-2.1.8-4.4.7-6.5-.6l-2.4 1.7c-.3.2-.6.1-.8-.2l-.6-1c-.2-.3-.1-.6.2-.8l2.1-1.6c-1.2-1.6-1.5-3.6-1-5.6l-2.1-1.6c-.3-.2-.4-.5-.2-.8l.7-.9c.2-.3.5-.3.8-.1l2.1 1.6c2.1-.8 4.4-.7 6.5.6l2.4-1.7c.3-.2.6-.1.8.2l.6 1c.2.3.1.6-.2.8l-2.1 1.6c1.2 1.6 1.5 3.6 1 5.6l2.1 1.6c.3.2.4.5.2.8z"/></svg>
                     </span>
 
                     <!-- Brand 6 - Instagram -->
-                    <span style="display: flex; align-items: center; gap: 10px; flex-shrink: 0;">
-                        <svg viewBox="0 0 24 24" style="width: 28px; height: 28px; fill: #0f172a;"><path d="M12 2.2c-5.4 0-9.8 4.4-9.8 9.8 0 4.9 3.6 9 8.2 9.7v-6.9H7.5v-2.8h2.9V9.9c0-2.9 1.7-4.5 4.3-4.5.9 0 1.8.1 2.5.3v2.7h-1.4c-1.4 0-1.7.8-1.7 1.7v2h2.9l-.5 2.8h-2.4v6.9c4.6-.7 8.2-4.8 8.2-9.7 0-5.4-4.4-9.8-9.8-9.8z"/></svg>
-                        <span class="brand-label" style="font-size: 0.8rem; font-weight: 600; color: #0f172a; font-family: 'Inter', sans-serif; letter-spacing: 0.05em; text-transform: uppercase;">Instagram</span>
+                    <span style="display: inline-flex; align-items: center; gap: 8px; flex-shrink: 0; position: relative;">
+                        <span class="brand-label" style="font-size: 0.85rem; font-weight: 600; color: #0f172a; font-family: 'Inter', sans-serif; letter-spacing: 0.05em; text-transform: uppercase; position: relative; z-index: 1;">Instagram</span>
+                        <svg viewBox="0 0 24 24" style="width: 24px; height: 24px; fill: #0f172a; opacity: 0.15; position: absolute; left: -4px; top: 50%; transform: translateY(-50%);"><path d="M12 2.2c-5.4 0-9.8 4.4-9.8 9.8 0 4.9 3.6 9 8.2 9.7v-6.9H7.5v-2.8h2.9V9.9c0-2.9 1.7-4.5 4.3-4.5.9 0 1.8.1 2.5.3v2.7h-1.4c-1.4 0-1.7.8-1.7 1.7v2h2.9l-.5 2.8h-2.4v6.9c4.6-.7 8.2-4.8 8.2-9.7 0-5.4-4.4-9.8-9.8-9.8z"/></svg>
                     </span>
 
                     <!-- DUPLICATE SET for seamless loop -->
                     
-                    <span style="display: flex; align-items: center; gap: 10px; flex-shrink: 0;">
-                        <svg viewBox="0 0 24 24" style="width: 28px; height: 28px; fill: #0f172a;"><path d="M19.59 6.69a4.83 4.83 0 0 0-3.77-4.25c-2.19-.38-6.32.02-6.32.02s-4.13-.4-6.32-.02A4.83 4.83 0 0 0 .41 6.69c-.43 4.72.07 9.97.07 9.97s.5 5.45 1.29 6.85c1.19 2.13 3.33 2.2 5.79 2.2h4.88c2.46 0 4.6-.07 5.79-2.2.79-1.4 1.29-6.85 1.29-6.85s.5-5.25.07-9.97zM9.5 14.5v-5l4.4 2.5-4.4 2.5z"/></svg>
-                        <span class="brand-label" style="font-size: 0.8rem; font-weight: 600; color: #0f172a; font-family: 'Inter', sans-serif; letter-spacing: 0.05em; text-transform: uppercase;">TikTok</span>
+                    <span style="display: inline-flex; align-items: center; gap: 8px; flex-shrink: 0; position: relative;">
+                        <span class="brand-label" style="font-size: 0.85rem; font-weight: 600; color: #0f172a; font-family: 'Inter', sans-serif; letter-spacing: 0.05em; text-transform: uppercase; position: relative; z-index: 1;">TikTok</span>
+                        <svg viewBox="0 0 24 24" style="width: 24px; height: 24px; fill: #0f172a; opacity: 0.15; position: absolute; left: -4px; top: 50%; transform: translateY(-50%);"><path d="M19.59 6.69a4.83 4.83 0 0 0-3.77-4.25c-2.19-.38-6.32.02-6.32.02s-4.13-.4-6.32-.02A4.83 4.83 0 0 0 .41 6.69c-.43 4.72.07 9.97.07 9.97s.5 5.45 1.29 6.85c1.19 2.13 3.33 2.2 5.79 2.2h4.88c2.46 0 4.6-.07 5.79-2.2.79-1.4 1.29-6.85 1.29-6.85s.5-5.25.07-9.97zM9.5 14.5v-5l4.4 2.5-4.4 2.5z"/></svg>
                     </span>
 
-                    <span style="display: flex; align-items: center; gap: 10px; flex-shrink: 0;">
-                        <svg viewBox="0 0 24 24" style="width: 28px; height: 28px; fill: #0f172a;"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.6 0 12 0zm3 14.4l-3-3.6-3 3.6-3.6-4.8 3.6-4.8 3 3.6 3-3.6 3.6 4.8-3.6 4.8z"/></svg>
-                        <span class="brand-label" style="font-size: 0.8rem; font-weight: 600; color: #0f172a; font-family: 'Inter', sans-serif; letter-spacing: 0.05em; text-transform: uppercase;">Meta Business</span>
+                    <span style="display: inline-flex; align-items: center; gap: 8px; flex-shrink: 0; position: relative;">
+                        <span class="brand-label" style="font-size: 0.85rem; font-weight: 600; color: #0f172a; font-family: 'Inter', sans-serif; letter-spacing: 0.05em; text-transform: uppercase; position: relative; z-index: 1;">Meta Business</span>
+                        <svg viewBox="0 0 24 24" style="width: 24px; height: 24px; fill: #0f172a; opacity: 0.15; position: absolute; left: -4px; top: 50%; transform: translateY(-50%);"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.6 0 12 0zm3 14.4l-3-3.6-3 3.6-3.6-4.8 3.6-4.8 3 3.6 3-3.6 3.6 4.8-3.6 4.8z"/></svg>
                     </span>
 
-                    <span style="display: flex; align-items: center; gap: 10px; flex-shrink: 0;">
-                        <svg viewBox="0 0 24 24" style="width: 28px; height: 28px; fill: #0f172a;"><path d="M12 4.8c2.4 0 4.2 1.2 5.4 2.4l3.6-3.6C18.6 1.2 15.6 0 12 0 7.2 0 3 3 1.2 7.2L5.4 10.8C6.6 7.2 9 4.8 12 4.8z"/><path d="M12 24c3.6 0 6.6-1.2 9-3.6l-4.2-4.2c-1.2 1.2-3 1.8-4.8 1.8-3.6 0-6.6-2.4-7.8-6L.6 16.2C2.4 20.4 6.6 24 12 24z"/><path d="M12 19.2v-6.6H0v6.6h12z"/></svg>
-                        <span class="brand-label" style="font-size: 0.8rem; font-weight: 600; color: #0f172a; font-family: 'Inter', sans-serif; letter-spacing: 0.05em; text-transform: uppercase;">Google</span>
+                    <span style="display: inline-flex; align-items: center; gap: 8px; flex-shrink: 0; position: relative;">
+                        <span class="brand-label" style="font-size: 0.85rem; font-weight: 600; color: #0f172a; font-family: 'Inter', sans-serif; letter-spacing: 0.05em; text-transform: uppercase; position: relative; z-index: 1;">Google</span>
+                        <svg viewBox="0 0 24 24" style="width: 24px; height: 24px; fill: #0f172a; opacity: 0.15; position: absolute; left: -4px; top: 50%; transform: translateY(-50%);"><path d="M12 4.8c2.4 0 4.2 1.2 5.4 2.4l3.6-3.6C18.6 1.2 15.6 0 12 0 7.2 0 3 3 1.2 7.2L5.4 10.8C6.6 7.2 9 4.8 12 4.8z"/><path d="M12 24c3.6 0 6.6-1.2 9-3.6l-4.2-4.2c-1.2 1.2-3 1.8-4.8 1.8-3.6 0-6.6-2.4-7.8-6L.6 16.2C2.4 20.4 6.6 24 12 24z"/><path d="M12 19.2v-6.6H0v6.6h12z"/></svg>
                     </span>
 
-                    <span style="display: flex; align-items: center; gap: 10px; flex-shrink: 0;">
-                        <svg viewBox="0 0 24 24" style="width: 28px; height: 28px; fill: #0f172a;"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.6 0 12 0zm5.4 17.4c-.6.6-1.2.6-1.8 0-1.8-1.2-4.2-1.8-6.6-1.2-.6.6-1.2.6-1.8 0s-.6-1.2 0-1.8c3-1.2 6.6-.6 9 1.2.6.6.6 1.2 0 1.8zm1.8-3.6c-.6.6-1.8.6-2.4 0-2.4-1.8-5.4-2.4-8.4-1.2-.6.6-1.8.6-2.4 0s-.6-1.8 0-2.4c3.6-1.8 7.8-1.2 10.8 1.2.6.6.6 1.8 0 2.4zm1.8-3.6c-.6.6-1.8.6-2.4 0-3-2.4-7.2-3-10.8-1.2-.6.6-1.8.6-2.4 0s-.6-1.8 0-2.4c4.2-2.4 9.6-1.8 13.2 1.2.6.6.6 1.8 0 2.4z"/></svg>
-                        <span class="brand-label" style="font-size: 0.8rem; font-weight: 600; color: #0f172a; font-family: 'Inter', sans-serif; letter-spacing: 0.05em; text-transform: uppercase;">Spotify</span>
+                    <span style="display: inline-flex; align-items: center; gap: 8px; flex-shrink: 0; position: relative;">
+                        <span class="brand-label" style="font-size: 0.85rem; font-weight: 600; color: #0f172a; font-family: 'Inter', sans-serif; letter-spacing: 0.05em; text-transform: uppercase; position: relative; z-index: 1;">Spotify</span>
+                        <svg viewBox="0 0 24 24" style="width: 24px; height: 24px; fill: #0f172a; opacity: 0.15; position: absolute; left: -4px; top: 50%; transform: translateY(-50%);"><path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.6 0 12 0zm5.4 17.4c-.6.6-1.2.6-1.8 0-1.8-1.2-4.2-1.8-6.6-1.2-.6.6-1.2.6-1.8 0s-.6-1.2 0-1.8c3-1.2 6.6-.6 9 1.2.6.6.6 1.2 0 1.8zm1.8-3.6c-.6.6-1.8.6-2.4 0-2.4-1.8-5.4-2.4-8.4-1.2-.6.6-1.8.6-2.4 0s-.6-1.8 0-2.4c3.6-1.8 7.8-1.2 10.8 1.2.6.6.6 1.8 0 2.4zm1.8-3.6c-.6.6-1.8.6-2.4 0-3-2.4-7.2-3-10.8-1.2-.6.6-1.8.6-2.4 0s-.6-1.8 0-2.4c4.2-2.4 9.6-1.8 13.2 1.2.6.6.6 1.8 0 2.4z"/></svg>
                     </span>
 
-                    <span style="display: flex; align-items: center; gap: 10px; flex-shrink: 0;">
-                        <svg viewBox="0 0 24 24" style="width: 28px; height: 28px; fill: #0f172a;"><path d="M22.5 0H1.5C.7 0 0 .7 0 1.5v21c0 .8.7 1.5 1.5 1.5h21c.8 0 1.5-.7 1.5-1.5v-21c0-.8-.7-1.5-1.5-1.5zm-5.8 17.4l-.7.9c-.2.3-.5.3-.8.1l-2.1-1.6c-2.1.8-4.4.7-6.5-.6l-2.4 1.7c-.3.2-.6.1-.8-.2l-.6-1c-.2-.3-.1-.6.2-.8l2.1-1.6c-1.2-1.6-1.5-3.6-1-5.6l-2.1-1.6c-.3-.2-.4-.5-.2-.8l.7-.9c.2-.3.5-.3.8-.1l2.1 1.6c2.1-.8 4.4-.7 6.5.6l2.4-1.7c.3-.2.6-.1.8.2l.6 1c.2.3.1.6-.2.8l-2.1 1.6c1.2 1.6 1.5 3.6 1 5.6l2.1 1.6c.3.2.4.5.2.8z"/></svg>
-                        <span class="brand-label" style="font-size: 0.8rem; font-weight: 600; color: #0f172a; font-family: 'Inter', sans-serif; letter-spacing: 0.05em; text-transform: uppercase;">Facebook</span>
+                    <span style="display: inline-flex; align-items: center; gap: 8px; flex-shrink: 0; position: relative;">
+                        <span class="brand-label" style="font-size: 0.85rem; font-weight: 600; color: #0f172a; font-family: 'Inter', sans-serif; letter-spacing: 0.05em; text-transform: uppercase; position: relative; z-index: 1;">Facebook</span>
+                        <svg viewBox="0 0 24 24" style="width: 24px; height: 24px; fill: #0f172a; opacity: 0.15; position: absolute; left: -4px; top: 50%; transform: translateY(-50%);"><path d="M22.5 0H1.5C.7 0 0 .7 0 1.5v21c0 .8.7 1.5 1.5 1.5h21c.8 0 1.5-.7 1.5-1.5v-21c0-.8-.7-1.5-1.5-1.5zm-5.8 17.4l-.7.9c-.2.3-.5.3-.8.1l-2.1-1.6c-2.1.8-4.4.7-6.5-.6l-2.4 1.7c-.3.2-.6.1-.8-.2l-.6-1c-.2-.3-.1-.6.2-.8l2.1-1.6c-1.2-1.6-1.5-3.6-1-5.6l-2.1-1.6c-.3-.2-.4-.5-.2-.8l.7-.9c.2-.3.5-.3.8-.1l2.1 1.6c2.1-.8 4.4-.7 6.5.6l2.4-1.7c.3-.2.6-.1.8.2l.6 1c.2.3.1.6-.2.8l-2.1 1.6c1.2 1.6 1.5 3.6 1 5.6l2.1 1.6c.3.2.4.5.2.8z"/></svg>
                     </span>
 
-                    <span style="display: flex; align-items: center; gap: 10px; flex-shrink: 0;">
-                        <svg viewBox="0 0 24 24" style="width: 28px; height: 28px; fill: #0f172a;"><path d="M12 2.2c-5.4 0-9.8 4.4-9.8 9.8 0 4.9 3.6 9 8.2 9.7v-6.9H7.5v-2.8h2.9V9.9c0-2.9 1.7-4.5 4.3-4.5.9 0 1.8.1 2.5.3v2.7h-1.4c-1.4 0-1.7.8-1.7 1.7v2h2.9l-.5 2.8h-2.4v6.9c4.6-.7 8.2-4.8 8.2-9.7 0-5.4-4.4-9.8-9.8-9.8z"/></svg>
-                        <span class="brand-label" style="font-size: 0.8rem; font-weight: 600; color: #0f172a; font-family: 'Inter', sans-serif; letter-spacing: 0.05em; text-transform: uppercase;">Instagram</span>
+                    <span style="display: inline-flex; align-items: center; gap: 8px; flex-shrink: 0; position: relative;">
+                        <span class="brand-label" style="font-size: 0.85rem; font-weight: 600; color: #0f172a; font-family: 'Inter', sans-serif; letter-spacing: 0.05em; text-transform: uppercase; position: relative; z-index: 1;">Instagram</span>
+                        <svg viewBox="0 0 24 24" style="width: 24px; height: 24px; fill: #0f172a; opacity: 0.15; position: absolute; left: -4px; top: 50%; transform: translateY(-50%);"><path d="M12 2.2c-5.4 0-9.8 4.4-9.8 9.8 0 4.9 3.6 9 8.2 9.7v-6.9H7.5v-2.8h2.9V9.9c0-2.9 1.7-4.5 4.3-4.5.9 0 1.8.1 2.5.3v2.7h-1.4c-1.4 0-1.7.8-1.7 1.7v2h2.9l-.5 2.8h-2.4v6.9c4.6-.7 8.2-4.8 8.2-9.7 0-5.4-4.4-9.8-9.8-9.8z"/></svg>
                     </span>
 
                 </div>
